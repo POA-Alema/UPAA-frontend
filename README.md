@@ -1,6 +1,6 @@
 # UPAA Frontend
 
-Base inicial do frontend do projeto Uma Porto Alegre Além da AGES, preparada para evolução incremental com foco em previsibilidade de ambiente, qualidade estática e CI desde o início.
+Base inicial do frontend do projeto Uma Porto Alegre Alemã da AGES, preparada para evolução incremental com foco em previsibilidade de ambiente, qualidade estática e CI desde o início.
 
 ## Stack inicial
 
@@ -14,12 +14,56 @@ Base inicial do frontend do projeto Uma Porto Alegre Além da AGES, preparada pa
 
 ## Requisitos
 
-- Node.js 20.19 ou superior dentro da linha 20.x
-- npm 10 ou superior
+- Node.js 24 LTS
+- npm 11 ou superior
 
-Para manter aderência com a CI, use Node 20 LTS. O repositório inclui `.nvmrc` com a versão base recomendada.
+O npm já vem junto com a instalação oficial do Node.js.
 
-## Primeira configuração
+Download oficial do Node.js e npm:
+
+- https://nodejs.org/en/download
+
+Referência oficial de releases do Node.js:
+
+- https://nodejs.org/en/about/previous-releases
+
+O repositório inclui `.nvmrc` apontando para Node 24.
+
+## Clonando o repositório
+
+```bash
+git clone https://github.com/POA-Alema/UPAA-frontend.git
+cd UPAA-frontend
+```
+
+## Primeiro acesso à branch `develop`
+
+Depois de clonar, busque as referências remotas e garanta que você está trabalhando em `develop`:
+
+```bash
+git fetch origin
+git checkout develop
+git pull origin develop
+```
+
+Se o `checkout develop` não funcionar no primeiro acesso, use:
+
+```bash
+git fetch origin
+git checkout -b develop origin/develop
+```
+
+## Atualizando sua branch local `develop`
+
+Sempre que voltar ao projeto e quiser atualizar sua base local:
+
+```bash
+git fetch origin
+git checkout develop
+git pull origin develop
+```
+
+## Primeira configuração do ambiente
 
 Use o script de setup do projeto:
 
@@ -29,26 +73,37 @@ npm run setup
 
 O script:
 
-- cria `.env.local` a partir de `.env.example` se o arquivo ainda não existir
+- cria `.env.local` a partir de `.env.example`, se o arquivo ainda não existir
 - instala as dependências do projeto
 - mostra os próximos passos no terminal
 
 Depois disso:
 
-1. Revise o valor de `NEXT_PUBLIC_API_URL` em `.env.local`.
-2. Rode a validação local:
+1. Abra `.env.local`.
+2. Revise `NEXT_PUBLIC_API_URL`.
+   O que revisar aqui:
+   essa variável deve apontar para a URL do backend que você vai usar no ambiente local.
+   Valor padrão atual:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
+Se o backend estiver rodando em outra porta, host ou ambiente remoto, ajuste esse valor.
+
+3. Rode a validação local:
 
 ```bash
 npm run validate
 ```
 
-3. Inicie o ambiente:
+4. Inicie o ambiente:
 
 ```bash
 npm run dev
 ```
 
-4. Abra `http://localhost:3000` e verifique se a tela inicial carrega com o título do projeto.
+5. Abra `http://localhost:3000` e verifique se a tela inicial carrega com o título do projeto.
 
 ## Scripts disponíveis
 
@@ -63,7 +118,7 @@ npm run dev
 - `npm run test`: executa os testes uma vez
 - `npm run test:watch`: executa os testes em modo watch
 
-## Estrutura (inicial)
+## Estrutura inicial
 
 ```text
 .
@@ -72,21 +127,22 @@ npm run dev
 |  |- app/
 |  |  |- conteudo-acessivel/
 |  |  |- edificacoes/
-|  |- lib/
 |  |- components/
 |  |  |- layout/
 |  |- data/
 |  |- features/
-|     |- accessible-content/
-|     |- buildings/
-|     |- home/
-|     |- map/
+|  |  |- accessible-content/
+|  |  |- buildings/
+|  |  |- home/
+|  |  |- map/
+|  |- lib/
 |- .env.example
 |- .gitignore
+|- .nvmrc
 |- eslint.config.mjs
 |- next.config.ts
-|- postcss.config.mjs
 |- package.json
+|- postcss.config.mjs
 |- tsconfig.json
 |- vitest.config.ts
 ```
@@ -115,14 +171,14 @@ npm run dev
 
 Resultado esperado:
 
-- o setup cria `.env.local` se necessário e conclui a instalação das dependências
+- o setup cria `.env.local`, se necessário, e conclui a instalação das dependências
 - `lint`, `type-check`, `test` e `build` terminam com sucesso
 - `http://localhost:3000` abre a página inicial
-- a página mostra apenas o título `Uma Porto Alegre Além`
+- a página mostra o título `Uma Porto Alegre Alemã`
 
 ## Diferenças por sistema operacional
 
-O fluxo principal é o mesmo em Windows, Linux e macOS:
+O fluxo principal do projeto é o mesmo em Windows, Linux e macOS:
 
 ```bash
 npm run setup
@@ -130,10 +186,33 @@ npm run validate
 npm run dev
 ```
 
-O que muda na prática é a forma de selecionar a versão do Node:
+O que costuma mudar é a forma de instalar e gerenciar a versão do Node:
 
-- Linux/macOS com `nvm`: `nvm use`
-- Windows com `nvm-windows`: `nvm use 20.19.0`
+- Windows:
+  use o instalador oficial do Node.js ou, se preferir gerenciar versões, instale `nvm-windows`
+- Linux/macOS:
+  use o instalador oficial do Node.js ou, se preferir gerenciar versões, instale `nvm`
+
+Se você optar por gerenciador de versões:
+
+- `nvm` (Linux/macOS): https://github.com/nvm-sh/nvm
+- `nvm-windows`: https://github.com/coreybutler/nvm-windows
+
+Exemplos:
+
+- Linux/macOS com `nvm`:
+
+```bash
+nvm install 24
+nvm use 24
+```
+
+- Windows com `nvm-windows`:
+
+```bash
+nvm install 24
+nvm use 24
+```
 
 Se o seu terminal do Windows tiver problema com o alias do `npm`, use `npm.cmd` no lugar de `npm`.
 
@@ -142,7 +221,7 @@ Se o seu terminal do Windows tiver problema com o alias do `npm`, use `npm.cmd` 
 - O projeto usa alias `@/*` apontando para `src/*`.
 - O `NEXT_PUBLIC_API_URL` é a primeira variável pública formalizada para integração com backend.
 - O arquivo `next-env.d.ts` foi mantido versionado para evitar falhas no `tsc --noEmit` antes do primeiro `next build`. Se a pipeline mudar para gerar tipos antes da checagem, esse ponto pode ser revisado.
-- A CI usa Node 20. Desenvolver com Node 23 ou superior pode gerar warnings de engine e resultados diferentes do pipeline.
+- A CI agora está alinhada com Node 24 LTS.
 - `leaflet` e `react-leaflet` permanecem instalados porque fazem parte da arquitetura definida, mas nenhuma implementação de mapa foi antecipada neste mockup inicial.
 
 ## Estrutura de produto adotada

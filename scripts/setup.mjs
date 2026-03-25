@@ -1,10 +1,22 @@
 import { copyFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-const useShell = process.platform === 'win32';
 const envExamplePath = '.env.example';
 const envLocalPath = '.env.local';
+
+function runCommand(command, args) {
+  if (process.platform === 'win32') {
+    return spawnSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', command, ...args], {
+      stdio: 'inherit',
+      shell: false
+    });
+  }
+
+  return spawnSync(command, args, {
+    stdio: 'inherit',
+    shell: false
+  });
+}
 
 if (!existsSync(envLocalPath)) {
   copyFileSync(envExamplePath, envLocalPath);
@@ -15,10 +27,7 @@ if (!existsSync(envLocalPath)) {
 
 console.log('Installing dependencies...');
 
-const installResult = spawnSync(npmCommand, ['install'], {
-  stdio: 'inherit',
-  shell: useShell
-});
+const installResult = runCommand(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install']);
 
 if (installResult.status !== 0) {
   process.exit(installResult.status ?? 1);

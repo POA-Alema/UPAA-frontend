@@ -1,7 +1,20 @@
 import { spawnSync } from 'node:child_process';
 
+function runCommand(command, args) {
+  if (process.platform === 'win32') {
+    return spawnSync(process.env.ComSpec ?? 'cmd.exe', ['/d', '/s', '/c', command, ...args], {
+      stdio: 'inherit',
+      shell: false
+    });
+  }
+
+  return spawnSync(command, args, {
+    stdio: 'inherit',
+    shell: false
+  });
+}
+
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-const useShell = process.platform === 'win32';
 const steps = [
   ['run', 'lint'],
   ['run', 'type-check'],
@@ -13,10 +26,7 @@ for (const step of steps) {
   const label = `${npmCommand} ${step.join(' ')}`;
   console.log(`\n> ${label}`);
 
-  const result = spawnSync(npmCommand, step, {
-    stdio: 'inherit',
-    shell: useShell
-  });
+  const result = runCommand(npmCommand, step);
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
