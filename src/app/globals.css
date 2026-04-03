@@ -2,6 +2,7 @@
 
 :root {
   color-scheme: light;
+  
   --background: #f4efe7;
   --surface: rgba(255, 255, 255, 0.8);
   --foreground: #1f1d1a;
@@ -10,6 +11,14 @@
   --accent-soft: #d5ede6;
   --border: rgba(31, 29, 26, 0.12);
   --shadow: 0 24px 80px rgba(31, 29, 26, 0.12);
+
+  --dark-bg: #151312;
+  --dark-surface: #211f1e;
+  --dark-foreground: #e7e1df;
+  --dark-muted: #b7b5b0;
+  --gold-primary: #d1a65b;
+  --gold-hover: #efc173;
+  --dark-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
