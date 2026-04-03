@@ -2,7 +2,7 @@ export function MapPlaceholder() {
   return (
     <div className="map-placeholder">
       <div>
-        {/* to do: implementar dados dinamicos */}
+        {/* TODO: Implement dynamic data fetching for map content */}
         <h3>Mapa</h3>
       </div>
     </div>

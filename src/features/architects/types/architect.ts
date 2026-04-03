@@ -1,8 +1,7 @@
 /**
- * Tipos para a feature de arquitetos
- * 
- * A estrutura foi pensada para suportar tanto o preview na home
- * quanto a página completa de detalhes do arquiteto.
+ * Types for the architects feature.
+ * The structure is designed to support both the preview on the home page
+ * and the full architect detail page, ensuring consistent data flow.
  */
 
 export interface ArchitectImage {
@@ -22,40 +21,55 @@ export interface ArchitectAction {
   href: string;
 }
 
+// --- New Interfaces Based on Figma Design ---
+export interface ArchitectCharacteristic {
+  icon: string;        // Icon name from Material Symbols (e.g., 'auto_awesome')
+  title: string;       // Title of the architectural characteristic (e.g., 'Monumental Eclecticism')
+  description: string; // Explanatory text describing the characteristic
+}
+
+export interface ArchitectWork {
+  title: string;
+  image?: ArchitectImage; 
+}
+// ------------------------------------------
+
 /**
- * Dados completos de um arquiteto
- * 
- * Inclui informações para renderizar tanto o preview quanto a página completa.
+ * Complete data structure for an architect.
+ * Includes all information needed to render both preview and full detail page.
  */
 export interface Architect {
   id: string;
   slug: string;
   eyebrow?: string;
   title: string;
-  bioSummary: string; // Resumo curto para o preview na home
-  bio: string; // Biografia completa para a página de detalhes
+  bioSummary: string; // Short summary for the home page preview
+  bio: string; // Full biography for the detail page
   image?: ArchitectImage;
   actions?: {
-    primary: ArchitectAction;   // Para a biografia
-    secondary: ArchitectAction; // Para as obras
+    primary: ArchitectAction;   // Action button for biography section
+    secondary: ArchitectAction; // Action button for works section
   };
   details?: ArchitectDetail[];
+  
+  // New properties for the detailed page
+  characteristics?: ArchitectCharacteristic[];
+  works?: ArchitectWork[];
+  ctaDescription?: string; // Descriptive text above the buttons at the end of the page
 }
 
 /**
- * Props do componente ArchitectPreview
- * 
- * Renderiza um preview resumido do arquiteto na home.
- * Usa o PageSection para manter consistência visual.
+ * Props for the ArchitectPreview component.
+ * Renders a summarized preview of the architect on the home page.
+ * Uses PageSection for visual consistency.
  */
 export interface ArchitectPreviewProps {
   architect: Architect;
 }
 
 /**
- * Props do componente ArchitectPage
- * 
- * Renderiza a página completa de detalhes do arquiteto.
+ * Props for the ArchitectPage component.
+ * Renders the full detail page for an architect.
  */
 export interface ArchitectPageProps {
   architect: Architect;

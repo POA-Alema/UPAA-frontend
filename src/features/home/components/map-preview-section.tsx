@@ -4,7 +4,7 @@ import { MapPlaceholder } from '@/features/map/components/map-placeholder';
 
 export function MapPreviewSection() {
   return (
-    // to do: implementar dados dinamicos
+    // TODO: Implement dynamic data fetching for map preview section
     <PageSection eyebrow="Mapa" title="Mapa" description="Descrição">
       <MapPlaceholder />
       <div className="section-actions">

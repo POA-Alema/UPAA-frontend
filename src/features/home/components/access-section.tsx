@@ -3,7 +3,7 @@ import { PageSection } from '@/components/layout/page-section';
 
 export function AccessSection() {
   return (
-    // to do: implementar dados dinamicos
+    // TODO: Implement dynamic data fetching for accessible content section
     <PageSection
       eyebrow="Conteúdo"
       title="Conteúdo acessível"

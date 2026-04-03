@@ -1,4 +1,25 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+@theme {
+  --color-background: #151312;
+  --color-on-background: #e7e1df;
+  
+  --color-surface: #151312;
+  --color-on-surface: #e7e1df;
+  --color-surface-container-high: #2c2928;
+  --color-on-surface-variant: #d2c5b3;
+  
+  --color-primary: #efc173;
+  --color-on-primary: #422c00;
+  
+  --color-outline: #9b8f7f;
+  --color-outline-variant: #4e4538;
+
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Work Sans", sans-serif;
+  --font-label: "Work Sans", sans-serif;
+}
 
 :root {
   color-scheme: light;

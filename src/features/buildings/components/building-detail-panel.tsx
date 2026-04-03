@@ -7,7 +7,7 @@ type BuildingDetailPanelProps = {
 export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
   return (
     <div className="content-grid">
-      {/* to do: implementar dados dinamicos */}
+      {/* TODO: Implement dynamic data fetching for building details */}
       <article className="info-card">
         <p className="meta-line">
           {building.district} - {building.yearLabel}

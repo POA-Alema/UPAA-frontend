@@ -1,17 +1,39 @@
 import { notFound } from "next/navigation";
 import { ArchitectPage } from "@/features/architects/components/ArchitectPage";
 import { getArchitectBySlug, architectsMock } from "@/features/architects/mocks/architect-mock";
+import { Architect } from "@/features/architects/types/architect";
 
 type ArchitectDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
 /**
- * Gera os metadados da página dinamicamente com base no slug do arquiteto para fins de SEO.
+ * Fetches architect data from CMS with fallback to local mock.
+ * @param slug - The architect's unique URL identifier
+ * @returns Architect data or null if not found
+ */
+async function getArchitectData(slug: string): Promise<Architect | null> {
+  try {
+    const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:8080';
+const response = await fetch(`${CMS_URL}/api/architects/${slug}`, {
+  cache: "no-store",
+});
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (error) {
+    // Failed to communicate with CMS
+  }
+
+  return getArchitectBySlug(slug) || null;
+}
+
+/**
+ * Generates the page metadata dynamically.
  */
 export async function generateMetadata({ params }: ArchitectDetailPageProps) {
   const { slug } = await params;
-  const architect = getArchitectBySlug(slug);
+  const architect = await getArchitectData(slug);
 
   if (!architect) {
     return {
@@ -26,7 +48,8 @@ export async function generateMetadata({ params }: ArchitectDetailPageProps) {
 }
 
 /**
- * Gera as rotas estáticas em tempo de build.
+ * Generates static routes at build time based on the initial mock data.
+ * This ensures that all architect pages are pre-built for better performance.
  */
 export function generateStaticParams() {
   return architectsMock.map((architect) => ({
@@ -35,11 +58,12 @@ export function generateStaticParams() {
 }
 
 /**
- * Componente principal da página de detalhes do arquiteto.
+ * Main component for the architect detail page.
+ * Renders the full architect information using the ArchitectPage component.
  */
 export default async function ArchitectDetailPage({ params }: ArchitectDetailPageProps) {
   const { slug } = await params;
-  const architect = getArchitectBySlug(slug);
+  const architect = await getArchitectData(slug);
 
   if (!architect) {
     notFound();

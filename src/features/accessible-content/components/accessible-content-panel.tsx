@@ -1,7 +1,7 @@
 export function AccessibleContentPanel() {
   return (
     <div className="content-grid">
-      {/* to do: implementar dados dinamicos */}
+      {/* TODO: Implement dynamic data fetching for accessible content */}
       <article className="info-card">
         <h3>Conteúdo</h3>
         <p>Descrição</p>

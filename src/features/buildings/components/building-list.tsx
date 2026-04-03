@@ -4,7 +4,7 @@ import { buildings } from '@/data/buildings';
 export function BuildingList() {
   return (
     <div className="content-grid">
-      {/* to do: implementar dados dinamicos */}
+      {/* TODO: Implement dynamic data fetching for building list */}
       {buildings.map((building) => (
         <article className="info-card" key={building.slug}>
           <p className="meta-line">

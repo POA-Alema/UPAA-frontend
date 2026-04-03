@@ -10,7 +10,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
   return (
     <div className="bg-[var(--dark-bg)] max-w-sm mx-auto px-6 py-10 font-sans text-[var(--dark-foreground)]">
       
-      {/* 1. FOTO RETANGULAR COM MOLDURA DUPLA DOURADA */}
+      {/* 1. Rectangular Photo with Double Golden Frame */}
       <div className="flex flex-col items-center mb-8">
         <div className="relative w-full max-w-[260px] aspect-[4/5] p-1.5 border border-[var(--gold-primary)]/40 rounded-lg shadow-2xl">
           <div className="relative w-full h-full border-2 border-[var(--gold-primary)] rounded-md overflow-hidden bg-[var(--dark-surface)]">
@@ -29,7 +29,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
         </div>
       </div>
 
-      {/* 2. TÍTULOS */}
+      {/* 2. Titles Section */}
       <div className="text-center w-full mb-10">
         {architect.eyebrow && (
           <span className="text-[var(--gold-primary)] text-[10px] font-bold tracking-[0.25em] uppercase block mb-6">
@@ -42,7 +42,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
         <div className="w-16 h-[1px] bg-[var(--gold-primary)]/30 mx-auto"></div>
       </div>
 
-      {/* 3. HISTÓRIA COM DROP CAP */}
+      {/* 3. History with Drop Cap */}
       <div className="mb-10 pl-1">
         <h3 className="font-bold text-xl mb-8 text-[var(--gold-primary)] flex items-center gap-4 uppercase tracking-widest">
           <span className="h-[2px] w-8 bg-[var(--gold-primary)]"></span> História
@@ -58,11 +58,11 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
         </div>
       </div>
 
-      {/* 4. AÇÕES (Dois Botões em Empilhamento Vertical orientados a dados) */}
+      {/* 4. Actions (Two Buttons in Vertical Stack, Data-Driven) */}
       {architect.actions && (
         <div className="mt-6 flex flex-col gap-3">
           
-          {/* Botão Principal: Puxa os dados de actions.primary */}
+          {/* Primary Button: Uses data from actions.primary */}
           <Link 
             href={architect.actions.primary.href}
             className="w-full bg-[var(--gold-primary)] text-[var(--dark-bg)] font-bold py-4 rounded-md shadow-lg hover:bg-[var(--gold-hover)] transition-all flex items-center justify-center gap-3 tracking-[0.15em] text-[11px] uppercase"
@@ -73,7 +73,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
             {architect.actions.primary.label}
           </Link>
 
-          {/* Botão Secundário: Puxa os dados de actions.secondary */}
+          {/* Secondary Button: Uses data from actions.secondary */}
           <Link 
             href={architect.actions.secondary.href}
             className="w-full bg-[var(--dark-surface)] border border-[var(--gold-primary)]/40 text-[var(--gold-primary)] font-bold py-4 rounded-md hover:bg-[var(--dark-bg)] transition-all flex items-center justify-center gap-3 tracking-[0.15em] text-[11px] uppercase"

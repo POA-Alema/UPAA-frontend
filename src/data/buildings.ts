@@ -6,7 +6,7 @@ export type Building = {
   summary: string;
 };
 
-// to do: implementar dados dinamicos
+// TODO: Implement dynamic data fetching for buildings from CMS or API
 export const buildings: Building[] = [
   {
     slug: 'edificacao-exemplo-1',
