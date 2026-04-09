@@ -13,9 +13,8 @@ export default function HomePage() {
         <IntroSection />
         <MapPreviewSection />
         <AccessSection />
-         <ArchitectPreview architect={theodorWiederspahnMock} />
-
       </div>
+      <ArchitectPreview architect={theodorWiederspahnMock} />
     </main>
   );
 }

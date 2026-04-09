@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ArchitectPage } from "@/features/architects/components/ArchitectPage";
 import { getArchitectBySlug, architectsMock } from "@/features/architects/mocks/architect-mock";
-import { Architect } from "@/features/architects/types/architect";
+import type { Architect } from "@/features/architects/types/architect";
 
 type ArchitectDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -15,13 +15,18 @@ type ArchitectDetailPageProps = {
 async function getArchitectData(slug: string): Promise<Architect | null> {
   try {
     const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || 'http://localhost:8080';
-const response = await fetch(`${CMS_URL}/api/architects/${slug}`, {
-  cache: "no-store",
-});
+    const response = await fetch(`${CMS_URL}/api/architects/${slug}`, {
+      cache: "no-store",
+    });
+
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+
+      if (data?.slug && data?.title && data?.bioSummary) {
+        return data as Architect;
+      }
     }
-  } catch (error) {
+  } catch {
     // Failed to communicate with CMS
   }
 

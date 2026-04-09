@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArchitectPageProps } from "../types/architect";
+import type { ArchitectPageProps } from "../types/architect";
 
 export function ArchitectPage({ architect }: ArchitectPageProps) {
   if (!architect.title && !architect.bio && !architect.image) {
@@ -21,7 +21,7 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
                   alt={architect.image.alt || architect.title}
                   fill
                   priority
-                  className="object-cover grayscale brightness-90"
+                  className="object-cover"
                   sizes="(max-width: 768px) 260px, 260px"
                 />
                 <div 
@@ -91,7 +91,7 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
       {architect.characteristics && architect.characteristics.length > 0 && (
         <section className="px-8 py-16">
           <div className="max-w-4xl mx-auto antialiased">
-            <h2 className="font-headline font-bold text-3xl mb-12 text-primary md:text-right leading-tight tracking-tight">
+            <h2 className="font-headline font-bold text-3xl mb-12 text-left text-primary leading-tight tracking-tight">
               Características<br />Arquitetônicas
             </h2>
             
@@ -119,7 +119,7 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
       {/* Portfolio Section - Notable Works */}
       {architect.works && architect.works.length > 0 && (
         <section className="py-16">
-          <div className="px-8 max-w-4xl mx-auto mb-10 flex justify-between items-end antialiased">
+          <div className="px-8 max-w-4xl mx-auto mb-10 flex flex-col items-start gap-4 antialiased md:flex-row md:items-end md:justify-between">
             <h2 className="font-headline font-extrabold text-2xl uppercase tracking-widest text-primary">
               Obras Marcantes
             </h2>
@@ -129,7 +129,7 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
             </span>
           </div>
           
-          <div className="flex overflow-x-auto gap-6 px-8 pb-8 snap-x snap-mandatory scrollbar-hide max-w-6xl mx-auto">
+          <div className="flex overflow-x-auto gap-6 px-8 pb-8 snap-x snap-mandatory scrollbar-hide max-w-4xl mx-auto">
             {architect.works.map((work, index) => (
               <figure key={index} className="flex-none w-72 snap-center m-0 antialiased">
                 <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-2xl mb-6 border border-outline-variant/20 bg-surface-container-high flex items-center justify-center relative">

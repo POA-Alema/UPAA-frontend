@@ -1,4 +1,4 @@
-import { Architect } from "../types/architect";
+import type { Architect } from "../types/architect";
 
 /**
  * Mock data for architects.
