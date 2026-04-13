@@ -112,6 +112,7 @@ npm run dev
 - `npm run start`: serve o build de produção
 - `npm run setup`: cria `.env.local` se necessário e instala dependências
 - `npm run validate`: executa lint, type-check, testes e build em sequência
+- `npm run check:deps`: acusa alterações em `package.json` e `package-lock.json` em relação à baseline aprovada do projeto
 - `npm run lint`: executa o lint do projeto
 - `npm run lint:fix`: corrige problemas autocorrigíveis
 - `npm run type-check`: executa validação de tipos
@@ -126,7 +127,7 @@ npm run dev
 |- src/
 |  |- app/
 |  |  |- conteudo-acessivel/
-|  |  |- edificacoes/
+|  |  |- buildings/
 |  |- components/
 |  |  |- layout/
 |  |- data/
@@ -227,6 +228,6 @@ Se o seu terminal do Windows tiver problema com o alias do `npm`, use `npm.cmd` 
 ## Estrutura de produto adotada
 
 - A página inicial foi preparada com três blocos principais: introdução, mapa e acesso ao conteúdo acessível.
-- O mapa apontará para páginas de edificações em `src/app/edificacoes/[slug]`.
+- O mapa apontará para páginas de edificações em `src/app/buildings/[slug]`.
 - A rota `src/app/conteudo-acessivel` foi reservada para a versão textual e acessível do projeto.
 - Dados mockados iniciais ficam em `src/data` apenas para sustentar a navegação e os placeholders.

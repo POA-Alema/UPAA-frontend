@@ -2,8 +2,10 @@ export function MapPlaceholder() {
   return (
     <div className="map-placeholder">
       <div>
-        {/* to do: implementar dados dinamicos */}
-        <h3>Mapa</h3>
+        {/* TODO: Implement dynamic data fetching for map content */}
+        <p className="meta-line">Prévia visual</p>
+        <h3>Mapa interativo</h3>
+        <p>vem aí</p>
       </div>
     </div>
   );
