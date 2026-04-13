@@ -112,6 +112,7 @@ npm run dev
 - `npm run start`: serve o build de produção
 - `npm run setup`: cria `.env.local` se necessário e instala dependências
 - `npm run validate`: executa lint, type-check, testes e build em sequência
+- `npm run check:deps`: acusa alterações em `package.json` e `package-lock.json` em relação à baseline aprovada do projeto
 - `npm run lint`: executa o lint do projeto
 - `npm run lint:fix`: corrige problemas autocorrigíveis
 - `npm run type-check`: executa validação de tipos

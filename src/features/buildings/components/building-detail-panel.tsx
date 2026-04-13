@@ -1,4 +1,4 @@
-import type { Building } from '@/data/buildings';
+import type { Building } from "@/data/buildings";
 
 type BuildingDetailPanelProps = {
   building: Building;
@@ -17,7 +17,7 @@ export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
       </article>
       <article className="info-card">
         <h3>Mapa</h3>
-        <p>Descrição</p>
+        <p>Integração com o mapa será conectada assim que a feature correspondente estiver disponível.</p>
       </article>
     </div>
   );

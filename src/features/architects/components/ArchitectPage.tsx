@@ -1,198 +1,166 @@
 import Image from "next/image";
-import Link from "next/link";
+import { RichText } from "@/components/content/rich-text";
+import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPageProps } from "../types/architect";
 
 export function ArchitectPage({ architect }: ArchitectPageProps) {
-  if (!architect.title && !architect.bio && !architect.image) {
+  const hasHero = Boolean(architect.title || architect.eyebrow || architect.image);
+  const hasBiography = Boolean(architect.bio);
+  const hasDetails = Boolean(architect.details?.length);
+  const hasCharacteristics = Boolean(architect.characteristics?.length);
+  const hasWorks = Boolean(architect.works?.length);
+  const hasCta = Boolean(architect.ctaDescription || architect.actions?.secondary);
+
+  if (!hasHero && !hasBiography && !hasDetails && !hasCharacteristics && !hasWorks && !hasCta) {
     return null;
   }
 
   return (
-    <article className="pb-12 pt-16 font-body bg-background text-on-background min-h-screen">
-      
-      {/* Hero Section - Visual Identity */}
-      <section className="relative flex flex-col items-center px-8 mb-12">
-        {architect.image && (
-          <figure className="flex flex-col items-center mb-12 mt-4 m-0">
-            <div className="relative w-full max-w-[260px] aspect-[4/5] p-1.5 border border-primary/40 rounded-lg shadow-2xl mb-4 antialiased">
-              <div className="relative w-full h-full border-2 border-primary rounded-md overflow-hidden bg-surface-container-high z-10 antialiased">
-                <Image
-                  src={architect.image.src}
-                  alt={architect.image.alt || architect.title}
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 768px) 260px, 260px"
-                />
-                <div 
-                  className="absolute inset-0 pointer-events-none" 
-                  style={{ background: 'linear-gradient(45deg, rgba(21, 19, 18, 0.9), rgba(211, 166, 91, 0.1))' }}
-                ></div>
-              </div>
+    <article className="page-shell architect-page architect-page--dark architect-flow">
+      {hasHero ? (
+        <section className="architect-hero">
+          <div className="architect-hero__grid">
+            {architect.image ? (
+              <figure className="architect-hero__media">
+                <div className="architect-image-frame architect-image-frame--hero">
+                  <Image
+                    alt={architect.image.alt || architect.title}
+                    className="architect-image"
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 260px, 260px"
+                    src={architect.image.src}
+                  />
+                  <div className="architect-image-overlay architect-image-overlay--strong"></div>
+                </div>
+
+                {architect.image.caption ? (
+                  <figcaption className="architect-caption architect-caption--light">
+                    {architect.image.caption}
+                  </figcaption>
+                ) : null}
+              </figure>
+            ) : null}
+
+            <div className="architect-hero__copy">
+              {architect.eyebrow ? <p className="eyebrow eyebrow--light">{architect.eyebrow}</p> : null}
+              {architect.title ? (
+                <h1 className="architect-title architect-title--light">
+                  O Legado de <br /> {architect.title}
+                </h1>
+              ) : null}
+              <div className="section-divider section-divider--accent"></div>
             </div>
-            
-            <figcaption className="mt-4 text-[10px] uppercase tracking-widest text-on-surface-variant text-center max-w-xs">
-              {architect.image.caption}
-            </figcaption>
-          </figure>
-        )}
-
-        <div className="text-center max-w-2xl px-4 antialiased">
-          {architect.eyebrow && (
-            <span className="font-label uppercase tracking-[0.3em] text-[0.65rem] text-primary mb-4 block">
-              {architect.eyebrow}
-            </span>
-          )}
-          <h1 className="font-headline font-extrabold text-3xl md:text-5xl text-on-surface mb-6 tracking-tight">
-            O Legado de <br /> {architect.title}
-          </h1>
-          <div className="w-16 h-[1px] bg-primary mx-auto opacity-40"></div>
-        </div>
-      </section>
-
-      {/* History and Biography Section */}
-      {architect.bio && (
-        <section className="px-8 py-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="font-headline font-bold text-2xl mb-12 text-primary flex items-center gap-4 antialiased">
-              <span className="h-[2px] w-12 bg-primary"></span> História
-            </h2>
-            
-            <div className="relative mb-16 antialiased">
-              <div className="text-lg leading-[1.8] font-light text-on-surface/90 italic antialiased">
-                <span className="text-5xl font-headline text-primary float-left mr-4 mt-2 leading-none">
-                  {architect.bio.charAt(0)}
-                </span>
-                {architect.bio.slice(1)}
-              </div>
-            </div>
-
-            {/* Technical Information Grid */}
-            {architect.details && architect.details.length > 0 && (
-              <div className="grid grid-cols-1 gap-4 antialiased">
-                {architect.details.map((detail, index) => (
-                  <div key={index} className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/10">
-                    <span className="font-label text-[9px] uppercase tracking-[0.2em] text-primary/70 block mb-2">
-                      {detail.label}
-                    </span>
-                    <p className="font-headline font-bold text-lg text-on-surface">{detail.value}</p>
-                    {detail.subValue && (
-                      <p className="text-xs text-on-surface/40 mt-1">{detail.subValue}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* Architectural Characteristics Section */}
-      {architect.characteristics && architect.characteristics.length > 0 && (
-        <section className="px-8 py-16">
-          <div className="max-w-4xl mx-auto antialiased">
-            <h2 className="font-headline font-bold text-3xl mb-12 text-left text-primary leading-tight tracking-tight">
-              Características<br />Arquitetônicas
+      {hasBiography ? (
+        <section className="architect-section architect-section--bio architect-flow__section">
+          <div className="architect-section__inner">
+            <div className="section-heading">
+              <h2 className="architect-section__headline">
+                <span className="architect-section__headline-line"></span> História
+              </h2>
+            </div>
+
+            <RichText className="rich-text rich-text--muted" content={architect.bio} emphasizeFirstParagraph />
+
+            {hasDetails ? (
+              <div className="architect-detail-grid">
+                {architect.details?.map((detail) => (
+                  <article className="info-card info-card--architect" key={`${detail.label}-${detail.value}`}>
+                    <p className="meta-line meta-line--light">{detail.label}</p>
+                    <h3>{detail.value}</h3>
+                    {detail.subValue ? <p>{detail.subValue}</p> : null}
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {hasCharacteristics ? (
+        <section className="architect-section architect-section--features architect-flow__section">
+          <div className="architect-section__inner">
+            <h2 className="architect-section__title">
+              Características <br /> Arquitetônicas
             </h2>
-            
-            <div className="space-y-6">
-              {architect.characteristics.map((char, index) => (
-                <div key={index} className="bg-surface-container-high/30 p-8 rounded-xl border border-outline-variant/10 flex flex-col items-start">
-                  <span className="material-symbols-outlined text-primary mb-6 text-3xl">
-                    {char.icon}
-                  </span>
-                  <div className="antialiased">
-                    <h3 className="font-headline font-bold mb-4 text-on-surface text-xl">
-                      {char.title}
-                    </h3>
-                    <p className="text-sm text-on-surface-variant leading-relaxed">
-                      {char.description}
-                    </p>
-                  </div>
-                </div>
+
+            <div className="architect-feature-grid">
+              {architect.characteristics?.map((characteristic) => (
+                <article className="info-card info-card--architect info-card--feature" key={characteristic.title}>
+                  <span className="material-symbols-outlined architect-feature-icon">{characteristic.icon}</span>
+                  <h3>{characteristic.title}</h3>
+                  <p>{characteristic.description}</p>
+                </article>
               ))}
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* Portfolio Section - Notable Works */}
-      {architect.works && architect.works.length > 0 && (
-        <section className="py-16">
-          <div className="px-8 max-w-4xl mx-auto mb-10 flex flex-col items-start gap-4 antialiased md:flex-row md:items-end md:justify-between">
-            <h2 className="font-headline font-extrabold text-2xl uppercase tracking-widest text-primary">
-              Obras Marcantes
-            </h2>
-            <span className="text-outline font-label text-[9px] uppercase tracking-widest flex items-center gap-2 font-bold">
-              <span className="material-symbols-outlined text-sm">swipe_left</span>
-              Deslize
-            </span>
-          </div>
-          
-          <div className="flex overflow-x-auto gap-6 px-8 pb-8 snap-x snap-mandatory scrollbar-hide max-w-4xl mx-auto">
-            {architect.works.map((work, index) => (
-              <figure key={index} className="flex-none w-72 snap-center m-0 antialiased">
-                <div className="aspect-[4/3] rounded-xl overflow-hidden shadow-2xl mb-6 border border-outline-variant/20 bg-surface-container-high flex items-center justify-center relative">
-                  {work.image ? (
-                    <Image
-                      src={work.image.src}
-                      alt={work.image.alt}
-                      fill
-                      priority={index === 0}
-                      className="object-cover antialiased"
-                      sizes="(max-width: 768px) 288px, 288px"
-                    />
-                  ) : (
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant">image</span>
-                  )}
-                </div>
-                <figcaption className="text-center px-2">
-                  <strong className="block text-[11px] uppercase tracking-[0.15em] text-primary mb-1">
-                    {work.title}
-                  </strong>
-                  {work.image && (
-                    <span className="text-[9px] uppercase tracking-[0.15em] text-outline">
-                      {work.image.caption}
-                    </span>
-                  )}
-                </figcaption>
-              </figure>
-            ))}
+      {hasWorks ? (
+        <section className="architect-section architect-section--works architect-flow__section">
+          <div className="architect-section__inner architect-section__inner--wide">
+            <div className="architect-works__header">
+              <h2 className="architect-works__title">Obras Marcantes</h2>
+              <span className="architect-works__hint">
+                <span className="material-symbols-outlined">swipe_left</span>
+                Deslize
+              </span>
+            </div>
+
+            <div className="architect-works__rail">
+              {architect.works?.map((work, index) => (
+                <figure className="architect-work-card" key={work.title}>
+                  <div className="architect-work-card__media">
+                    {work.image ? (
+                      <>
+                        <Image
+                          alt={work.image.alt}
+                          className="architect-image"
+                          fill
+                          priority={index === 0}
+                          sizes="(max-width: 768px) 288px, 288px"
+                          src={work.image.src}
+                        />
+                      </>
+                    ) : (
+                      <span className="material-symbols-outlined architect-work-card__fallback">image</span>
+                    )}
+                  </div>
+                  <figcaption className="architect-work-card__caption">
+                    <strong>{work.title}</strong>
+                    {work.image?.caption ? <span>{work.image.caption}</span> : null}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* Call to Action (CTA) Section */}
-      <section className="px-8 py-20 text-center antialiased">
-        <div className="max-w-xl mx-auto">
-          {architect.ctaDescription && (
-            <p className="text-on-surface-variant leading-relaxed text-lg font-light mb-12">
-              {architect.ctaDescription}
-            </p>
-          )}
-          
-          <div className="flex flex-col gap-4 max-w-xs mx-auto">
-            {architect.actions?.secondary && (
-              <Link 
-                href={architect.actions.secondary.href}
-                className="bg-primary text-[#151312] font-headline font-bold py-5 px-10 rounded-lg shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-3 tracking-widest text-[10px] uppercase border border-transparent"
-              >
-                <span className="material-symbols-outlined text-lg">explore</span>
-                {architect.actions.secondary.label}
-              </Link>
-            )}
+      {hasCta ? (
+        <section className="architect-cta architect-flow__section">
+          <div className="architect-cta__content">
+            {architect.ctaDescription ? <p className="section-copy architect-cta__copy">{architect.ctaDescription}</p> : null}
 
-            <Link 
-              href="/mapa"
-              className="bg-surface-container-high/50 text-on-surface font-headline font-bold py-5 px-10 rounded-lg transition-all flex items-center justify-center gap-3 tracking-widest text-[10px] uppercase border border-outline-variant/10 hover:bg-surface-container-high"
-            >
-              <span className="material-symbols-outlined text-lg">map</span>
-              Voltar ao Mapa
-            </Link>
+            <div className="section-actions section-actions--row section-actions--center">
+              {architect.actions?.secondary ? (
+                <FeatureAction
+                  href={architect.actions.secondary.href}
+                  icon="explore"
+                  label={architect.actions.secondary.label}
+                  variant="primary"
+                />
+              ) : null}
+              <FeatureAction icon="map" label="Voltar ao Mapa" variant="ghost" />
+            </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+      ) : null}
     </article>
   );
 }

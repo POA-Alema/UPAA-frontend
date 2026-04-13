@@ -1,20 +1,18 @@
-import { AccessSection } from '@/features/home/components/access-section';
-import { IntroSection } from '@/features/home/components/intro-section';
-import { MapPreviewSection } from '@/features/home/components/map-preview-section';
-import { ArchitectPreview } from '@/features/architects/components/ArchitectPreview';
-import { theodorWiederspahnMock } from '@/features/architects/mocks/architect-mock';
+import { ArchitectPreview } from "@/features/architects/components/ArchitectPreview";
+import { getFeaturedArchitect } from "@/features/architects/data/architects";
+import { IntroSection } from "@/features/home/components/intro-section";
+import { MapPreviewSection } from "@/features/home/components/map-preview-section";
 
+export default async function HomePage() {
+  const featuredArchitect = await getFeaturedArchitect();
 
-
-export default function HomePage() {
   return (
-    <main className="page-shell">
+    <main className="page-shell home-flow">
       <div className="page-stack">
         <IntroSection />
         <MapPreviewSection />
-        <AccessSection />
+        {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
       </div>
-      <ArchitectPreview architect={theodorWiederspahnMock} />
     </main>
   );
 }

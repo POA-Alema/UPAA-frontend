@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { buildings } from '@/data/buildings';
+import Link from "next/link";
+import { buildings } from "@/data/buildings";
 
 export function BuildingList() {
   return (

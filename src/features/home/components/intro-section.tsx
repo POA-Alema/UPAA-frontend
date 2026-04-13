@@ -1,9 +1,9 @@
-import { PageSection } from '@/components/layout/page-section';
+import { PageSection } from "@/components/layout/page-section";
 
 export function IntroSection() {
   return (
-    // TODO: Implement dynamic data fetching for introduction section content
     <PageSection
+      className="home-flow__section"
       eyebrow="Introdução"
       title="Uma Porto Alegre Alemã"
       description="Descrição"
