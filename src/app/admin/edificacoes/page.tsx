@@ -1,27 +1,9 @@
 import Link from "next/link";
 import DeleteButton from "@/components/admin/DeleteButton";
+import { getEdificacoes } from "@/services/edificacoes";
 
-interface Edificacao {
-  id: string;
-  titulo: string;
-  localizacao: string;
-}
-
-// Dados mockados para teste inicial
-const mockEdificacoes: Edificacao[] = [
-  {
-    id: "1",
-    titulo: "Casarão Histórico do Menino Deus",
-    localizacao: "Porto Alegre, RS",
-  },
-  {
-    id: "2",
-    titulo: "Sociedade Germânia",
-    localizacao: "Porto Alegre, RS",
-  },
-];
-
-export default function EdificacoesPage() {
+export default async function EdificacoesPage() {
+  const edificacoes = await getEdificacoes();
   return (
     <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
       <div className="max-w-6xl mx-auto">
@@ -48,7 +30,18 @@ export default function EdificacoesPage() {
 
         {/* Grid de Edificações */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockEdificacoes.map((edificacao) => (
+          {edificacoes.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-on-surface/70 mb-4">Nenhuma edificação cadastrada ainda.</p>
+              <Link
+                href="/admin/edificacoes/new"
+                className="text-primary hover:underline"
+              >
+                Crie a primeira →
+              </Link>
+            </div>
+          ) : (
+            edificacoes.map((edificacao) => (
             <div
               key={edificacao.id}
               className="bg-surface-container-high/40 p-6 rounded-xl border border-outline-variant/10 shadow-xl transition-all hover:shadow-2xl"
@@ -93,7 +86,8 @@ export default function EdificacoesPage() {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </section>

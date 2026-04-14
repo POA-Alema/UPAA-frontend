@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Work_Sans } from "next/font/google";
 import type { ReactNode } from "react";
+import { ScrollRestoration } from "@/components/ScrollRestoration";
 import "./globals.css";
 
 const headlineFont = Manrope({
@@ -33,7 +34,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ScrollRestoration />
+        {children}
+      </body>
     </html>
   );
 }

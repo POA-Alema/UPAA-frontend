@@ -19,6 +19,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@tiptap/react": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
     "leaflet": "^1.9.4",
     "next": "^15.5.2",
     "react": "^19.1.1",
