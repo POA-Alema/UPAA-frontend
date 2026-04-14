@@ -1,14 +1,17 @@
-import { AccessSection } from '@/features/home/components/access-section';
-import { IntroSection } from '@/features/home/components/intro-section';
-import { MapPreviewSection } from '@/features/home/components/map-preview-section';
+import { ArchitectPreview } from "@/features/architects/components/ArchitectPreview";
+import { getFeaturedArchitect } from "@/features/architects/data/architects";
+import { IntroSection } from "@/features/home/components/intro-section";
+import { MapPreviewSection } from "@/features/home/components/map-preview-section";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredArchitect = await getFeaturedArchitect();
+
   return (
-    <main className="page-shell">
+    <main className="page-shell home-flow">
       <div className="page-stack">
         <IntroSection />
         <MapPreviewSection />
-        <AccessSection />
+        {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
       </div>
     </main>
   );

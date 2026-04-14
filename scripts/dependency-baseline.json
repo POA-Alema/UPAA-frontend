@@ -1,23 +1,5 @@
 {
-  "name": "upaa-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "engines": {
-    "node": ">=24 <25"
-  },
-  "scripts": {
-    "setup": "node ./scripts/setup.mjs",
-    "check:deps": "node ./scripts/check-dependency-baseline.mjs",
-    "validate": "node ./scripts/validate.mjs",
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "type-check": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
+  "packageLockSha256": "38F5E3261B95F6348B7E2C339373E3294A98FE188EC704D7B93380E4DC9F8E3C",
   "dependencies": {
     "leaflet": "^1.9.4",
     "next": "^15.5.2",
@@ -35,8 +17,6 @@
     "@types/node": "^22.13.1",
     "@types/react": "^19.1.3",
     "@types/react-dom": "^19.1.2",
-    "@types/testing-library__jest-dom": "^5.14.9",
-    "@types/testing-library__react": "^10.0.1",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.24.0",
     "eslint-config-next": "^15.5.2",

@@ -16,6 +16,7 @@ function runCommand(command, args) {
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const steps = [
+  ['run', 'check:deps'],
   ['run', 'lint'],
   ['run', 'type-check'],
   ['run', 'test'],

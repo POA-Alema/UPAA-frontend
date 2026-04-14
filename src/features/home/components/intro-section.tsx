@@ -1,9 +1,9 @@
-import { PageSection } from '@/components/layout/page-section';
+import { PageSection } from "@/components/layout/page-section";
 
 export function IntroSection() {
   return (
-    // to do: implementar dados dinamicos
     <PageSection
+      className="home-flow__section"
       eyebrow="Introdução"
       title="Uma Porto Alegre Alemã"
       description="Descrição"
