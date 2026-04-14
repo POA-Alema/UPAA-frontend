@@ -3,6 +3,7 @@ export interface ImagemEdificacao {
   url: string;
   alt: string;
   legenda?: string;
+  fallbackUrl?: string;
 }
 
 export interface CategoriaImagens {

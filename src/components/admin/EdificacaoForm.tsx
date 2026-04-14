@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import type { EdificacaoFormData, FonteEdificacao } from '@/types/edificacao';
+import AssetCard from './AssetCard';
 import { RichTextEditor } from './RichTextEditor';
 
 interface EdificacaoFormProps {
@@ -10,8 +11,15 @@ interface EdificacaoFormProps {
   isLoading?: boolean;
 }
 
-export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: EdificacaoFormProps) {
-  const [formData, setFormData] = useState<EdificacaoFormData>(
+const IMAGE_CATEGORIES = [
+  { key: 'plantaBaixa', label: 'Planta baixa' },
+  { key: 'fachadas', label: 'Fachadas' },
+  { key: 'fotosExternas', label: 'Fotos externas' },
+  { key: 'fotosInternas', label: 'Fotos internas' },
+] as const;
+
+function createInitialData(initialData?: EdificacaoFormData): EdificacaoFormData {
+  return (
     initialData || {
       titulo: '',
       localizacao: '',
@@ -34,10 +42,22 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
       },
     }
   );
+}
 
+export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: EdificacaoFormProps) {
+  const [formData, setFormData] = useState<EdificacaoFormData>(createInitialData(initialData));
   const [fonteTemp, setFonteTemp] = useState<Partial<FonteEdificacao>>({});
+  const [imagemTemp, setImagemTemp] = useState<
+    Record<(typeof IMAGE_CATEGORIES)[number]['key'], { url: string; alt: string; legenda: string }>
+  >({
+    plantaBaixa: { url: '', alt: '', legenda: '' },
+    fachadas: { url: '', alt: '', legenda: '' },
+    fotosExternas: { url: '', alt: '', legenda: '' },
+    fotosInternas: { url: '', alt: '', legenda: '' },
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -46,7 +66,6 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
       [name]: value,
     }));
 
-    // Limpar erro do campo quando usuário começa a digitar
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -61,9 +80,6 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
 
     if (!formData.titulo.trim()) {
       newErrors.titulo = 'Título é obrigatório';
-    }
-    if (!formData.localizacao.trim()) {
-      newErrors.localizacao = 'Localização é obrigatória';
     }
 
     setErrors(newErrors);
@@ -104,7 +120,80 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
   const handleRemoveFonte = (id: string) => {
     setFormData((prev) => ({
       ...prev,
-      fontes: (prev.fontes || []).filter((f) => f.id !== id),
+      fontes: (prev.fontes || []).filter((fonte) => fonte.id !== id),
+    }));
+  };
+
+  const handleRemoveImage = (category: (typeof IMAGE_CATEGORIES)[number]['key'], imageId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      imagens: {
+        plantaBaixa: prev.imagens?.plantaBaixa || [],
+        fachadas: prev.imagens?.fachadas || [],
+        fotosExternas: prev.imagens?.fotosExternas || [],
+        fotosInternas: prev.imagens?.fotosInternas || [],
+        [category]: (prev.imagens?.[category] || []).filter((imagem) => imagem.id !== imageId),
+      },
+    }));
+  };
+
+  const handleImageInputChange = (
+    category: (typeof IMAGE_CATEGORIES)[number]['key'],
+    field: 'url' | 'alt' | 'legenda',
+    value: string
+  ) => {
+    setImagemTemp((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [field]: value,
+      },
+    }));
+
+    const errorKey = `imagem-${category}`;
+    if (errors[errorKey]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[errorKey];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleAddImage = (category: (typeof IMAGE_CATEGORIES)[number]['key']) => {
+    const draft = imagemTemp[category];
+    const errorKey = `imagem-${category}`;
+
+    if (!draft.url.trim() || !draft.alt.trim()) {
+      setErrors((prev) => ({
+        ...prev,
+        [errorKey]: 'URL e texto alternativo são obrigatórios para adicionar uma imagem.',
+      }));
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      imagens: {
+        plantaBaixa: prev.imagens?.plantaBaixa || [],
+        fachadas: prev.imagens?.fachadas || [],
+        fotosExternas: prev.imagens?.fotosExternas || [],
+        fotosInternas: prev.imagens?.fotosInternas || [],
+        [category]: [
+          ...(prev.imagens?.[category] || []),
+          {
+            id: `imagem-${category}-${Date.now()}`,
+            url: draft.url.trim(),
+            alt: draft.alt.trim(),
+            legenda: draft.legenda.trim() || undefined,
+          },
+        ],
+      },
+    }));
+
+    setImagemTemp((prev) => ({
+      ...prev,
+      [category]: { url: '', alt: '', legenda: '' },
     }));
   };
 
@@ -116,71 +205,49 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
       return;
     }
 
-    try {
-      await onSubmit(formData);
-      setSubmitMessage({
-        type: 'success',
-        text: initialData ? 'Edificação atualizada com sucesso!' : 'Edificação criada com sucesso!',
-      });
-      
-      if (!initialData) {
-        // Limpar formulário apenas se for criação
-        setFormData({
-          titulo: '',
-          localizacao: '',
-          data: '',
-          projeto: '',
-          construcao: '',
-          ornamentosEsculturas: '',
-          areaConstituida: '',
-          ocupacaoAtual: '',
-          projetoRestauracao: '',
-          tombamento: '',
-          descricao: '',
-          autor: '',
-          fontes: [],
-          imagens: {
-            plantaBaixa: [],
-            fachadas: [],
-            fotosExternas: [],
-            fotosInternas: [],
-          },
+    startTransition(async () => {
+      try {
+        await onSubmit(formData);
+        setSubmitMessage({
+          type: 'success',
+          text: initialData ? 'Edificação atualizada com sucesso!' : 'Edificação criada com sucesso!',
+        });
+
+        if (!initialData) {
+          setFormData(createInitialData());
+        }
+      } catch (error) {
+        setSubmitMessage({
+          type: 'error',
+          text: error instanceof Error ? error.message : 'Erro ao salvar edificação',
         });
       }
-    } catch (error) {
-      setSubmitMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Erro ao salvar edificação',
-      });
-    }
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto font-body">
-      {/* Mensagem de sucesso/erro */}
+    <form onSubmit={handleSubmit} className="mx-auto max-w-4xl font-body">
       {submitMessage && (
         <div
-          className={`p-4 rounded-lg mb-8 ${
+          className={`mb-8 rounded-lg border p-4 ${
             submitMessage.type === 'success'
-              ? 'bg-green-900/20 text-green-200 border border-green-700/50'
-              : 'bg-red-900/20 text-red-200 border border-red-700/50'
+              ? 'border-green-700/50 bg-green-900/20 text-green-200'
+              : 'border-red-700/50 bg-red-900/20 text-red-200'
           }`}
         >
           {submitMessage.text}
         </div>
       )}
 
-      {/* Seção 1: Informações Básicas */}
-      <fieldset className="mb-12 pb-12 border-b border-outline-variant/20">
-        <legend className="font-headline font-bold text-2xl mb-8 text-primary flex items-center gap-4">
+      <fieldset className="mb-12 border-b border-outline-variant/20 pb-12">
+        <legend className="mb-8 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
           <span className="h-[2px] w-12 bg-primary"></span>
           Informações Básicas
         </legend>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Título */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label htmlFor="titulo" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+            <label htmlFor="titulo" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Título *
             </label>
             <input
@@ -189,18 +256,19 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.titulo}
               onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-surface-container-high/50 border rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
-                errors.titulo ? 'border-red-500/50 focus:ring-red-500' : 'border-outline-variant/30'
+              className={`w-full rounded-lg border px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 ${
+                errors.titulo
+                  ? 'border-red-500/50 bg-surface-container-high/50 focus:ring-red-500'
+                  : 'border-outline-variant/30 bg-surface-container-high/50 focus:ring-primary'
               }`}
               required
             />
-            {errors.titulo && <p className="text-red-400 text-sm mt-1">{errors.titulo}</p>}
+            {errors.titulo && <p className="mt-1 text-sm text-red-400">{errors.titulo}</p>}
           </div>
 
-          {/* Localização */}
           <div>
-            <label htmlFor="localizacao" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
-              Localização *
+            <label htmlFor="localizacao" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              Localização
             </label>
             <input
               id="localizacao"
@@ -208,17 +276,17 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.localizacao}
               onChange={handleInputChange}
-              className={`w-full px-4 py-2 bg-surface-container-high/50 border rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
-                errors.localizacao ? 'border-red-500/50 focus:ring-red-500' : 'border-outline-variant/30'
+              className={`w-full rounded-lg border px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 ${
+                errors.localizacao
+                  ? 'border-red-500/50 bg-surface-container-high/50 focus:ring-red-500'
+                  : 'border-outline-variant/30 bg-surface-container-high/50 focus:ring-primary'
               }`}
-              required
             />
-            {errors.localizacao && <p className="text-red-400 text-sm mt-1">{errors.localizacao}</p>}
+            {errors.localizacao && <p className="mt-1 text-sm text-red-400">{errors.localizacao}</p>}
           </div>
 
-          {/* Data */}
           <div>
-            <label htmlFor="data" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+            <label htmlFor="data" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Data
             </label>
             <input
@@ -228,13 +296,12 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               placeholder="Ex: 1900"
               value={formData.data}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Projeto */}
           <div>
-            <label htmlFor="projeto" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+            <label htmlFor="projeto" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Projeto
             </label>
             <input
@@ -243,13 +310,12 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.projeto}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Construção */}
           <div>
-            <label htmlFor="construcao" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+            <label htmlFor="construcao" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Construção
             </label>
             <input
@@ -258,14 +324,13 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.construcao}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Ornamentos e Esculturas */}
           <div>
-            <label htmlFor="ornamentosEsculturas" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
-              Ornamentos e Esculturas
+            <label htmlFor="ornamentosEsculturas" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              Conjunto de ornamentos e esculturas
             </label>
             <input
               id="ornamentosEsculturas"
@@ -273,14 +338,13 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.ornamentosEsculturas}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Área Construída */}
           <div>
-            <label htmlFor="areaConstituida" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
-              Área Construída
+            <label htmlFor="areaConstituida" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              Área construída
             </label>
             <input
               id="areaConstituida"
@@ -288,14 +352,13 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.areaConstituida}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Ocupação Atual */}
           <div>
-            <label htmlFor="ocupacaoAtual" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
-              Ocupação Atual
+            <label htmlFor="ocupacaoAtual" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              Ocupação atual
             </label>
             <input
               id="ocupacaoAtual"
@@ -303,14 +366,13 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.ocupacaoAtual}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Projeto de Restauração */}
           <div>
-            <label htmlFor="projetoRestauracao" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
-              Projeto de Restauração
+            <label htmlFor="projetoRestauracao" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              Projeto de restauração
             </label>
             <input
               id="projetoRestauracao"
@@ -318,13 +380,12 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.projetoRestauracao}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Tombamento */}
           <div>
-            <label htmlFor="tombamento" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+            <label htmlFor="tombamento" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Tombamento
             </label>
             <input
@@ -333,13 +394,12 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.tombamento}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          {/* Autor */}
           <div>
-            <label htmlFor="autor" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+            <label htmlFor="autor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Autor
             </label>
             <input
@@ -348,21 +408,20 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
               type="text"
               value={formData.autor}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
       </fieldset>
 
-      {/* Seção 2: Descrição */}
-      <fieldset className="mb-12 pb-12 border-b border-outline-variant/20">
-        <legend className="font-headline font-bold text-2xl mb-8 text-primary flex items-center gap-4">
+      <fieldset className="mb-12 border-b border-outline-variant/20 pb-12">
+        <legend className="mb-8 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
           <span className="h-[2px] w-12 bg-primary"></span>
           Descrição
         </legend>
 
         <div>
-          <label className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-4">
+          <label className="mb-4 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
             Descrição da Edificação (RichText)
           </label>
           <RichTextEditor
@@ -377,20 +436,18 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
         </div>
       </fieldset>
 
-      {/* Seção 3: Fontes */}
-      <fieldset className="mb-12 pb-12 border-b border-outline-variant/20">
-        <legend className="font-headline font-bold text-2xl mb-8 text-primary flex items-center gap-4">
+      <fieldset className="mb-12 border-b border-outline-variant/20 pb-12">
+        <legend className="mb-8 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
           <span className="h-[2px] w-12 bg-primary"></span>
           Fontes
         </legend>
 
-        {/* Adicionar Fonte */}
-        <div className="bg-surface-container-high/30 p-6 rounded-lg border border-outline-variant/20 mb-6">
-          <h3 className="font-headline font-bold text-lg mb-4">Adicionar Fonte</h3>
+        <div className="mb-6 rounded-lg border border-outline-variant/20 bg-surface-container-high/30 p-6">
+          <h3 className="mb-4 font-headline text-lg font-bold">Adicionar Fonte</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="fonteTitulo" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+              <label htmlFor="fonteTitulo" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
                 Título *
               </label>
               <input
@@ -403,14 +460,16 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                     titulo: e.target.value,
                   }))
                 }
-                className={`w-full px-4 py-2 bg-surface-container-high/50 border rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
-                  errors.fonteTemp ? 'border-red-500/50 focus:ring-red-500' : 'border-outline-variant/30'
+                className={`w-full rounded-lg border px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 ${
+                  errors.fonteTemp
+                    ? 'border-red-500/50 bg-surface-container-high/50 focus:ring-red-500'
+                    : 'border-outline-variant/30 bg-surface-container-high/50 focus:ring-primary'
                 }`}
               />
             </div>
 
             <div>
-              <label htmlFor="fonteAutor" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+              <label htmlFor="fonteAutor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
                 Autor
               </label>
               <input
@@ -423,12 +482,12 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                     autor: e.target.value,
                   }))
                 }
-                className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label htmlFor="fonteUrl" className="block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70 mb-2">
+              <label htmlFor="fonteUrl" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
                 URL
               </label>
               <input
@@ -441,42 +500,44 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                     url: e.target.value,
                   }))
                 }
-                className="w-full px-4 py-2 bg-surface-container-high/50 border border-outline-variant/30 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
 
-          {errors.fonteTemp && <p className="text-red-400 text-sm mb-4">{errors.fonteTemp}</p>}
+          {errors.fonteTemp && <p className="mb-4 text-sm text-red-400">{errors.fonteTemp}</p>}
 
           <button
             type="button"
             onClick={handleAddFonte}
-            className="bg-primary/20 hover:bg-primary/30 text-primary font-headline font-bold py-2 px-4 rounded-lg transition-all flex items-center gap-2 uppercase tracking-widest text-[10px]"
+            className="flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-all hover:bg-primary/30"
           >
             <span className="material-symbols-outlined text-sm">add</span>
             Adicionar Fonte
           </button>
         </div>
 
-        {/* Lista de Fontes */}
         {formData.fontes && formData.fontes.length > 0 && (
           <div className="space-y-3">
-            <h3 className="font-headline font-bold text-lg">Fontes Adicionadas:</h3>
+            <h3 className="font-headline text-lg font-bold">Fontes Adicionadas:</h3>
             {formData.fontes.map((fonte) => (
-              <div key={fonte.id} className="bg-surface-container-high/40 p-4 rounded-lg border border-outline-variant/30 flex justify-between items-start gap-4">
+              <div
+                key={fonte.id}
+                className="flex items-start justify-between gap-4 rounded-lg border border-outline-variant/30 bg-surface-container-high/40 p-4"
+              >
                 <div>
                   <p className="font-headline font-bold text-on-surface">{fonte.titulo}</p>
-                  {fonte.autor && <p className="text-on-surface/70 text-sm">Por: {fonte.autor}</p>}
+                  {fonte.autor && <p className="text-sm text-on-surface/70">Por: {fonte.autor}</p>}
                   {fonte.url && (
-                    <a href={fonte.url} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">
-                      Acessar →
+                    <a href={fonte.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                      Acessar
                     </a>
                   )}
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveFonte(fonte.id)}
-                  className="text-red-400 hover:text-red-300 transition-colors"
+                  className="text-red-400 transition-colors hover:text-red-300"
                 >
                   <span className="material-symbols-outlined">delete</span>
                 </button>
@@ -486,17 +547,139 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
         )}
       </fieldset>
 
-      {/* Botão de Envio */}
+      <fieldset className="mb-12 border-b border-outline-variant/20 pb-12">
+        <legend className="mb-8 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
+          <span className="h-[2px] w-12 bg-primary"></span>
+          Seções de Imagens
+        </legend>
+
+        <div className="space-y-8">
+          {IMAGE_CATEGORIES.map(({ key, label }) => {
+            const imagens = formData.imagens?.[key] || [];
+            const draftImage = imagemTemp[key];
+            const previewImage =
+              draftImage.url.trim() && draftImage.alt.trim()
+                ? {
+                    id: `preview-${key}`,
+                    url: draftImage.url.trim(),
+                    alt: draftImage.alt.trim(),
+                    legenda: draftImage.legenda.trim() || undefined,
+                    fallbackUrl:
+                      key === 'fachadas' || key === 'fotosExternas'
+                        ? '/images/Margs.jpg'
+                        : key === 'fotosInternas'
+                          ? '/images/Memorial RS.jpg'
+                          : '/images/Margs.jpg',
+                  }
+                : null;
+
+            return (
+              <section key={key} className="rounded-lg border border-outline-variant/20 bg-surface-container-high/30 p-6">
+                <div className="mb-4">
+                  <h3 className="font-headline text-lg font-bold text-on-surface">{label}</h3>
+                  <p className="text-sm text-on-surface/60">
+                    {imagens.length > 0
+                      ? `${imagens.length} imagem(ns) disponível(is) nesta categoria`
+                      : 'Nenhuma imagem cadastrada. O formulário continua podendo ser salvo sem imagens.'}
+                  </p>
+                </div>
+
+                <div className="mb-6 grid grid-cols-1 gap-4 rounded-lg border border-outline-variant/20 bg-surface-container-high/20 p-4 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+                      URL da imagem *
+                    </label>
+                    <input
+                      type="text"
+                      value={imagemTemp[key].url}
+                      onChange={(e) => handleImageInputChange(key, 'url', e.target.value)}
+                      placeholder="/images/Margs.jpg ou URL externa"
+                      className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+                      Texto alternativo *
+                    </label>
+                    <input
+                      type="text"
+                      value={imagemTemp[key].alt}
+                      onChange={(e) => handleImageInputChange(key, 'alt', e.target.value)}
+                      className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+                      Legenda
+                    </label>
+                    <input
+                      type="text"
+                      value={imagemTemp[key].legenda}
+                      onChange={(e) => handleImageInputChange(key, 'legenda', e.target.value)}
+                      className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  {errors[`imagem-${key}`] && (
+                    <p className="md:col-span-2 text-sm text-red-400">{errors[`imagem-${key}`]}</p>
+                  )}
+
+                  <div className="md:col-span-2">
+                    <button
+                      type="button"
+                      onClick={() => handleAddImage(key)}
+                      className="flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-all hover:bg-primary/30"
+                    >
+                      <span className="material-symbols-outlined text-sm">add_photo_alternate</span>
+                      Adicionar imagem
+                    </button>
+                  </div>
+                </div>
+
+                {previewImage && (
+                  <div className="mb-6">
+                    <p className="mb-3 font-label text-[0.75rem] uppercase tracking-[0.2em] text-on-surface/60">
+                      Pré-visualização
+                    </p>
+                    <div className="max-w-md">
+                      <AssetCard image={previewImage} />
+                    </div>
+                  </div>
+                )}
+
+                {imagens.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {imagens.map((imagem) => (
+                      <AssetCard
+                        key={imagem.id}
+                        image={imagem}
+                        onRemove={() => handleRemoveImage(key, imagem.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-outline-variant/30 px-4 py-6 text-sm text-on-surface/50">
+                    Categoria vazia.
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      </fieldset>
+
       <div className="flex justify-end gap-4">
         <button
           type="submit"
-          disabled={isLoading}
-          className="bg-primary text-on-primary font-headline font-bold py-3 px-8 rounded-lg shadow-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 uppercase tracking-widest text-[10px]"
+          disabled={isLoading || isPending}
+          className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-headline text-[10px] font-bold uppercase tracking-widest text-on-primary shadow-xl transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="material-symbols-outlined text-lg">
-            {isLoading ? 'hourglass_empty' : 'check'}
+            {isLoading || isPending ? 'hourglass_empty' : 'check'}
           </span>
-          {isLoading ? 'Salvando...' : initialData ? 'Atualizar Edificação' : 'Criar Edificação'}
+          {isLoading || isPending ? 'Salvando...' : initialData ? 'Atualizar Edificação' : 'Criar Edificação'}
         </button>
       </div>
     </form>

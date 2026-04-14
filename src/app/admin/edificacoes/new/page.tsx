@@ -7,7 +7,7 @@ export default function NewEdificacaoPage() {
   const handleSubmit = async (data: EdificacaoFormData) => {
     'use server';
     await createEdificacao(data);
-    redirect('/admin/edificacoes');
+    redirect('/admin/edificacoes?status=created');
   };
 
   return (

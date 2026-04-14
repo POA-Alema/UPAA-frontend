@@ -37,7 +37,7 @@ export default async function EditEdificacaoPage({ params }: EditEdificacaoPageP
   const handleSubmit = async (data: EdificacaoFormData) => {
     'use server';
     await updateEdificacao(id, data);
-    redirect('/admin/edificacoes');
+    redirect('/admin/edificacoes?status=updated');
   };
 
   return (

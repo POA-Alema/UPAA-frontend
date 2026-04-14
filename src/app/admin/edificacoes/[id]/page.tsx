@@ -1,7 +1,29 @@
-import { getEdificacaoById } from '@/services/edificacoes';
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import AssetCard from '@/components/admin/AssetCard';
 import { RichTextDisplay } from '@/components/admin/RichTextDisplay';
+import { getEdificacaoById } from '@/services/edificacoes';
+
+const DETAIL_FIELDS = [
+  { key: 'titulo', label: 'Título' },
+  { key: 'localizacao', label: 'Localização' },
+  { key: 'data', label: 'Data' },
+  { key: 'projeto', label: 'Projeto' },
+  { key: 'construcao', label: 'Construção' },
+  { key: 'ornamentosEsculturas', label: 'Conjunto de ornamentos e esculturas' },
+  { key: 'areaConstituida', label: 'Área construída' },
+  { key: 'ocupacaoAtual', label: 'Ocupação atual' },
+  { key: 'projetoRestauracao', label: 'Projeto de restauração' },
+  { key: 'tombamento', label: 'Tombamento' },
+  { key: 'autor', label: 'Autor' },
+] as const;
+
+const IMAGE_CATEGORIES = [
+  { key: 'plantaBaixa', label: 'Planta baixa' },
+  { key: 'fachadas', label: 'Fachadas' },
+  { key: 'fotosExternas', label: 'Fotos externas' },
+  { key: 'fotosInternas', label: 'Fotos internas' },
+] as const;
 
 interface EdificacaoPageProps {
   params: Promise<{
@@ -18,89 +40,56 @@ export default async function EdificacaoPage({ params }: EdificacaoPageProps) {
   }
 
   return (
-    <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
-      <div className="max-w-4xl mx-auto">
-        {/* Header com Voltar */}
+    <section className="min-h-screen bg-background px-8 pb-20 pt-16 font-body text-on-background">
+      <div className="mx-auto max-w-5xl">
         <Link
           href="/admin/edificacoes"
-          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-8 uppercase tracking-widest text-[10px] font-headline"
+          className="mb-8 inline-flex items-center gap-2 font-headline text-[10px] uppercase tracking-widest text-primary transition-colors hover:text-primary/80"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Voltar para Edificações
         </Link>
 
-        {/* Título */}
         <div className="mb-12">
-          <span className="font-label uppercase tracking-[0.3em] text-[0.65rem] text-primary">
+          <span className="font-label text-[0.65rem] uppercase tracking-[0.3em] text-primary">
             Visualizar
           </span>
-          <h1 className="font-headline font-extrabold text-3xl md:text-5xl text-on-surface tracking-tight mt-2">
+          <h1 className="mt-2 font-headline text-3xl font-extrabold tracking-tight text-on-surface md:text-5xl">
             {edificacao.titulo}
           </h1>
-          <div className="w-16 h-[1px] bg-primary mt-4 opacity-40"></div>
+          <div className="mt-4 h-[1px] w-16 bg-primary opacity-40"></div>
         </div>
 
-        {/* Conteúdo */}
         <div className="space-y-8">
-          {/* Informações Básicas */}
-          <div className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/20">
-            <h2 className="font-headline font-bold text-2xl mb-6 text-primary flex items-center gap-4">
+          <div className="rounded-lg border border-outline-variant/20 bg-surface-container-high/40 p-6">
+            <h2 className="mb-6 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
               <span className="h-[2px] w-12 bg-primary"></span>
               Informações Básicas
             </h2>
 
-            <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Título</dt>
-                <dd className="mt-2 text-lg text-on-surface">{edificacao.titulo}</dd>
-              </div>
+            <dl className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {DETAIL_FIELDS.map(({ key, label }) => {
+                const value = edificacao[key];
 
-              <div>
-                <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Localização</dt>
-                <dd className="mt-2 text-lg text-on-surface">{edificacao.localizacao}</dd>
-              </div>
+                if (!value) {
+                  return null;
+                }
 
-              {edificacao.data && (
-                <div>
-                  <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Data</dt>
-                  <dd className="mt-2 text-lg text-on-surface">{edificacao.data}</dd>
-                </div>
-              )}
-
-              {edificacao.projeto && (
-                <div>
-                  <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Projeto</dt>
-                  <dd className="mt-2 text-lg text-on-surface">{edificacao.projeto}</dd>
-                </div>
-              )}
-
-              {edificacao.construcao && (
-                <div>
-                  <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Construção</dt>
-                  <dd className="mt-2 text-lg text-on-surface">{edificacao.construcao}</dd>
-                </div>
-              )}
-
-              {edificacao.ocupacaoAtual && (
-                <div>
-                  <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Ocupação Atual</dt>
-                  <dd className="mt-2 text-lg text-on-surface">{edificacao.ocupacaoAtual}</dd>
-                </div>
-              )}
-
-              {edificacao.autor && (
-                <div>
-                  <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Autor</dt>
-                  <dd className="mt-2 text-lg text-on-surface">{edificacao.autor}</dd>
-                </div>
-              )}
+                return (
+                  <div key={key}>
+                    <dt className="font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+                      {label}
+                    </dt>
+                    <dd className="mt-2 text-lg text-on-surface">{value}</dd>
+                  </div>
+                );
+              })}
             </dl>
           </div>
 
-          {/* Descrição */}
           {edificacao.descricao && (
-            <div className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/20">
-              <h2 className="font-headline font-bold text-2xl mb-4 text-primary flex items-center gap-4">
+            <div className="rounded-lg border border-outline-variant/20 bg-surface-container-high/40 p-6">
+              <h2 className="mb-4 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
                 <span className="h-[2px] w-12 bg-primary"></span>
                 Descrição
               </h2>
@@ -108,10 +97,9 @@ export default async function EdificacaoPage({ params }: EdificacaoPageProps) {
             </div>
           )}
 
-          {/* Fontes */}
           {edificacao.fontes && edificacao.fontes.length > 0 && (
-            <div className="bg-surface-container-high/40 p-6 rounded-lg border border-outline-variant/20">
-              <h2 className="font-headline font-bold text-2xl mb-4 text-primary flex items-center gap-4">
+            <div className="rounded-lg border border-outline-variant/20 bg-surface-container-high/40 p-6">
+              <h2 className="mb-4 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
                 <span className="h-[2px] w-12 bg-primary"></span>
                 Fontes
               </h2>
@@ -133,13 +121,47 @@ export default async function EdificacaoPage({ params }: EdificacaoPageProps) {
               </ul>
             </div>
           )}
+
+          <div className="rounded-lg border border-outline-variant/20 bg-surface-container-high/40 p-6">
+            <h2 className="mb-6 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
+              <span className="h-[2px] w-12 bg-primary"></span>
+              Imagens
+            </h2>
+
+            <div className="space-y-8">
+              {IMAGE_CATEGORIES.map(({ key, label }) => {
+                const imagens = edificacao.imagens?.[key] || [];
+
+                if (imagens.length === 0) {
+                  return (
+                    <section key={key}>
+                      <h3 className="mb-3 font-headline text-lg font-bold text-on-surface">{label}</h3>
+                      <div className="rounded-lg border border-dashed border-outline-variant/30 px-4 py-5 text-sm text-on-surface/50">
+                        Nenhuma imagem cadastrada nesta categoria.
+                      </div>
+                    </section>
+                  );
+                }
+
+                return (
+                  <section key={key}>
+                    <h3 className="mb-3 font-headline text-lg font-bold text-on-surface">{label}</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {imagens.map((imagem) => (
+                        <AssetCard key={imagem.id} image={imagem} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Botão de Edição */}
         <div className="mt-12 flex justify-end">
           <Link
             href={`/admin/edificacoes/${id}/edit`}
-            className="bg-primary text-on-primary font-headline font-bold py-3 px-8 rounded-lg shadow-xl hover:bg-primary/90 transition-all flex items-center gap-2 uppercase tracking-widest text-[10px]"
+            className="flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-headline text-[10px] font-bold uppercase tracking-widest text-on-primary shadow-xl transition-all hover:bg-primary/90"
           >
             <span className="material-symbols-outlined text-lg">edit</span>
             Editar Edificação
