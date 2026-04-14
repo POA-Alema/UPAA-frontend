@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { buildings } from '@/data/buildings';
+import Link from "next/link";
+import { buildings } from "@/data/buildings";
 
 export function BuildingList() {
   return (
@@ -12,7 +12,7 @@ export function BuildingList() {
           </p>
           <h3>{building.title}</h3>
           <p>{building.summary}</p>
-          <Link className="text-link" href={`/edificacoes/${building.slug}`}>
+          <Link className="text-link" href={`/buildings/${building.slug}`}>
             Ver página
           </Link>
         </article>

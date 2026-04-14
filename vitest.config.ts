@@ -1,17 +1,17 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import path from 'node:path';
+import path from "node:path";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [react()], // Habilita o processamento de componentes React
+  plugins: [react()],
   test: {
-    environment: 'jsdom', // Essencial para renderizar componentes
+    environment: "jsdom",
     globals: true,
-    setupFiles: './vitest.setup.ts', // Aponta para o arquivo que você criou no passo 1
+    setupFiles: "./vitest.setup.ts",
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });
