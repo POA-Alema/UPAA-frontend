@@ -10,6 +10,7 @@ export default async function HomePage() {
     <main className="page-shell home-flow">
       <div className="page-stack">
         <IntroSection />
+              
         <MapPreviewSection />
         {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
       </div>
