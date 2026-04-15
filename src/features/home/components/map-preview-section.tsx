@@ -2,19 +2,38 @@ import Image from 'next/image';
 import { FeatureAction } from "@/components/ui/feature-action";
 
 export function MapPreviewSection() {
+  const translations = {
+  en: {
+    mapPreviewAltText: "Preview map of Porto Alegre with a focus on some germanic buildings",
+    interactiveMap: "Interactive Map",
+    botonMapa: "Explore Map",
+
+  },
+  de: {
+    mapPreviewAltText: "Vorschaukarte von Porto Alegre mit Schwerpunkt auf einigen germanischen Gebäuden",
+    botonMapa: "Karte Erkunden",
+    interactiveMap: "Interaktive Karte"
+  },
+  pt: {
+    interactiveMap: "Mapa Interativo",
+    mapPreviewAltText: "Mapa de Porto Alegre com destaque para alguns edifícios de estilo germânico.",
+    botonMapa: "Explorar Mapa"
+  },
+  
+}
+const currentLanguage = 'pt'
   return (
     <section className="flex flex-col items-center w-full max-w-7xl mx-auto py-12 px-4">
       <div className="w-full mb-8">
-        <p className="eyebrow eyebrow--light mb-2">Mapa</p>
         
         <h2 className="architect-title architect-title--light">
-          Mapa interativo
+          {translations[currentLanguage].interactiveMap}
         </h2>
         
         <div className="section-divider section-divider--accent mt-6 mb-6" />
         
         <p className="section-copy text-labels/secondary">
-          Explore a presença histórica alemã em Porto Alegre através do nosso mapa interativo.
+          {translations[currentLanguage].mapPreviewAltText}
         </p>
       </div>
 
@@ -32,7 +51,7 @@ export function MapPreviewSection() {
         <FeatureAction 
           href="/mapa" 
           icon="map" 
-          label="Explorar Mapa" 
+          label= {translations[currentLanguage].botonMapa}
           variant="primary" 
         />
       </div>
