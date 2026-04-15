@@ -7,16 +7,16 @@ export function MapPreviewSection() {
   const translations = {
   en: {
     mapPreviewAltText: "Preview map of Porto Alegre with a focus on some germanic buildings",
-    botonMapa: "Explore Map",
+    mapCTAButton: "Explore Map",
 
   },
   de: {
     mapPreviewAltText: "Vorschaukarte von Porto Alegre mit Schwerpunkt auf einigen germanischen Gebäuden",
-    botonMapa: "Karte Erkunden",
+    mapCTAButton: "Karte Erkunden",
   },
   pt: {
     mapPreviewAltText: "Mapa de Porto Alegre com destaque para alguns edifícios de estilo germânico.",
-    botonMapa: "Explorar Mapa"
+    mapCTAButton: "Explorar Mapa"
   },
   
 }
@@ -43,7 +43,7 @@ function onMapClick() {  window.location.href = "/mapa";
         <FeatureAction 
           href="/mapa" 
           icon="map" 
-          label= {translations[currentLanguage].botonMapa}
+          label= {translations[currentLanguage].mapCTAButton}
           variant="primary" 
         />
       </div>
