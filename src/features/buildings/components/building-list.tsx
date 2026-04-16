@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { buildings } from '@/data/buildings';
+import Link from "next/link";
+import { buildings } from "@/data/buildings";
 
 export function BuildingList() {
   return (
     <div className="content-grid">
-      {/* to do: implementar dados dinamicos */}
+      {/* TODO: Implement dynamic data fetching for building list */}
       {buildings.map((building) => (
         <article className="info-card" key={building.slug}>
           <p className="meta-line">
@@ -12,7 +12,7 @@ export function BuildingList() {
           </p>
           <h3>{building.title}</h3>
           <p>{building.summary}</p>
-          <Link className="text-link" href={`/edificacoes/${building.slug}`}>
+          <Link className="text-link" href={`/buildings/${building.slug}`}>
             Ver página
           </Link>
         </article>

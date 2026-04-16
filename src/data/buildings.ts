@@ -6,30 +6,7 @@ export type Building = {
   summary: string;
 };
 
-// to do: implementar dados dinamicos
-export const buildings: Building[] = [
-  {
-    slug: 'edificacao-exemplo-1',
-    title: 'Edificação 1',
-    district: 'Centro Histórico',
-    yearLabel: 'Ano',
-    summary: 'Descrição'
-  },
-  {
-    slug: 'edificacao-exemplo-2',
-    title: 'Edificação 2',
-    district: 'Moinhos de Vento',
-    yearLabel: 'Ano',
-    summary: 'Descrição'
-  },
-  {
-    slug: 'edificacao-exemplo-3',
-    title: 'Edificação 3',
-    district: 'Cidade Baixa',
-    yearLabel: 'Ano',
-    summary: 'Descrição'
-  }
-];
+export const buildings: Building[] = [];
 
 export function getBuildingBySlug(slug: string) {
   return buildings.find((building) => building.slug === slug);

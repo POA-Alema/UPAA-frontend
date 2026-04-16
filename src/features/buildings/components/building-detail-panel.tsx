@@ -1,4 +1,4 @@
-import type { Building } from '@/data/buildings';
+import type { Building } from "@/data/buildings";
 
 type BuildingDetailPanelProps = {
   building: Building;
@@ -7,7 +7,7 @@ type BuildingDetailPanelProps = {
 export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
   return (
     <div className="content-grid">
-      {/* to do: implementar dados dinamicos */}
+      {/* TODO: Implement dynamic data fetching for building details */}
       <article className="info-card">
         <p className="meta-line">
           {building.district} - {building.yearLabel}
@@ -17,7 +17,7 @@ export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
       </article>
       <article className="info-card">
         <h3>Mapa</h3>
-        <p>Descrição</p>
+        <p>Integração com o mapa será conectada assim que a feature correspondente estiver disponível.</p>
       </article>
     </div>
   );

@@ -1,17 +1,53 @@
-import Link from 'next/link';
-import { PageSection } from '@/components/layout/page-section';
-import { MapPlaceholder } from '@/features/map/components/map-placeholder';
+"use client";
+import Image from 'next/image';
+import { FeatureAction } from "@/components/ui/feature-action";
+
 
 export function MapPreviewSection() {
+  const translations = {
+    en: {
+      mapPreviewAltText: "Preview map of Porto Alegre with a focus on some germanic buildings",
+      mapCTAButton: "Explore Map",
+
+    },
+    de: {
+      mapPreviewAltText: "Vorschaukarte von Porto Alegre mit Schwerpunkt auf einigen germanischen Gebäuden",
+      mapCTAButton: "Karte Erkunden",
+    },
+    pt: {
+      mapPreviewAltText: "Mapa de Porto Alegre com destaque para alguns edifícios de estilo germânico.",
+      mapCTAButton: "Explorar Mapa"
+    },
+
+  }
+  const currentLanguage = 'pt'
+
+  function onMapClick() {
+    window.location.href = "/mapa";
+  }
+
   return (
-    // to do: implementar dados dinamicos
-    <PageSection eyebrow="Mapa" title="Mapa" description="Descrição">
-      <MapPlaceholder />
-      <div className="section-actions">
-        <Link className="text-link" href="/edificacoes">
-          Edificações
-        </Link>
+    <section className="flex flex-col items-center w-full py-12">
+
+      <button onClick={onMapClick} className="w-full h-80 relative bg-slate-200 rounded-lg overflow-hidden shadow-lg mb-8">
+        <Image
+          src="/mapa-preview.jpg"
+          alt={translations[currentLanguage].mapPreviewAltText}
+          fill
+          title={translations[currentLanguage].mapPreviewAltText}
+          className="object-cover text-amber-950"
+          priority
+        />
+      </button>
+
+      <div className="w-full flex justify-center">
+        <FeatureAction
+          href="/mapa"
+          icon="map"
+          label={translations[currentLanguage].mapCTAButton}
+          variant="primary"
+        />
       </div>
-    </PageSection>
+    </section>
   );
 }

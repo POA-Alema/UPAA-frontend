@@ -2,23 +2,18 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import {
-  mapBuildingsToMarkers,
-  MapMarker,
-  Building,
-} from "@/features/map/utils/map-buildings";
+import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
+import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 import { MapMarkers } from "./map-markers";
-
-import "leaflet/dist/leaflet.css";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
-  { ssr: false }
+  { ssr: false },
 );
 
 const TileLayer = dynamic(
   () => import("react-leaflet").then((m) => m.TileLayer),
-  { ssr: false }
+  { ssr: false },
 );
 
 export function MapPlaceholder() {
@@ -26,28 +21,24 @@ export function MapPlaceholder() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {/*
-      Deixei essa parte comentada pra conseguir ver os pontos no mapa enquanto ainda não temos os dados das edificacoes
-      const data: Building[] = [
-        {
-          id: 1,
-          name: "Teatro São Pedro",
-          latitude: -30.0303,
-          longitude: -51.2296,
-        },
-        {
-          id: 2,
-          name: "Casa de Cultura Mario Quintana",
-          latitude: -30.0316,
-          longitude: -51.2310,
-        },
-        {
-          id: 3,
-          name: "Sem coordenada",
-        },
-      ];
-      */
-      const data: Building[] = [];
+    async function load() {
+      const response = await fetch("/api/buildings");
+      const data: Building[] = response.ok
+        ? await response.json()
+        : [
+            {
+              id: 1,
+              name: "Teatro São Pedro",
+              latitude: -30.0303,
+              longitude: -51.2296,
+            },
+            {
+              id: 2,
+              name: "Casa de Cultura Mario Quintana",
+              latitude: -30.0316,
+              longitude: -51.231,
+            },
+          ];
       const mappedMarkers = mapBuildingsToMarkers(data);
 
       setMarkers(mappedMarkers);
@@ -58,7 +49,7 @@ export function MapPlaceholder() {
   }, []);
 
   return (
-    <div className="w-full h-[500px] relative">
+    <div className="w-full h-125 relative">
       <MapContainer
         center={[-30.0277, -51.2287]}
         zoom={15}
