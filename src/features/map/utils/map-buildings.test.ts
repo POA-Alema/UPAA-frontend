@@ -34,4 +34,15 @@ describe("mapBuildingsToMarkers", () => {
 
     expect(result[0].position).toEqual([-30, -51]);
   });
+
+  it("deve aceitar coordenadas zero como valores validos", () => {
+    const mock = [
+      { id: 1, name: "A", latitude: 0, longitude: 0 },
+    ];
+
+    const result = mapBuildingsToMarkers(mock);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].position).toEqual([0, 0]);
+  });
 });

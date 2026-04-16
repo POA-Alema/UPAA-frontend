@@ -1,7 +1,6 @@
 "use client";
-import Image from 'next/image';
 import { FeatureAction } from "@/components/ui/feature-action";
-
+import { MapPlaceholder } from "@/features/map/components/map-placeholder";
 
 export function MapPreviewSection() {
   const translations = {
@@ -22,23 +21,14 @@ export function MapPreviewSection() {
   }
   const currentLanguage = 'pt'
 
-  function onMapClick() {
-    window.location.href = "/mapa";
-  }
-
   return (
     <section className="flex flex-col items-center w-full py-12">
-
-      <button onClick={onMapClick} className="w-full h-80 relative bg-slate-200 rounded-lg overflow-hidden shadow-lg mb-8">
-        <Image
-          src="/mapa-preview.jpg"
-          alt={translations[currentLanguage].mapPreviewAltText}
-          fill
-          title={translations[currentLanguage].mapPreviewAltText}
-          className="object-cover text-amber-950"
-          priority
-        />
-      </button>
+      <div
+        aria-label={translations[currentLanguage].mapPreviewAltText}
+        className="w-full h-80 relative overflow-hidden rounded-lg shadow-lg mb-8"
+      >
+        <MapPlaceholder className="h-full" />
+      </div>
 
       <div className="w-full flex justify-center">
         <FeatureAction

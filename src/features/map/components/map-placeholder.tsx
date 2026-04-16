@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
-import { MapMarkers } from "./map-markers";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -16,56 +15,88 @@ const TileLayer = dynamic(
   { ssr: false },
 );
 
-export function MapPlaceholder() {
+const MapMarkers = dynamic(
+  () => import("./map-markers").then((m) => m.MapMarkers),
+  { ssr: false },
+);
+
+type MapPlaceholderProps = {
+  className?: string;
+};
+
+export function MapPlaceholder({ className = "h-125" }: MapPlaceholderProps) {
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      const response = await fetch("/api/buildings");
-      const data: Building[] = response.ok
-        ? await response.json()
-        : [
-            {
-              id: 1,
-              name: "Teatro São Pedro",
-              latitude: -30.0303,
-              longitude: -51.2296,
-            },
-            {
-              id: 2,
-              name: "Casa de Cultura Mario Quintana",
-              latitude: -30.0316,
-              longitude: -51.231,
-            },
-          ];
-      const mappedMarkers = mapBuildingsToMarkers(data);
+    let isMounted = true;
 
-      setMarkers(mappedMarkers);
-      setLoading(false);
+    async function load() {
+      try {
+        const response = await fetch("/api/buildings");
+
+        if (!response.ok) {
+          throw new Error("Failed to load buildings");
+        }
+
+        const data: Building[] = await response.json();
+        const mappedMarkers = mapBuildingsToMarkers(data);
+
+        if (!isMounted) {
+          return;
+        }
+        setMarkers(mappedMarkers);
+        setHasError(false);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setMarkers([]);
+        setHasError(true);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     }
 
     load();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
-    <div className="w-full h-125 relative">
+    <div className={`w-full relative ${className}`}>
       <MapContainer
         center={[-30.0277, -51.2287]}
         zoom={15}
+        maxZoom={20}
+        minZoom={15}
         className="w-full h-full"
       >
         <TileLayer
           attribution="&copy; OpenStreetMap"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          minZoom={15}
+          maxZoom={20}
         />
 
         <MapMarkers markers={markers} />
       </MapContainer>
 
-      {!loading && markers.length === 0 && (
+      {!loading && markers.length === 0 && !hasError && (
         <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          Dados de localização indisponíveis
+          Nenhum ponto disponivel para exibir.
+        </div>
+      )}
+
+      {!loading && hasError && (
+        <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
+          Nao foi possivel carregar os dados do mapa.
         </div>
       )}
     </div>
