@@ -15,7 +15,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
           {architect.eyebrow ? <p className="eyebrow eyebrow--light">{architect.eyebrow}</p> : null}
 
           <h2 className="architect-title architect-title--light">
-            O Legado de <br /> {architect.title}
+            O Legado de <br /> <strong>{architect.title}</strong>
           </h2>
           <div className="section-divider section-divider--accent"></div>
 
