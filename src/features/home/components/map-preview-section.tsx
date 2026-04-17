@@ -1,30 +1,19 @@
 "use client";
-import { IntroSection } from "@/features/home/components/intro-section";
+
 import { MapPlaceholder } from "@/features/map/components/map-placeholder";
+import { useLanguage } from "@/context/LanguageContext";
+import { allTranslations } from "@/data/translations";
 
 export function MapPreviewSection() {
-  const translations = {
-    en: {
-      mapPreviewAltText: "Preview map of Porto Alegre with a focus on some germanic buildings",
-      mapCTAButton: "Explore Map",
+  const { language } = useLanguage();
+  const t = allTranslations.mapSection[language];
 
-    },
-    de: {
-      mapPreviewAltText: "Vorschaukarte von Porto Alegre mit Schwerpunkt auf einigen germanischen Gebäuden",
-      mapCTAButton: "Karte Erkunden",
-    },
-    pt: {
-      mapPreviewAltText: "Mapa de Porto Alegre com destaque para alguns edifícios de estilo germânico.",
-      mapCTAButton: "Explorar Mapa"
-    },
-
-  }
   return (
     <section className="home-flow__section home-map-preview">
-      <IntroSection />
+      {/* REMOVEMOS a IntroSection daqui para parar a duplicação! */}
 
       <div
-        aria-label={translations.pt.mapPreviewAltText}
+        aria-label={t.mapPreviewAltText}
         className="w-full h-80 relative overflow-hidden rounded-3xl shadow-lg"
       >
         <MapPlaceholder className="h-full" showPopups={false} />

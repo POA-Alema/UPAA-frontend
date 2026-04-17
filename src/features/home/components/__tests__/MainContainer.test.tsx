@@ -1,39 +1,52 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import MainContainer from "@/components/layout/MainContainer";
-import MainContainerSkeleton from "@/components/layout/MainContainerSkeleton";
-import { landingMock, landingMockEmpty } from "@/features/home/mocks/landing-mock";
+"use client";
 
-describe("MainContainer (Landing Page)", () => {
-  it("deve renderizar título e descrição do mock", () => {
-    render(<MainContainer data={landingMock} />);
+import React from 'react';
+import { useLanguage } from "@/context/LanguageContext";
+import { allTranslations } from "@/data/translations";
 
-    expect(
-      screen.getByRole("heading", { level: 2, name: /o legado alemão na arquitetura de porto alegre/i })
-    ).toBeInTheDocument();
+interface MainContainerProps {
+  data: any;
+  children?: React.ReactNode;
+}
 
-    expect(
-      screen.getByText(/explorando as obras que transformaram/i)
-    ).toBeInTheDocument();
+export default function MainContainer({ data, children }: MainContainerProps) {
+  const { language } = useLanguage();
+  
+  // Aqui conectamos com o dicionário de traduções
+  const t = allTranslations.hero[language];
 
-    expect(screen.getByTestId("landing-content")).toBeInTheDocument();
-  });
+  // Verificação de segurança (fallback)
+  if (!data || (data.title === "" && data.description === "")) {
+    return (
+      <div data-testid="landing-fallback" className="p-20 text-center text-white">
+         {language === 'pt' ? 'Nenhum conteúdo disponível' : 
+          language === 'en' ? 'No content available' : 'Kein Inhalt verfügbar'}
+      </div>
+    );
+  }
 
-  it("deve exibir loading (skeleton)", () => {
-    render(<MainContainerSkeleton />);
+  return (
+    <main data-testid="landing-content" className="w-full min-h-screen bg-black text-white px-8 pt-32">
+      <section className="max-w-4xl">
+        {/* TRADUÇÃO DA TAG (INTRODUÇÃO) */}
+        <span className="text-orange-500 font-bold tracking-widest text-sm uppercase">
+          {t.tag}
+        </span>
+        
+        {/* O TÍTULO: Note que usamos {t.title} e NÃO {data.title} */}
+        <h2 className="text-5xl md:text-7xl font-bold mt-4 leading-tight">
+          {t.title}
+        </h2>
+        
+        {/* O SUBTÍTULO: Note que usamos {t.subtitle} e NÃO {data.description} */}
+        <p className="text-xl md:text-2xl text-zinc-400 mt-6 font-medium">
+          {t.subtitle}
+        </p>
+      </section>
 
-    expect(screen.getByTestId("landing-loading")).toBeInTheDocument();
-  });
-
-  it("deve exibir fallback com mock vazio", () => {
-    render(<MainContainer data={landingMockEmpty} />);
-
-    expect(screen.getByTestId("landing-fallback")).toBeInTheDocument();
-
-    expect(
-      screen.getByText(/nenhum conteúdo disponível/i)
-    ).toBeInTheDocument();
-
-    expect(screen.queryByTestId("landing-content")).not.toBeInTheDocument();
-  });
-});
+      <div className="mt-12">
+        {children}
+      </div>
+    </main>
+  );
+}

@@ -5,6 +5,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 
+// Importamos o provedor de idioma que você criou
+import { LanguageProvider } from "@/context/LanguageContext";
+
 const headlineFont = Manrope({
   subsets: ["latin"],
   variable: "--font-headline",
@@ -39,7 +42,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Envolvemos o conteúdo do site com o provedor de idioma */}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

@@ -1,61 +1,97 @@
+"use client";
+
 import Image from "next/image";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPreviewProps } from "../types/architect";
+import { useLanguage } from "@/context/LanguageContext";
+import { allTranslations } from "@/data/translations";
 
 export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
+  const { language } = useLanguage();
+  const t = allTranslations.architectsSection[language];
+
   if (!architect.title || !architect.bio) {
     return null;
   }
 
+  // Função auxiliar para garantir que pegamos a string correta, 
+  // seja o dado uma string direta ou um objeto de traduções
+  const getTranslation = (field: any) => {
+    if (typeof field === "object" && field !== null) {
+      return field[language] || field["pt"]; // fallback para PT se não achar a língua
+    }
+    return field;
+  };
+
+  const legacyPrefix = {
+    pt: "O Legado de",
+    en: "The Legacy of",
+    de: "Das Erbe von"
+  };
+
   return (
-    <article className="section-card section-card--dark architect-preview home-flow__section">
+    <article className="section-card section-card--dark architect-preview home-flow__section mt-12">
       <section className="architect-preview__grid">
         <div className="architect-preview__copy">
-          {architect.eyebrow ? <p className="eyebrow eyebrow--light">{architect.eyebrow}</p> : null}
+          <p className="eyebrow eyebrow--light">{t.tag}</p>
 
           <h2 className="architect-title architect-title--light">
-            O Legado de <br /> <strong>{architect.title}</strong>
+            {legacyPrefix[language]} <br /> <strong>{architect.title}</strong>
           </h2>
           <div className="section-divider section-divider--accent"></div>
 
-          <RichText className="rich-text rich-text--muted" content={architect.bio} emphasizeFirstParagraph />
+          {/* AGORA BUSCA A BIO TRADUZIDA */}
+          <RichText 
+            className="rich-text rich-text--muted" 
+            content={getTranslation(architect.bio)} 
+            emphasizeFirstParagraph 
+          />
 
           {architect.details?.length ? (
             <div className="architect-detail-grid architect-detail-grid--compact">
-              {architect.details.map((detail) => (
-                <article className="info-card info-card--dark" key={`${detail.label}-${detail.value}`}>
-                  <p className="meta-line">{detail.label}</p>
-                  <h3>{detail.value}</h3>
-                  {detail.subValue ? <p>{detail.subValue}</p> : null}
-                </article>
-              ))}
+              {architect.details.map((detail) => {
+                let translatedLabel = detail.label;
+                if (detail.label.toLowerCase() === "origem") translatedLabel = t.origin;
+                if (detail.label.toLowerCase() === "morte") translatedLabel = t.death;
+
+                let translatedSubValue = detail.subValue || "";
+                translatedSubValue = translatedSubValue
+                  .replace("Nascimento", t.born)
+                  .replace("Falecimento", t.died);
+
+                return (
+                  <article className="info-card info-card--dark" key={`${detail.label}-${detail.value}`}>
+                    <p className="meta-line">{translatedLabel}</p>
+                    <h3>{detail.value}</h3>
+                    {translatedSubValue ? <p>{translatedSubValue}</p> : null}
+                  </article>
+                );
+              })}
             </div>
           ) : null}
 
-          {architect.actions?.primary || architect.actions?.secondary ? (
-            <div className="section-actions section-actions--row">
-              {architect.actions?.primary ? (
-                <FeatureAction
-                  href={architect.actions.primary.href}
-                  icon="menu_book"
-                  label={architect.actions.primary.label}
-                  variant="primary"
-                />
-              ) : null}
-              {architect.actions?.secondary ? (
-                <FeatureAction
-                  href={architect.actions.secondary.href}
-                  icon="explore"
-                  label={architect.actions.secondary.label}
-                  variant="secondary"
-                />
-              ) : null}
-            </div>
-          ) : null}
+          <div className="section-actions section-actions--row">
+            {architect.actions?.primary && (
+              <FeatureAction
+                href={architect.actions.primary.href}
+                icon="menu_book"
+                label={t.viewMore}
+                variant="primary"
+              />
+            )}
+            {architect.actions?.secondary && (
+              <FeatureAction
+                href={architect.actions.secondary.href}
+                icon="explore"
+                label={t.exploreWorks}
+                variant="secondary"
+              />
+            )}
+          </div>
         </div>
 
-        {architect.image ? (
+        {architect.image && (
           <figure className="architect-preview__media">
             <div className="architect-image-frame architect-image-frame--preview">
               <Image
@@ -68,14 +104,14 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
               />
               <div className="architect-image-overlay"></div>
             </div>
-
-            {architect.image.caption ? (
+            {/* TRADUÇÃO DA LEGENDA DA FOTO */}
+            {architect.image.caption && (
               <figcaption className="architect-caption architect-caption--light">
-                {architect.image.caption}
+                {getTranslation(architect.image.caption)}
               </figcaption>
-            ) : null}
+            )}
           </figure>
-        ) : null}
+        )}
       </section>
     </article>
   );
