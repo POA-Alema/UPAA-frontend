@@ -28,16 +28,20 @@ type MapPopupCardProps = {
   onRequestClose?: () => void;
 };
 
-const POPUP_SUMMARY_BASE_LENGTH =
-  "Um dos marcos culturais mais emblematicos do centro historico, com presenca monumental e memoria urbana duradoura.".length;
-const POPUP_SUMMARY_MAX_LENGTH = Math.round(POPUP_SUMMARY_BASE_LENGTH * 1.9);
+const MAP_POPUP_SUMMARY_CHARACTER_LIMIT = 220;
 
-function truncatePopupSummary(summary: string) {
-  if (summary.length <= POPUP_SUMMARY_MAX_LENGTH) {
-    return summary;
+function getPopupSummaryPreview(summary: string) {
+  if (summary.length <= MAP_POPUP_SUMMARY_CHARACTER_LIMIT) {
+    return {
+      isTruncated: false,
+      text: summary,
+    };
   }
 
-  return `${summary.slice(0, POPUP_SUMMARY_MAX_LENGTH).trimEnd()} (...)`;
+  return {
+    isTruncated: true,
+    text: `${summary.slice(0, MAP_POPUP_SUMMARY_CHARACTER_LIMIT).trimEnd()}...`,
+  };
 }
 
 function MapPopupCard({
@@ -49,18 +53,28 @@ function MapPopupCard({
 
   const selectedAttachment: BuildingAttachment | undefined =
     marker.attachments[selectedAttachmentIndex];
+  const summaryPreview = marker.summary
+    ? getPopupSummaryPreview(marker.summary)
+    : null;
 
   return (
     <article
       className={`map-popup-card${
         variant === "sheet" ? " map-popup-card--sheet" : ""
       }`}
-      onTouchMove={variant === "sheet" ? (event) => event.stopPropagation() : undefined}
-      onWheel={variant === "sheet" ? (event) => event.stopPropagation() : undefined}
+      onTouchMove={
+        variant === "sheet" ? (event) => event.stopPropagation() : undefined
+      }
+      onWheel={
+        variant === "sheet" ? (event) => event.stopPropagation() : undefined
+      }
     >
       {variant === "sheet" ? (
         <div className="map-popup-card__sheet-header">
-          <div className="map-popup-card__sheet-handle" aria-hidden="true"></div>
+          <div
+            className="map-popup-card__sheet-handle"
+            aria-hidden="true"
+          ></div>
           {onRequestClose ? (
             <button
               aria-label="Fechar detalhes da edificacao"
@@ -98,9 +112,23 @@ function MapPopupCard({
         </p>
         <h3 className="map-popup-card__title">{marker.name}</h3>
 
-        {marker.summary ? (
+        {summaryPreview ? (
           <p className="map-popup-card__summary">
-            {truncatePopupSummary(marker.summary)}
+            {summaryPreview.text}{" "}
+            {summaryPreview.isTruncated ? (
+              <button
+                aria-disabled="true"
+                className="map-popup-card__summary-link"
+                title={
+                  marker.routePath
+                    ? `${marker.routePath}`
+                    : "Pagina da edificacao ainda nao disponivel"
+                }
+                type="button"
+              >
+                Ver Mais
+              </button>
+            ) : null}
           </p>
         ) : null}
 
@@ -231,7 +259,7 @@ export function MapMarkers({ markers, showPopups = true }: Props) {
 
   const selectedMarker =
     selectedMarkerId != null
-      ? markers.find((marker) => marker.id === selectedMarkerId) ?? null
+      ? (markers.find((marker) => marker.id === selectedMarkerId) ?? null)
       : null;
 
   function openSheet(markerId: number) {
