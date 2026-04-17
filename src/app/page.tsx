@@ -1,6 +1,5 @@
 import { ArchitectPreview } from "@/features/architects/components/ArchitectPreview";
 import { getFeaturedArchitect } from "@/features/architects/data/architects";
-import { IntroSection } from "@/features/home/components/intro-section";
 import { MapPreviewSection } from "@/features/home/components/map-preview-section";
 
 export default async function HomePage() {
@@ -9,10 +8,10 @@ export default async function HomePage() {
   return (
     <main className="page-shell home-flow">
       <div className="page-stack">
-        <IntroSection />
-              
         <MapPreviewSection />
-        {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
+        {featuredArchitect ? (
+          <ArchitectPreview architect={featuredArchitect} />
+        ) : null}
       </div>
     </main>
   );

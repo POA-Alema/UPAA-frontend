@@ -1,7 +1,6 @@
 "use client";
-import Image from 'next/image';
-import { FeatureAction } from "@/components/ui/feature-action";
-
+import { IntroSection } from "@/features/home/components/intro-section";
+import { MapPlaceholder } from "@/features/map/components/map-placeholder";
 
 export function MapPreviewSection() {
   const translations = {
@@ -20,33 +19,15 @@ export function MapPreviewSection() {
     },
 
   }
-  const currentLanguage = 'pt'
-
-  function onMapClick() {
-    window.location.href = "/mapa";
-  }
-
   return (
-    <section className="flex flex-col items-center w-full py-12">
+    <section className="home-flow__section home-map-preview">
+      <IntroSection />
 
-      <button onClick={onMapClick} className="w-full h-80 relative bg-slate-200 rounded-lg overflow-hidden shadow-lg mb-8">
-        <Image
-          src="/mapa-preview.jpg"
-          alt={translations[currentLanguage].mapPreviewAltText}
-          fill
-          title={translations[currentLanguage].mapPreviewAltText}
-          className="object-cover text-amber-950"
-          priority
-        />
-      </button>
-
-      <div className="w-full flex justify-center">
-        <FeatureAction
-          href="/mapa"
-          icon="map"
-          label={translations[currentLanguage].mapCTAButton}
-          variant="primary"
-        />
+      <div
+        aria-label={translations.pt.mapPreviewAltText}
+        className="w-full h-80 relative overflow-hidden rounded-3xl shadow-lg"
+      >
+        <MapPlaceholder className="h-full" showPopups={false} />
       </div>
     </section>
   );

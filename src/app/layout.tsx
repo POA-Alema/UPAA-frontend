@@ -1,7 +1,9 @@
+/* eslint-disable @next/next/no-page-custom-font */
 import type { Metadata } from "next";
 import { Manrope, Work_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
 const headlineFont = Manrope({
   subsets: ["latin"],
@@ -17,7 +19,8 @@ const bodyFont = Work_Sans({
 
 export const metadata: Metadata = {
   title: "Uma Porto Alegre Alemã",
-  description: "Projeto inicial do frontend dedicado a narrativas, arquiteturas e memórias urbanas de Porto Alegre.",
+  description:
+    "Projeto inicial do frontend dedicado a narrativas, arquiteturas e memórias urbanas de Porto Alegre.",
 };
 
 type RootLayoutProps = Readonly<{
@@ -26,10 +29,13 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html className={`${headlineFont.variable} ${bodyFont.variable}`} lang="pt-BR">
+    <html
+      className={`${headlineFont.variable} ${bodyFont.variable}`}
+      lang="pt-BR"
+    >
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
       </head>

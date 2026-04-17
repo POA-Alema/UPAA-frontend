@@ -4,14 +4,25 @@ import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPageProps } from "../types/architect";
 
 export function ArchitectPage({ architect }: ArchitectPageProps) {
-  const hasHero = Boolean(architect.title || architect.eyebrow || architect.image);
+  const hasHero = Boolean(
+    architect.title || architect.eyebrow || architect.image,
+  );
   const hasBiography = Boolean(architect.bio);
   const hasDetails = Boolean(architect.details?.length);
   const hasCharacteristics = Boolean(architect.characteristics?.length);
   const hasWorks = Boolean(architect.works?.length);
-  const hasCta = Boolean(architect.ctaDescription || architect.actions?.secondary);
+  const hasCta = Boolean(
+    architect.ctaDescription || architect.actions?.secondary,
+  );
 
-  if (!hasHero && !hasBiography && !hasDetails && !hasCharacteristics && !hasWorks && !hasCta) {
+  if (
+    !hasHero &&
+    !hasBiography &&
+    !hasDetails &&
+    !hasCharacteristics &&
+    !hasWorks &&
+    !hasCta
+  ) {
     return null;
   }
 
@@ -43,10 +54,12 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
             ) : null}
 
             <div className="architect-hero__copy">
-              {architect.eyebrow ? <p className="eyebrow eyebrow--light">{architect.eyebrow}</p> : null}
+              {architect.eyebrow ? (
+                <p className="eyebrow eyebrow--light">{architect.eyebrow}</p>
+              ) : null}
               {architect.title ? (
                 <h1 className="architect-title architect-title--light">
-                  O Legado de <br /> {architect.title}
+                  O Legado de <br /> <strong>{architect.title}</strong>
                 </h1>
               ) : null}
               <div className="section-divider section-divider--accent"></div>
@@ -60,16 +73,24 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
           <div className="architect-section__inner">
             <div className="section-heading">
               <h2 className="architect-section__headline">
-                <span className="architect-section__headline-line"></span> História
+                <span className="architect-section__headline-line"></span>{" "}
+                História
               </h2>
             </div>
 
-            <RichText className="rich-text rich-text--muted" content={architect.bio} emphasizeFirstParagraph />
+            <RichText
+              className="rich-text rich-text--muted"
+              content={architect.bio}
+              emphasizeFirstParagraph
+            />
 
             {hasDetails ? (
               <div className="architect-detail-grid">
                 {architect.details?.map((detail) => (
-                  <article className="info-card info-card--architect" key={`${detail.label}-${detail.value}`}>
+                  <article
+                    className="info-card info-card--architect"
+                    key={`${detail.label}-${detail.value}`}
+                  >
                     <p className="meta-line meta-line--light">{detail.label}</p>
                     <h3>{detail.value}</h3>
                     {detail.subValue ? <p>{detail.subValue}</p> : null}
@@ -90,8 +111,13 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
 
             <div className="architect-feature-grid">
               {architect.characteristics?.map((characteristic) => (
-                <article className="info-card info-card--architect info-card--feature" key={characteristic.title}>
-                  <span className="material-symbols-outlined architect-feature-icon">{characteristic.icon}</span>
+                <article
+                  className="info-card info-card--architect info-card--feature"
+                  key={characteristic.title}
+                >
+                  <span className="material-symbols-outlined architect-feature-icon">
+                    {characteristic.icon}
+                  </span>
                   <h3>{characteristic.title}</h3>
                   <p>{characteristic.description}</p>
                 </article>
@@ -128,12 +154,16 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
                         />
                       </>
                     ) : (
-                      <span className="material-symbols-outlined architect-work-card__fallback">image</span>
+                      <span className="material-symbols-outlined architect-work-card__fallback">
+                        image
+                      </span>
                     )}
                   </div>
                   <figcaption className="architect-work-card__caption">
                     <strong>{work.title}</strong>
-                    {work.image?.caption ? <span>{work.image.caption}</span> : null}
+                    {work.image?.caption ? (
+                      <span>{work.image.caption}</span>
+                    ) : null}
                   </figcaption>
                 </figure>
               ))}
@@ -145,7 +175,11 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
       {hasCta ? (
         <section className="architect-cta architect-flow__section">
           <div className="architect-cta__content">
-            {architect.ctaDescription ? <p className="section-copy architect-cta__copy">{architect.ctaDescription}</p> : null}
+            {architect.ctaDescription ? (
+              <p className="section-copy architect-cta__copy">
+                {architect.ctaDescription}
+              </p>
+            ) : null}
 
             <div className="section-actions section-actions--row section-actions--center">
               {architect.actions?.secondary ? (
@@ -156,7 +190,11 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
                   variant="primary"
                 />
               ) : null}
-              <FeatureAction icon="map" label="Voltar ao Mapa" variant="ghost" />
+              <FeatureAction
+                icon="map"
+                label="Voltar ao Mapa"
+                variant="ghost"
+              />
             </div>
           </div>
         </section>
