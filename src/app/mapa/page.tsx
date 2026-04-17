@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function MapPage() {
   return (
     <main className="min-h-screen relative">
-      <div className="absolute top-4 left-4 z-[1000] sm:top-6 sm:left-6">
+      <div className="absolute bottom-4 left-4 z-[1000] sm:bottom-6 sm:left-6">
         <FeatureAction
           href="/"
           icon="arrow_back"

@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { mapBuildingsToMarkers } from "./map-buildings";
 
 describe("mapBuildingsToMarkers", () => {
-  it("deve retornar apenas edificações com coordenadas válidas", () => {
+  it("deve retornar apenas edificacoes com coordenadas validas", () => {
     const mock = [
       { id: 1, name: "A", latitude: -30, longitude: -51 },
       { id: 2, name: "B" },
@@ -26,9 +26,7 @@ describe("mapBuildingsToMarkers", () => {
   });
 
   it("deve mapear corretamente latitude e longitude para position", () => {
-    const mock = [
-      { id: 1, name: "A", latitude: -30, longitude: -51 },
-    ];
+    const mock = [{ id: 1, name: "A", latitude: -30, longitude: -51 }];
 
     const result = mapBuildingsToMarkers(mock);
 
@@ -36,13 +34,58 @@ describe("mapBuildingsToMarkers", () => {
   });
 
   it("deve aceitar coordenadas zero como valores validos", () => {
-    const mock = [
-      { id: 1, name: "A", latitude: 0, longitude: 0 },
-    ];
+    const mock = [{ id: 1, name: "A", latitude: 0, longitude: 0 }];
 
     const result = mapBuildingsToMarkers(mock);
 
     expect(result).toHaveLength(1);
     expect(result[0].position).toEqual([0, 0]);
+  });
+
+  it("deve preservar metadados e montar a rota da obra a partir do slug", () => {
+    const attachments = [
+      { src: "/images/a.jpg", alt: "Imagem A", caption: "Vista frontal" },
+    ];
+    const mock = [
+      {
+        id: 7,
+        name: "Museu X",
+        slug: "museu-x",
+        district: "Centro Historico",
+        summary: "Descricao curta da obra",
+        yearLabel: "1912",
+        architectName: "Theodor Wiederspahn",
+        architectPath: "/architects/theodor-wiederspahn",
+        attachments,
+        latitude: -30.01,
+        longitude: -51.22,
+      },
+    ];
+
+    const [result] = mapBuildingsToMarkers(mock);
+
+    expect(result).toMatchObject({
+      id: 7,
+      name: "Museu X",
+      slug: "museu-x",
+      district: "Centro Historico",
+      summary: "Descricao curta da obra",
+      yearLabel: "1912",
+      architectName: "Theodor Wiederspahn",
+      routePath: "/buildings/museu-x",
+      architectPath: "/architects/theodor-wiederspahn",
+      position: [-30.01, -51.22],
+    });
+    expect(result.attachments).toEqual(attachments);
+  });
+
+  it("deve deixar routePath indefinido quando a edificacao nao tiver slug", () => {
+    const mock = [
+      { id: 1, name: "Sem slug", latitude: -30, longitude: -51, attachments: [] },
+    ];
+
+    const [result] = mapBuildingsToMarkers(mock);
+
+    expect(result.routePath).toBeUndefined();
   });
 });

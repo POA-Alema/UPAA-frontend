@@ -22,9 +22,13 @@ const MapMarkers = dynamic(
 
 type MapPlaceholderProps = {
   className?: string;
+  showPopups?: boolean;
 };
 
-export function MapPlaceholder({ className = "h-125" }: MapPlaceholderProps) {
+export function MapPlaceholder({
+  className = "h-125",
+  showPopups = true,
+}: MapPlaceholderProps) {
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -85,7 +89,7 @@ export function MapPlaceholder({ className = "h-125" }: MapPlaceholderProps) {
           maxZoom={20}
         />
 
-        <MapMarkers markers={markers} />
+        <MapMarkers markers={markers} showPopups={showPopups} />
       </MapContainer>
 
       {!loading && markers.length === 0 && !hasError && (
