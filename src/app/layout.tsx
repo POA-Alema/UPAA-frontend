@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-page-custom-font */
 import type { Metadata } from "next";
 import { Manrope, Work_Sans } from "next/font/google";
 import type { ReactNode } from "react";

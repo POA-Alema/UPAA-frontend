@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type {
   AnchorHTMLAttributes,
@@ -20,14 +21,16 @@ vi.mock("next/image", () => ({
   default: ({
     alt,
     src,
-    fill: _fill,
+    fill,
     ...props
   }: ImgHTMLAttributes<HTMLImageElement> & {
     fill?: boolean;
     src: string;
-  }) => (
-    <img alt={alt} src={src} {...props} />
-  ),
+  }) => {
+    void fill;
+
+    return <img alt={alt} src={src} {...props} />;
+  },
 }));
 
 vi.mock("next/link", () => ({
