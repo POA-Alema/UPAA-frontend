@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -50,6 +53,7 @@ function MapPopupCard({
   variant = "popup",
   onRequestClose,
 }: MapPopupCardProps) {
+  const { t } = useTranslation("common");
   const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
 
   const selectedAttachment: BuildingAttachment | undefined =
@@ -78,7 +82,7 @@ function MapPopupCard({
           ></div>
           {onRequestClose ? (
             <button
-              aria-label="Fechar detalhes da edificacao"
+              aria-label={t("map.close_details", "Fechar detalhes da edificação")}
               className="map-popup-card__sheet-close"
               onClick={onRequestClose}
               type="button"
@@ -105,11 +109,17 @@ function MapPopupCard({
           />
           <div className="map-popup-card__media-overlay"></div>
         </a>
-      ) : null}
+      ) : (
+        <div className="map-popup-card__media flex items-center justify-center bg-zinc-800 min-h-[200px]">
+          <span className="text-sm text-zinc-400 font-medium italic">
+            {t("map.image_unavailable", "Imagem indisponível")}
+          </span>
+        </div>
+      )}
 
       <div className="map-popup-card__body">
         <p className="map-popup-card__eyebrow">
-          {marker.district ?? "Edificacao mapeada"}
+          {marker.district ?? t("map.mapped_building", "Edificação mapeada")}
         </p>
         <h3 className="map-popup-card__title">{marker.name}</h3>
 
@@ -123,11 +133,11 @@ function MapPopupCard({
                 title={
                   marker.routePath
                     ? `${marker.routePath}`
-                    : "Pagina da edificacao ainda nao disponivel"
+                    : t("map.page_unavailable", "Página da edificação ainda não disponível")
                 }
                 type="button"
               >
-                Ver Mais
+                {t("map.see_more", "Ver Mais")}
               </button>
             ) : null}
           </p>
@@ -137,12 +147,12 @@ function MapPopupCard({
           <div className="map-popup-card__meta">
             {marker.yearLabel ? (
               <span className="map-popup-card__meta-item">
-                Ano: {marker.yearLabel}
+                {t("map.year", "Ano")}: {marker.yearLabel}
               </span>
             ) : null}
             {marker.architectName ? (
               <span className="map-popup-card__meta-item">
-                Autoria: {marker.architectName}
+                {t("map.author", "Autoria")}: {marker.architectName}
               </span>
             ) : null}
           </div>
@@ -155,7 +165,7 @@ function MapPopupCard({
                 <span className="material-symbols-outlined map-popup-card__action-icon">
                   menu_book
                 </span>
-                <span>Conhecer a obra</span>
+                <span>{t("map.know_work", "Conhecer a obra")}</span>
               </button>
             ) : null}
 
@@ -167,7 +177,7 @@ function MapPopupCard({
                 <span className="material-symbols-outlined map-popup-card__action-icon">
                   account_circle
                 </span>
-                <span>Conhecer o autor</span>
+                <span>{t("map.know_author", "Conhecer o autor")}</span>
               </Link>
             ) : null}
           </div>
@@ -201,7 +211,7 @@ function MapPopupCard({
 
         {selectedAttachment?.caption ? (
           <p className="map-popup-card__caption">
-            Imagem: {selectedAttachment.caption}
+            {t("map.image_label", "Imagem")}: {selectedAttachment.caption}
           </p>
         ) : null}
       </div>
@@ -210,6 +220,7 @@ function MapPopupCard({
 }
 
 export function MapMarkers({ markers, showPopups = true }: Props) {
+  const { t } = useTranslation("common");
   const [isMobile, setIsMobile] = useState(false);
   const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
   const [isSheetClosing, setIsSheetClosing] = useState(false);
@@ -342,7 +353,31 @@ export function MapMarkers({ markers, showPopups = true }: Props) {
         </Marker>
       ))}
 
-      {sheet}
+      {showPopups && isMobile && selectedMarker ? (
+        <div
+          className={`map-popup-sheet${
+            isSheetClosing ? " map-popup-sheet--closing" : ""
+          }`}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            aria-label={t("map.close_details", "Fechar detalhes da edificação")}
+            className="map-popup-sheet__backdrop"
+            onClick={closeSheet}
+            type="button"
+          ></button>
+
+          <div className="map-popup-sheet__panel">
+            <MapPopupCard
+              key={selectedMarker.id}
+              marker={selectedMarker}
+              onRequestClose={closeSheet}
+              variant="sheet"
+            />
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
