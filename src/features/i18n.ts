@@ -57,7 +57,7 @@ i18n
   .init({
     resources,
     lng: 'en',// DEFAULT LANGUAGE - TESTS
-    fallbackLng: 'pt',
+    fallbackLng: 'de',
     interpolation: {
       escapeValue: false
     }
