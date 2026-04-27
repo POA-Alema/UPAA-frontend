@@ -9,6 +9,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapMarkers } from "./map-markers";
 import type { MapMarker } from "@/features/map/utils/map-buildings";
 
+// 1. I18N MOCK: Prevents test errors and returns the default text
+vi.mock("@/features/i18n", () => ({ default: {} }));
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string, defaultValue: string) => defaultValue,
+  }),
+}));
+
 vi.mock("leaflet", () => ({
   default: {
     Icon: class Icon {
@@ -28,7 +36,6 @@ vi.mock("next/image", () => ({
     src: string;
   }) => {
     void fill;
-
     return <img alt={alt} src={src} {...props} />;
   },
 }));
@@ -122,7 +129,7 @@ describe("MapMarkers", () => {
     vi.useRealTimers();
   });
 
-  it("renderiza o popup desktop com metadados e CTA do autor", () => {
+  it("renders the desktop popup with metadata and author CTA", () => {
     render(<MapMarkers markers={[marker]} />);
 
     const popup = screen.getByTestId("leaflet-popup");
@@ -144,7 +151,7 @@ describe("MapMarkers", () => {
     ).toBeInTheDocument();
   });
 
-  it("atualiza a imagem selecionada ao clicar em um thumbnail", () => {
+  it("updates the selected image when clicking a thumbnail", () => {
     render(<MapMarkers markers={[marker]} />);
 
     const secondThumb = screen.getByTitle("Vista lateral");
@@ -154,7 +161,18 @@ describe("MapMarkers", () => {
     expect(screen.getAllByAltText("Vista lateral do MARGS")).toHaveLength(2);
   });
 
-  it("abre um bottom sheet no mobile e bloqueia o scroll do body", () => {
+  // 2. NEW TEST: Ensuring Acceptance Criteria (Image Fallback)
+  it("displays the image fallback when the building has no photos", () => {
+    const markerWithoutPhotos = { ...marker, attachments: [] };
+    render(<MapMarkers markers={[markerWithoutPhotos]} />);
+
+    const popup = screen.getByTestId("leaflet-popup");
+    
+    expect(popup).toBeInTheDocument();
+    expect(within(popup).getByText("Imagem indisponível")).toBeInTheDocument();
+  });
+
+  it("opens a bottom sheet on mobile and blocks body scroll", () => {
     mockMatchMedia(true);
 
     render(<MapMarkers markers={[marker]} />);
@@ -166,12 +184,12 @@ describe("MapMarkers", () => {
     expect(document.body.style.overflow).toBe("hidden");
     expect(
       screen.getAllByRole("button", {
-        name: /fechar detalhes da edificacao/i,
+        name: /fechar detalhes da edificação/i, // Maintained Portuguese to match the component's default fallback
       }),
     ).toHaveLength(2);
   });
 
-  it("fecha o bottom sheet no mobile e restaura o body apos a animacao", () => {
+  it("closes the bottom sheet on mobile and restores body after animation", () => {
     vi.useFakeTimers();
     mockMatchMedia(true);
 
@@ -181,7 +199,7 @@ describe("MapMarkers", () => {
 
     const dialog = screen.getByRole("dialog");
     const closeButtons = within(dialog).getAllByRole("button", {
-      name: /fechar detalhes da edificacao/i,
+      name: /fechar detalhes da edificação/i,
     });
 
     fireEvent.click(closeButtons[0]);
@@ -197,7 +215,7 @@ describe("MapMarkers", () => {
     expect(document.body.style.overflow).toBe("");
   });
 
-  it("nao exibe popup nem sheet quando showPopups for falso", () => {
+  it("does not render popup or sheet when showPopups is false", () => {
     mockMatchMedia(true);
 
     render(<MapMarkers markers={[marker]} showPopups={false} />);
