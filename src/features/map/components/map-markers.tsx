@@ -146,15 +146,19 @@ function MapPopupCard({
             )}
           </div>
 
-          {marker.routePath && (
-            <button
-              onClick={handleSeeMore}
-              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
-            >
-              <div className="flex items-center gap-3 text-[#1A1A1A]">
-                <span className="material-symbols-outlined font-bold">
+        {marker.routePath || marker.architectPath ? (
+          <div className="map-popup-card__actions">
+            {marker.routePath ? (
+              <Link
+                className="map-popup-card__action map-popup-card__action--secondary"
+                href={marker.routePath}
+              >
+                <span className="material-symbols-outlined map-popup-card__action-icon">
                   menu_book
                 </span>
+                <span>Conhecer a obra</span>
+              </Link>
+            ) : null}
 
                 <span className="uppercase tracking-wider text-sm">
                   {t("map.know_work", "Explorar Obra")}

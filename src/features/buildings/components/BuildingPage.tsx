@@ -16,7 +16,6 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
   const resolvedBackToMapHref = backToMapHref ?? backToMapAction?.href;
   const hasBackToMap = Boolean(resolvedBackToMapHref);
   const hasArchitectCta = Boolean(building.architectCta?.description);
-  const hasCta = hasBackToMap || hasArchitectCta;
 
   if (
     !hasHero &&
@@ -24,7 +23,8 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
     !hasHistory &&
     !hasCharacteristics &&
     !hasGallery &&
-    !hasCta
+    !hasBackToMap &&
+    !hasArchitectCta
   ) {
     return null;
   }
@@ -83,8 +83,8 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         <section className="building-section building-section--history building-flow__section">
           <div className="building-section__inner">
             <div className="section-heading">
-              <h2 className="architect-section__headline">
-                <span className="architect-section__headline-line"></span>{" "}
+              <h2 className="building-section__headline">
+                <span className="building-section__headline-line"></span>{" "}
                 Histórico
               </h2>
             </div>
@@ -101,17 +101,17 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
       {hasCharacteristics ? (
         <section className="building-section building-section--features building-flow__section">
           <div className="building-section__inner">
-            <h2 className="architect-section__title">
+            <h2 className="building-section__title building-section__title--right">
               Características <br /> Arquitetônicas
             </h2>
 
-            <div className="feature-grid">
-              {building.characteristics?.map((characteristic) => (
+            <div className="building-feature-stack">
+              {building.characteristics?.map((characteristic, index) => (
                 <article
-                  className="info-card info-card--architect info-card--feature"
+                  className={`info-card building-feature-card building-feature-card--${index % 2 === 0 ? "left" : "right"}`}
                   key={characteristic.title}
                 >
-                  <span className="material-symbols-outlined architect-feature-icon">
+                  <span className="material-symbols-outlined building-feature-icon">
                     {characteristic.icon}
                   </span>
                   <h3>{characteristic.title}</h3>
@@ -135,32 +135,35 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         </section>
       ) : null}
 
-      {hasCta ? (
-        <section className="architect-cta building-flow__section">
-          <div className="architect-cta__content">
-            {hasArchitectCta && building.architectCta ? (
-              <p className="section-copy architect-cta__copy">
+      {hasBackToMap && backToMapAction ? (
+        <section className="building-cta building-flow__section">
+          <div className="building-cta__content">
+            <FeatureAction
+              href={resolvedBackToMapHref}
+              icon="map"
+              label={backToMapAction.label}
+              variant="primary"
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {hasArchitectCta && building.architectCta ? (
+        <section className="building-section building-section--architect-cta building-flow__section">
+          <div className="building-section__inner">
+            <div className="building-architect-cta">
+              <h2 className="building-architect-cta__title">O Arquiteto</h2>
+              <p className="building-architect-cta__copy">
                 {building.architectCta.description}
               </p>
-            ) : null}
-
-            <div className="section-actions section-actions--row section-actions--center">
-              {hasArchitectCta && building.architectCta ? (
+              <div className="section-actions section-actions--center">
                 <FeatureAction
                   href={building.architectCta.href}
                   icon="person"
                   label={building.architectCta.label}
                   variant="primary"
                 />
-              ) : null}
-              {hasBackToMap ? (
-                <FeatureAction
-                  href={resolvedBackToMapHref}
-                  icon="map"
-                  label={backToMapAction?.label ?? "Voltar ao Mapa"}
-                  variant="ghost"
-                />
-              ) : null}
+              </div>
             </div>
           </div>
         </section>
