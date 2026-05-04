@@ -10,7 +10,13 @@ vi.mock("next/image", () => ({
     alt,
     "data-testid": dataTestId,
     ...props
-  }: any) => (
+  }: {
+    src: string;
+    alt: string;
+    "data-testid"?: string;
+    [key: string]: unknown;
+  }) => (
+    // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} data-testid={dataTestId} {...props} />
   ),
 }));
@@ -18,7 +24,6 @@ vi.mock("next/image", () => ({
 describe("ImmigrationSectionComponent", () => {
   it("should render title and content", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
-
     expect(
       screen.getByText("A IMPORTÂNCIA DA IMIGRAÇÃO ALEMÃ PARA O ESTADO")
     ).toBeInTheDocument();
@@ -26,18 +31,14 @@ describe("ImmigrationSectionComponent", () => {
       screen.getByText(/A imigração alemã no Rio Grande do Sul teve início/i)
     ).toBeInTheDocument();
   });
-
   it("should render eyebrow", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
-
     expect(
       screen.getByText("IMIGRAÇÃO ALEMÃ NO RIO GRANDE DO SUL")
     ).toBeInTheDocument();
   });
-
   it("should render image when present", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
-
     const image = screen.getByTestId("immigration-image");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute(
@@ -46,42 +47,30 @@ describe("ImmigrationSectionComponent", () => {
     );
     expect(image).toHaveAttribute("src", "/images/Margs.jpg");
   });
-
   it("should not render section when data is empty", () => {
     const { container } = render(
       <ImmigrationSectionComponent data={immigrationMockEmpty} />
     );
-
     expect(container.firstChild).toBeNull();
   });
-
   it("should not render section when data is null", () => {
     const { container } = render(
       <ImmigrationSectionComponent data={null} />
     );
-
     expect(container.firstChild).toBeNull();
   });
-
   it("should render content with proper formatting", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
-
-    // RichText component should format content into paragraphs
     const contentElement = screen.getByTestId("immigration-content");
     expect(contentElement).toBeInTheDocument();
-
-    // Check if paragraphs are rendered
     const paragraphs = contentElement.querySelectorAll("p");
     expect(paragraphs.length).toBeGreaterThan(0);
   });
-
   it("should emphasize first paragraph", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
-
     const firstParagraph = screen.getByTestId("immigration-content").querySelector(
       ".rich-text__paragraph--lead"
     );
     expect(firstParagraph).toBeInTheDocument();
   });
 });
-
