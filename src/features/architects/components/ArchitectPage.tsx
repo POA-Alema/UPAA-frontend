@@ -3,7 +3,7 @@ import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPageProps } from "../types/architect";
 
-export function ArchitectPage({ architect }: ArchitectPageProps) {
+export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) {
   const hasHero = Boolean(
     architect.title || architect.eyebrow || architect.image,
   );
@@ -12,7 +12,7 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
   const hasCharacteristics = Boolean(architect.characteristics?.length);
   const hasWorks = Boolean(architect.works?.length);
   const hasCta = Boolean(
-    architect.ctaDescription || architect.actions?.secondary,
+    architect.ctaDescription || architect.actions?.secondary || backToMapHref,
   );
 
   if (
@@ -191,6 +191,7 @@ export function ArchitectPage({ architect }: ArchitectPageProps) {
                 />
               ) : null}
               <FeatureAction
+                href={backToMapHref}
                 icon="map"
                 label="Voltar ao Mapa"
                 variant="ghost"
