@@ -318,6 +318,15 @@ button:focus-visible {
   color: var(--foreground-soft);
 }
 
+.section-title--full {
+  max-width: none;
+}
+
+.section-copy--accent {
+  max-width: none;
+  color: var(--accent);
+}
+
 .section-divider {
   width: 72px;
   height: 1px;

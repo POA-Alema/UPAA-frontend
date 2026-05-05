@@ -121,6 +121,7 @@ describe("MapMarkers", () => {
     const mapMarker = screen.getByTestId("marker--30.02,-51.23");
     fireEvent.click(mapMarker);
 
+
     const sidebar = screen.getByRole("complementary");
     expect(sidebar).toBeInTheDocument();
     expect(within(sidebar).getByRole("heading", { name: "MARGS", level: 1 })).toBeInTheDocument();
