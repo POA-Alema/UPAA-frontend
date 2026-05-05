@@ -10,7 +10,7 @@ type ImmigrationSectionComponentProps = {
 export function ImmigrationSectionComponent({
   data,
 }: ImmigrationSectionComponentProps) {
-  if (!data || (!data.title && !data.content)) {
+  if (!data || !data.content) {
     return null;
   }
 
