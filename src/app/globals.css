@@ -896,6 +896,34 @@ button:focus-visible {
   border-radius: 14px;
 }
 
+.immigration-section__content {
+  display: grid;
+  gap: 18px;
+}
+
+.immigration-section .section-title {
+  max-width: none;
+}
+
+.immigration-section__media {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 0;
+  width: 100%;
+}
+
+.immigration-section__image-frame {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.immigration-section__image {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 21 / 8;
+}
+
 .architect-image-overlay {
   position: absolute;
   inset: 6px;
@@ -1516,6 +1544,10 @@ button:focus-visible {
     max-width: 100%;
   }
 
+  .immigration-section__media {
+    margin-top: 24px;
+  }
+
   .architect-works__header {
     align-items: start;
     flex-direction: column;
@@ -1549,6 +1581,24 @@ button:focus-visible {
     border-radius: 0;
   }
 
+  .immigration-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .immigration-section > .immigration-section__media {
+    order: -3;
+    margin: 0 0 28px;
+  }
+
+  .immigration-section > .section-divider {
+    order: 3;
+  }
+
+  .immigration-section > .immigration-section__content {
+    order: 4;
+  }
+
   .section-title,
   .architect-title {
     max-width: none;
@@ -1576,6 +1626,15 @@ button:focus-visible {
   .architect-hero__media {
     justify-self: center;
     width: 100%;
+  }
+
+  .immigration-section__image-frame {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .immigration-section__image {
+    aspect-ratio: 1 / 1;
   }
 
   .architect-image-frame--preview {
