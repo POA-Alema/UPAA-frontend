@@ -17,28 +17,36 @@ export function ImmigrationSectionComponent({
   return (
     <PageSection
       eyebrow={data.eyebrow}
-      title={data.title}
-      className="immigration-section"
+      title={
+        <>
+          A Importância da <strong>Imigração Alemã</strong> para o Estado
+        </>
+      }
+      className="home-flow__section immigration-section"
     >
-      {data.image && (
-        <div className="immigration-section__image-container mb-8">
-          <Image
-            src={data.image.src}
-            alt={data.image.alt}
-            width={600}
-            height={600}
-            className="w-full h-auto rounded-lg shadow-md"
-            data-testid="immigration-image"
-          />
-        </div>
-      )}
+      <div className="section-divider section-divider--accent"></div>
+
       <RichText
         content={data.content}
         emphasizeFirstParagraph
         className="immigration-section__content"
         data-testid="immigration-content"
       />
+
+      {data.image ? (
+        <figure className="immigration-section__media">
+          <div className="architect-image-frame immigration-section__image-frame">
+            <Image
+              src={data.image.src}
+              alt={data.image.alt}
+              width={900}
+              height={675}
+              className="architect-image immigration-section__image"
+              data-testid="immigration-image"
+            />
+          </div>
+        </figure>
+      ) : null}
     </PageSection>
   );
 }
-

@@ -24,17 +24,17 @@ vi.mock("next/image", () => ({
 describe("ImmigrationSectionComponent", () => {
   it("should render title and content", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
-    expect(
-      screen.getByText("A IMPORTÂNCIA DA IMIGRAÇÃO ALEMÃ PARA O ESTADO")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/A imigração alemã no Rio Grande do Sul teve início/i)
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
+      "A Importância da Imigração Alemã para o Estado"
+    );
+    expect(screen.getByTestId("immigration-content")).toHaveTextContent(
+      /A imigração alemã no Rio Grande do Sul teve início/i
+    );
   });
   it("should render eyebrow", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
     expect(
-      screen.getByText("IMIGRAÇÃO ALEMÃ NO RIO GRANDE DO SUL")
+      screen.getByText("Imigração Alemã no Rio Grande do Sul")
     ).toBeInTheDocument();
   });
   it("should render image when present", () => {
@@ -43,9 +43,9 @@ describe("ImmigrationSectionComponent", () => {
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute(
       "alt",
-      "Celebração da imigração alemã no Rio Grande do Sul com pessoas em trajes típicos alemães e bandeira alemã"
+      "Fachada do Museu de Arte do Rio Grande do Sul, edificação histórica no centro de Porto Alegre"
     );
-    expect(image).toHaveAttribute("src", "/images/Margs.jpg");
+    expect(image).toHaveAttribute("src", immigrationMock.image?.src);
   });
   it("should not render section when data is empty", () => {
     const { container } = render(
