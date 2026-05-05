@@ -284,6 +284,11 @@ button {
   transform: translateY(-1px);
 }
 
+.feature-action:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+
 .feature-action__icon {
   font-size: 1.1rem;
   line-height: 1;

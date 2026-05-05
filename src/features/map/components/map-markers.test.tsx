@@ -78,7 +78,7 @@ const marker: MapMarker = {
     "Um dos marcos culturais mais emblematicos do centro historico, com presenca monumental e memoria urbana duradoura.",
   yearLabel: "1912",
   architectName: "Theodor Wiederspahn",
-  routePath: "/buildings/margs",
+  routePath: "/buildings/margs?returnTo=%2Fmapa",
   architectPath: "/architects/theodor-wiederspahn",
   attachments: [
     {
@@ -139,6 +139,9 @@ describe("MapMarkers", () => {
     expect(
       within(popup).getByRole("link", { name: /conhecer o autor/i }),
     ).toHaveAttribute("href", "/architects/theodor-wiederspahn");
+    expect(
+      within(popup).getByRole("link", { name: /conhecer a obra/i }),
+    ).toHaveAttribute("href", "/buildings/margs?returnTo=%2Fmapa");
     expect(
       within(popup).getByText("Imagem: Fachada principal"),
     ).toBeInTheDocument();

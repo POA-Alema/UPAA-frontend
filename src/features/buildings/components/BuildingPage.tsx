@@ -3,7 +3,7 @@ import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import type { BuildingPageProps } from "../types/building";
 
-export function BuildingPage({ building }: BuildingPageProps) {
+export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
   const hasHero = Boolean(
     building.title || building.eyebrow || building.hero,
   );
@@ -11,7 +11,9 @@ export function BuildingPage({ building }: BuildingPageProps) {
   const hasHistory = Boolean(building.history);
   const hasCharacteristics = Boolean(building.characteristics?.length);
   const hasGallery = Boolean(building.gallery?.length);
-  const hasBackToMap = Boolean(building.actions?.backToMap);
+  const backToMapAction = building.actions?.backToMap;
+  const resolvedBackToMapHref = backToMapHref ?? backToMapAction?.href;
+  const hasBackToMap = Boolean(resolvedBackToMapHref);
   const hasArchitectCta = Boolean(building.architectCta?.description);
 
   if (
@@ -155,13 +157,13 @@ export function BuildingPage({ building }: BuildingPageProps) {
         </section>
       ) : null}
 
-      {hasBackToMap && building.actions?.backToMap ? (
+      {hasBackToMap && backToMapAction ? (
         <section className="building-cta building-flow__section">
           <div className="building-cta__content">
             <FeatureAction
-              href={building.actions.backToMap.href}
+              href={resolvedBackToMapHref}
               icon="map"
-              label={building.actions.backToMap.label}
+              label={backToMapAction.label}
               variant="primary"
             />
           </div>
