@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import L from "leaflet";
 import { Marker, Popup } from "react-leaflet";
 import type {
@@ -289,6 +290,36 @@ export function MapMarkers({ markers, showPopups = true }: Props) {
     }, 220);
   }
 
+  const sheet =
+    showPopups && isMobile && selectedMarker
+      ? createPortal(
+          <div
+            className={`map-popup-sheet${
+              isSheetClosing ? " map-popup-sheet--closing" : ""
+            }`}
+            role="dialog"
+            aria-modal="true"
+          >
+            <button
+              aria-label="Fechar detalhes da edificacao"
+              className="map-popup-sheet__backdrop"
+              onClick={closeSheet}
+              type="button"
+            ></button>
+
+            <div className="map-popup-sheet__panel">
+              <MapPopupCard
+                key={selectedMarker.id}
+                marker={selectedMarker}
+                onRequestClose={closeSheet}
+                variant="sheet"
+              />
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
     <>
       {markers.map((marker) => (
@@ -314,31 +345,7 @@ export function MapMarkers({ markers, showPopups = true }: Props) {
         </Marker>
       ))}
 
-      {showPopups && isMobile && selectedMarker ? (
-        <div
-          className={`map-popup-sheet${
-            isSheetClosing ? " map-popup-sheet--closing" : ""
-          }`}
-          role="dialog"
-          aria-modal="true"
-        >
-          <button
-            aria-label="Fechar detalhes da edificacao"
-            className="map-popup-sheet__backdrop"
-            onClick={closeSheet}
-            type="button"
-          ></button>
-
-          <div className="map-popup-sheet__panel">
-            <MapPopupCard
-              key={selectedMarker.id}
-              marker={selectedMarker}
-              onRequestClose={closeSheet}
-              variant="sheet"
-            />
-          </div>
-        </div>
-      ) : null}
+      {sheet}
     </>
   );
 }
