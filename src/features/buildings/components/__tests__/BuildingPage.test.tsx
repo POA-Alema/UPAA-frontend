@@ -35,6 +35,10 @@ describe("BuildingPage", () => {
     expect(screen.getByAltText(/foto histórica externa/i)).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: /voltar ao mapa/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /voltar ao mapa/i })).toHaveAttribute(
+      "href",
+      "/mapa",
+    );
     expect(screen.getByRole("link", { name: /conheça mais sobre o arquiteto/i })).toBeInTheDocument();
   });
 

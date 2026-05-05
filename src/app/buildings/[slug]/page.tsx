@@ -4,9 +4,13 @@ import {
   getBuildingBySlug,
   listBuildings,
 } from "@/features/buildings/data/buildings";
+import { resolveBuildingBackToMapHref } from "@/features/buildings/utils/navigation";
 
 type BuildingDetailPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{
+    returnTo?: string | string[];
+  }>;
 };
 
 export async function generateMetadata({ params }: BuildingDetailPageProps) {
@@ -34,13 +38,20 @@ export async function generateStaticParams() {
 
 export default async function BuildingDetailPage({
   params,
+  searchParams,
 }: BuildingDetailPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const building = await getBuildingBySlug(slug);
 
   if (!building) {
     notFound();
   }
 
-  return <BuildingPage building={building} />;
+  return (
+    <BuildingPage
+      backToMapHref={resolveBuildingBackToMapHref(resolvedSearchParams)}
+      building={building}
+    />
+  );
 }
