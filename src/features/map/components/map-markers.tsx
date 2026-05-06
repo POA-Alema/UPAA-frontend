@@ -151,12 +151,16 @@ function MapPopupCard({
         {marker.routePath || marker.architectPath ? (
           <div className="map-popup-card__actions">
             {marker.routePath ? (
-              <button className="map-popup-card__action" type="button">
+              <Link
+                aria-label={`Ver detalhes da obra ${marker.name}`}
+                className="map-popup-card__action"
+                href={marker.routePath}
+              >
                 <span className="material-symbols-outlined map-popup-card__action-icon">
                   menu_book
                 </span>
-                <span>Conhecer a obra</span>
-              </button>
+                <span>Ver mais sobre obra</span>
+              </Link>
             ) : null}
 
             {marker.architectPath ? (

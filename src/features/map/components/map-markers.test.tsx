@@ -122,7 +122,7 @@ describe("MapMarkers", () => {
     vi.useRealTimers();
   });
 
-  it("renderiza o popup desktop com metadados e CTA do autor", () => {
+  it("renderiza o popup desktop com metadados e CTAs da obra e do autor", () => {
     render(<MapMarkers markers={[marker]} />);
 
     const popup = screen.getByTestId("leaflet-popup");
@@ -136,6 +136,9 @@ describe("MapMarkers", () => {
     expect(
       within(popup).getByText("Autoria: Theodor Wiederspahn"),
     ).toBeInTheDocument();
+    expect(
+      within(popup).getByRole("link", { name: /ver detalhes da obra/i }),
+    ).toHaveAttribute("href", "/buildings/margs");
     expect(
       within(popup).getByRole("link", { name: /conhecer o autor/i }),
     ).toHaveAttribute("href", "/architects/theodor-wiederspahn");
