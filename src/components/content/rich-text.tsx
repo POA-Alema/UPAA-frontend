@@ -1,13 +1,15 @@
-type RichTextProps = {
+import type { HTMLAttributes } from "react";
+
+type RichTextProps = HTMLAttributes<HTMLDivElement> & {
   content: string;
   emphasizeFirstParagraph?: boolean;
-  className?: string;
 };
 
 export function RichText({
   content,
   emphasizeFirstParagraph = false,
   className = "",
+  ...props
 }: RichTextProps) {
   const paragraphs = content
     .split(/\n\s*\n/)
@@ -19,7 +21,7 @@ export function RichText({
   }
 
   return (
-    <div className={className}>
+    <div className={className} {...props}>
       {paragraphs.map((paragraph, index) => {
         const isLead = emphasizeFirstParagraph && index === 0;
 

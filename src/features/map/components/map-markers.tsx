@@ -6,6 +6,7 @@ import "@/features/i18n";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import L from "leaflet";
 import { Marker, useMap, Tooltip } from "react-leaflet";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ import type {
   MapMarker,
 } from "@/features/map/utils/map-buildings";
 
-// Ícone padrão (Menor)
+// Ícones
 const defaultIcon = new L.Icon({
   iconUrl: "/map-marker.svg",
   iconSize: [28, 40],
@@ -22,13 +23,12 @@ const defaultIcon = new L.Icon({
   popupAnchor: [0, -34],
 });
 
-// Ícone Selecionado (Significativamente maior para o efeito de feedback)
 const selectedIcon = new L.Icon({
   iconUrl: "/map-marker.svg",
-  iconSize: [44, 60], 
+  iconSize: [44, 60],
   iconAnchor: [22, 60],
   popupAnchor: [0, -52],
-  className: "filter drop-shadow-[0_0_12px_rgba(233,196,106,1)] transition-all duration-300", 
+  className: "filter drop-shadow-[0_0_12px_rgba(233,196,106,1)] transition-all duration-300",
 });
 
 function MapPopupCard({
@@ -56,7 +56,6 @@ function MapPopupCard({
     if (!map) return;
     map.scrollWheelZoom.disable();
     map.dragging.disable();
-
     return () => {
       map.scrollWheelZoom.enable();
       map.dragging.enable();
@@ -68,15 +67,14 @@ function MapPopupCard({
       className="flex flex-col h-full w-full bg-[#1A1A1A] text-white shadow-2xl pointer-events-auto selection:bg-[#E9C46A] selection:text-[#1A1A1A]"
       onWheel={(e) => e.stopPropagation()}
     >
-      {/* Header: Título sem truncate (permite 2 linhas) */}
+      {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-white/5 bg-[#1A1A1A]/80 backdrop-blur-md shrink-0 sticky top-0 z-20">
         <div className="flex flex-col overflow-hidden mr-2">
-           <h2 className="text-xl font-bold text-[#E9C46A] !no-underline tracking-tight leading-tight line-clamp-2">
+          <h2 className="text-xl font-bold text-[#E9C46A] !no-underline tracking-tight leading-tight line-clamp-2">
             {variant === "sidebar" ? marker.name : t("map.mapped_building", "Edificação")}
           </h2>
           <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium mt-0.5">Patrimônio Histórico</span>
         </div>
-        
         {onRequestClose && (
           <button
             onClick={onRequestClose}
@@ -87,18 +85,12 @@ function MapPopupCard({
         )}
       </div>
 
+      {/* Área de Scroll */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent">
         <div className="relative w-full aspect-[16/10] overflow-hidden group">
           {selectedAttachment ? (
             <>
-              <Image
-                alt={selectedAttachment.alt}
-                src={selectedAttachment.src}
-                fill
-                className="object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
-                sizes="(max-width: 820px) 100vw, 450px"
-                priority
-              />
+              <Image alt={selectedAttachment.alt} src={selectedAttachment.src} fill className="object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out" priority />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60" />
             </>
           ) : (
@@ -112,21 +104,14 @@ function MapPopupCard({
           <section className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="w-8 h-[1px] bg-[#E9C46A]/50"></span>
-              <span className="text-[11px] font-bold text-[#E9C46A] uppercase tracking-[0.25em]">
-                {marker.district || "Porto Alegre"}
-              </span>
+              <span className="text-[11px] font-bold text-[#E9C46A] uppercase tracking-[0.25em]">{marker.district || "Porto Alegre"}</span>
             </div>
-            <h1 className="text-3xl font-black text-white leading-tight !no-underline">
-              {marker.name}
-            </h1>
+            <h1 className="text-3xl font-black text-white leading-tight">{marker.name}</h1>
           </section>
 
-          {marker.summary && (
-            <p className="text-white/70 leading-relaxed text-base font-light">
-              {marker.summary}
-            </p>
-          )}
+          {marker.summary && <p className="text-white/70 leading-relaxed text-base font-light">{marker.summary}</p>}
 
+          {/* REESTABELECIDO: Badges de Informação */}
           <div className="flex flex-wrap gap-3">
             {marker.yearLabel && (
               <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs text-white/80">
@@ -142,11 +127,12 @@ function MapPopupCard({
             )}
           </div>
 
+          {/* REESTABELECIDO: Ambos os Botões com cores fixas */}
           <div className="flex flex-col gap-4 pt-4">
             {marker.routePath && (
               <button 
-                onClick={handleSeeMore}
-                className="group w-full bg-[#E9C46A] hover:bg-[#D4A346] text-[#1A1A1A] !text-[#1A1A1A] font-black py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-between shadow-[0_10px_20px_-10px_rgba(233,196,106,0.3)] hover:-translate-y-0.5 active:scale-95 border-none"
+                onClick={handleSeeMore} 
+                className="group w-full bg-[#E9C46A] text-[#1A1A1A] !text-[#1A1A1A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined font-bold !text-[#1A1A1A]">menu_book</span>
@@ -155,11 +141,11 @@ function MapPopupCard({
                 <span className="material-symbols-outlined !text-[#1A1A1A] group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </button>
             )}
-            
+
             {marker.architectPath && (
               <Link
                 href={marker.architectPath}
-                className="group w-full border border-[#E9C46A]/50 text-[#E9C46A] !text-[#E9C46A] font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-between hover:bg-[#E9C46A]/10 hover:border-[#E9C46A] active:scale-95 !no-underline"
+                className="group w-full border border-[#E9C46A]/50 text-[#E9C46A] !text-[#E9C46A] font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 !no-underline transition-all"
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined !text-[#E9C46A]">account_circle</span>
@@ -170,6 +156,7 @@ function MapPopupCard({
             )}
           </div>
 
+          {/* REESTABELECIDO: Galeria de Miniaturas */}
           {marker.attachments.length > 1 && (
             <div className="space-y-3 pt-4 border-t border-white/5 pb-8">
               <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Galeria de Imagens</span>
@@ -214,7 +201,7 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const close = () => {
+  const closePanel = () => {
     setIsClosing(true);
     setTimeout(() => {
       setSelectedMarkerId(null);
@@ -226,36 +213,38 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
     ? markers.find((m: MapMarker) => m.id === selectedMarkerId) 
     : null;
 
+  const sheet = showPopups && isMobile && selectedMarker
+    ? createPortal(
+        <div className={`fixed inset-0 z-[10000] flex items-end justify-center pointer-events-none`}>
+          <div 
+            className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${isClosing ? 'opacity-0' : 'opacity-100'}`} 
+            onClick={closePanel} 
+          />
+          <aside 
+            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-[32px] transition-all duration-500 flex flex-col shadow-2xl ${isClosing ? 'translate-y-full' : 'translate-y-0'}`}
+          >
+            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
+            <MapPopupCard marker={selectedMarker} onRequestClose={closePanel} variant="sheet" />
+          </aside>
+        </div>,
+        document.body
+      )
+    : null;
+
   return (
     <>
       {markers.map((m: MapMarker) => {
         const isSelected = selectedMarkerId === m.id;
-        
         return (
           <Marker
             key={m.id}
             position={m.position}
             icon={isSelected ? selectedIcon : defaultIcon}
-            eventHandlers={{ 
-              click: () => { 
-                setIsClosing(false); 
-                setSelectedMarkerId(m.id); 
-              } 
-            }}
+            eventHandlers={{ click: () => { setIsClosing(false); setSelectedMarkerId(m.id); } }}
           >
-            {/* Texto flutuante estilo Google Maps: Só aparece na seleção, escrito em preto */}
             {isSelected && (
-              <Tooltip 
-                permanent 
-                direction="top" 
-                offset={[0, -28]} 
-                opacity={1} 
-                className="!bg-transparent !border-none !shadow-none !p-0"
-              >
-                <span 
-                  className="text-[13px] font-black tracking-tight text-black uppercase whitespace-nowrap"
-                  style={{ textShadow: "0px 0px 4px rgba(255, 255, 255, 1), 0px 0px 8px rgba(255, 255, 255, 0.5)" }}
-                >
+              <Tooltip permanent direction="top" offset={[0, -28]} opacity={1} className="!bg-transparent !border-none !shadow-none !p-0">
+                <span className="text-[13px] font-black tracking-tight text-black uppercase" style={{ textShadow: "0px 0px 4px rgba(255, 255, 255, 1)" }}>
                   {m.name}
                 </span>
               </Tooltip>
@@ -264,31 +253,17 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
         );
       })}
 
-      {showPopups && selectedMarker && (
-        <div className={`fixed inset-0 z-[10000] pointer-events-none flex ${isMobile ? 'items-end justify-center' : 'justify-end'}`}>
-          {isMobile && (
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto" onClick={close} />
-          )}
-          
+      {showPopups && !isMobile && selectedMarker && (
+        <div className="fixed inset-0 z-[10000] pointer-events-none flex justify-end">
           <aside 
-            className={`pointer-events-auto bg-[#1A1A1A] transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col shadow-[-20px_0_50px_rgba(0,0,0,0.5)]
-              ${isMobile 
-                ? `w-full h-[92vh] rounded-t-[32px] ${isClosing ? 'translate-y-full' : 'translate-y-0'}` 
-                : `w-[450px] h-screen ${isClosing ? 'translate-x-full' : 'translate-x-0'}`
-              }`}
+            className={`pointer-events-auto bg-[#1A1A1A] w-[450px] h-screen transition-all duration-500 flex flex-col shadow-2xl ${isClosing ? 'translate-x-full' : 'translate-x-0'}`}
           >
-            {isMobile && (
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
-            )}
-            
-            <MapPopupCard
-              marker={selectedMarker}
-              onRequestClose={close}
-              variant={isMobile ? "sheet" : "sidebar"}
-            />
+            <MapPopupCard marker={selectedMarker} onRequestClose={closePanel} variant="sidebar" />
           </aside>
         </div>
       )}
+
+      {sheet}
     </>
   );
 }
