@@ -10,7 +10,7 @@ export const buildingsMock: Building[] = [
     summary:
       "Edifício projetado por Theodor Wiederspahn entre 1913 e 1914 para abrigar a antiga Delegacia Fiscal da Fazenda no Rio Grande do Sul, hoje sede do MARGS, na Praça da Alfândega.",
     hero: {
-      src: "/images/Margs.jpg",
+      src: "/images/margs/Margs.jpg",
       alt: "Fachada do Museu de Arte do Rio Grande do Sul",
     },
     history: `Localizado na Praça da Alfândega, o Museu de Arte do Rio Grande do Sul, pertencente ao estado, situa-se na área do antigo cais de 1856, aterrada quando da construção do novo porto, de onde se ingressa no centro histórico da cidade pelo Pórtico do Cais Mauá. Projetado e construído de 1913 a 1916, pelo arquiteto Theodor Wiederspahn, com a execução do Engenheiro Rudolph Arhons para abrigar a Delegacia Fiscal.
@@ -62,24 +62,44 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
     ],
     gallery: [
       {
-        src: "/images/Margs_2.jpg",
+        src: "/images/margs/planta_baixa.jpg",
         alt: "Planta baixa do segundo pavimento da antiga Delegacia Fiscal",
         caption: "Planta baixa",
       },
       {
-        src: "/images/Margs.jpg",
+        src: "/images/margs/fachadas.jpg",
         alt: "Fachada principal da antiga Delegacia Fiscal",
         caption: "Fachadas",
       },
       {
-        src: "/images/Margs.jpg",
+        src: "/images/margs/fotos_externas.jpg",
         alt: "Foto histórica externa do MARGS",
         caption: "Fotos externas",
       },
       {
-        src: "/images/Margs_2.jpg",
+        src: "/images/margs/fotos_internas.jpg",
         alt: "Vista interna do hall central do MARGS",
         caption: "Fotos internas",
+      },
+      {
+        src: "/images/margs/planta_baixa.jpg",
+        alt: "Planta baixa do segundo pavimento da antiga Delegacia Fiscal",
+        caption: "Planta baixa (2)",
+      },
+      {
+        src: "/images/margs/fachadas.jpg",
+        alt: "Fachada principal da antiga Delegacia Fiscal",
+        caption: "Fachadas (2)",
+      },
+      {
+        src: "/images/margs/fotos_externas.jpg",
+        alt: "Foto histórica externa do MARGS",
+        caption: "Fotos externas (2)",
+      },
+      {
+        src: "/images/margs/fotos_internas.jpg",
+        alt: "Vista interna do hall central do MARGS",
+        caption: "Fotos internas (2)",
       },
     ],
     architectCta: {

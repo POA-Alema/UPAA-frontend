@@ -109,7 +109,7 @@ export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) 
               Características <br /> Arquitetônicas
             </h2>
 
-            <div className="architect-feature-grid">
+            <div className="feature-grid">
               {architect.characteristics?.map((characteristic) => (
                 <article
                   className="info-card info-card--architect info-card--feature"

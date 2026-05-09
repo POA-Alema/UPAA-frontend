@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
+import { BuildingGallery } from "./BuildingGallery";
 import type { BuildingPageProps } from "../types/building";
 
 export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
@@ -103,10 +104,10 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
               Características <br /> Arquitetônicas
             </h2>
 
-            <div className="building-feature-stack">
-              {building.characteristics?.map((characteristic, index) => (
+            <div className="feature-grid">
+              {building.characteristics?.map((characteristic) => (
                 <article
-                  className={`info-card building-feature-card building-feature-card--${index % 2 === 0 ? "left" : "right"}`}
+                  className="info-card info-card--feature"
                   key={characteristic.title}
                 >
                   <span className="material-symbols-outlined building-feature-icon">
@@ -121,39 +122,15 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         </section>
       ) : null}
 
-      {hasGallery ? (
+      {hasGallery && building.gallery ? (
         <section className="building-section building-section--gallery building-flow__section">
           <div className="building-section__inner building-section__inner--wide">
             <div className="building-gallery__header">
               <h2 className="building-gallery__title">Galeria de Fotos</h2>
-              <span className="building-gallery__hint">
-                <span className="material-symbols-outlined">swipe_left</span>
-                Deslize
-              </span>
-            </div>
-
-            <div className="building-gallery__rail">
-              {building.gallery?.map((item, index) => (
-                <figure className="building-gallery-card" key={item.src}>
-                  <div className="building-gallery-card__media">
-                    <Image
-                      alt={item.alt}
-                      className="building-gallery-card__image"
-                      fill
-                      priority={index === 0}
-                      sizes="(max-width: 768px) 80vw, 320px"
-                      src={item.src}
-                    />
-                  </div>
-                  {item.caption ? (
-                    <figcaption className="building-gallery-card__caption">
-                      {item.caption}
-                    </figcaption>
-                  ) : null}
-                </figure>
-              ))}
             </div>
           </div>
+
+          <BuildingGallery items={building.gallery} />
         </section>
       ) : null}
 
