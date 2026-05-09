@@ -81,26 +81,6 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         alt: "Vista interna do hall central do MARGS",
         caption: "Fotos internas",
       },
-      {
-        src: "/images/margs/planta_baixa.jpg",
-        alt: "Planta baixa do segundo pavimento da antiga Delegacia Fiscal",
-        caption: "Planta baixa (2)",
-      },
-      {
-        src: "/images/margs/fachadas.jpg",
-        alt: "Fachada principal da antiga Delegacia Fiscal",
-        caption: "Fachadas (2)",
-      },
-      {
-        src: "/images/margs/fotos_externas.jpg",
-        alt: "Foto histórica externa do MARGS",
-        caption: "Fotos externas (2)",
-      },
-      {
-        src: "/images/margs/fotos_internas.jpg",
-        alt: "Vista interna do hall central do MARGS",
-        caption: "Fotos internas (2)",
-      },
     ],
     architectCta: {
       description:
