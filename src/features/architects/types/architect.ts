@@ -24,6 +24,7 @@ export interface ArchitectCharacteristic {
 export interface ArchitectWork {
   title: string;
   image?: ArchitectImage;
+  href?: string;
 }
 
 export interface Architect {

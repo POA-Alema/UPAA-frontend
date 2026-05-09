@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
+import { ArchitectGallery } from "./ArchitectGallery";
 import type { ArchitectPageProps } from "../types/architect";
 
 export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) {
@@ -132,43 +133,10 @@ export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) 
           <div className="architect-section__inner architect-section__inner--wide">
             <div className="architect-works__header">
               <h2 className="architect-works__title">Obras Marcantes</h2>
-              <span className="architect-works__hint">
-                <span className="material-symbols-outlined">swipe_left</span>
-                Deslize
-              </span>
-            </div>
-
-            <div className="architect-works__rail">
-              {architect.works?.map((work, index) => (
-                <figure className="architect-work-card" key={work.title}>
-                  <div className="architect-work-card__media">
-                    {work.image ? (
-                      <>
-                        <Image
-                          alt={work.image.alt}
-                          className="architect-image"
-                          fill
-                          priority={index === 0}
-                          sizes="(max-width: 768px) 288px, 288px"
-                          src={work.image.src}
-                        />
-                      </>
-                    ) : (
-                      <span className="material-symbols-outlined architect-work-card__fallback">
-                        image
-                      </span>
-                    )}
-                  </div>
-                  <figcaption className="architect-work-card__caption">
-                    <strong>{work.title}</strong>
-                    {work.image?.caption ? (
-                      <span>{work.image.caption}</span>
-                    ) : null}
-                  </figcaption>
-                </figure>
-              ))}
             </div>
           </div>
+
+          <ArchitectGallery items={architect.works!} />
         </section>
       ) : null}
 

@@ -51,6 +51,7 @@ Sua obra marcou a paisagem urbana da capital ga√∫cha, com projetos ligados a pr√
     works: [
       {
         title: "Museu de Arte do RS",
+        href: "/buildings/margs",
         image: {
           src: "/images/margs/Margs.jpg",
           alt: "Fachada do Museu de Arte do Rio Grande do Sul",

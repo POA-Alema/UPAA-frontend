@@ -1,14 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { BuildingImage } from "../types/building";
+import type { ArchitectWork } from "../types/architect";
 
-interface BuildingGalleryProps {
-  items: BuildingImage[];
+interface ArchitectGalleryProps {
+  items: ArchitectWork[];
 }
 
-export function BuildingGallery({ items }: BuildingGalleryProps) {
+export function ArchitectGallery({ items }: ArchitectGalleryProps) {
   const railRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeIndexRef = useRef(0);
@@ -65,26 +66,49 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
 
   return (
     <div className="building-gallery__wrapper">
-      <div className="building-gallery__rail" ref={railRef}>
-        {items.map((item, index) => (
-          <figure className="building-gallery-card" key={`${item.src}-${index}`}>
-            <div className="building-gallery-card__media">
-              <Image
-                alt={item.alt}
-                className="building-gallery-card__image"
-                fill
-                priority={index === 0}
-                sizes="(max-width: 768px) 80vw, 360px"
-                src={item.src}
-              />
-            </div>
-            {item.caption ? (
-              <figcaption className="building-gallery-card__caption">
-                {item.caption}
+      <div className="architect-works__rail" ref={railRef}>
+        {items.map((work, index) => {
+          const cardInner = (
+            <>
+              <div className="architect-work-card__media">
+                {work.image ? (
+                  <Image
+                    alt={work.image.alt}
+                    className="architect-image"
+                    fill
+                    priority={index === 0}
+                    sizes="(max-width: 768px) 82vw, 288px"
+                    src={work.image.src}
+                  />
+                ) : (
+                  <span className="material-symbols-outlined architect-work-card__fallback">
+                    image
+                  </span>
+                )}
+              </div>
+              <figcaption className="architect-work-card__caption">
+                <strong>{work.title}</strong>
+                {work.image?.caption ? (
+                  <span>{work.image.caption}</span>
+                ) : null}
               </figcaption>
-            ) : null}
-          </figure>
-        ))}
+            </>
+          );
+
+          return work.href ? (
+            <Link
+              className="architect-work-card architect-work-card--link"
+              href={work.href}
+              key={`${work.title}-${index}`}
+            >
+              {cardInner}
+            </Link>
+          ) : (
+            <figure className="architect-work-card" key={`${work.title}-${index}`}>
+              {cardInner}
+            </figure>
+          );
+        })}
       </div>
 
       <div className="building-gallery__nav">
@@ -109,7 +133,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
                   : "building-gallery__dot--far";
             return (
               <button
-                aria-label={`Ir para foto ${index + 1}`}
+                aria-label={`Ir para obra ${index + 1}`}
                 aria-selected={index === activeIndex}
                 className={`building-gallery__dot ${sizeClass}`}
                 key={index}
