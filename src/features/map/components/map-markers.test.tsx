@@ -118,9 +118,7 @@ describe("MapMarkers", () => {
   it("renderiza a sidebar no desktop ao clicar em um marcador", () => {
     render(<MapMarkers markers={[marker]} />);
 
-    const mapMarker = screen.getByTestId("marker--30.02,-51.23");
-    fireEvent.click(mapMarker);
-
+    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
 
     const sidebar = screen.getByRole("complementary");
     expect(sidebar).toBeInTheDocument();

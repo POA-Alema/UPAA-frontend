@@ -135,13 +135,13 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         </section>
       ) : null}
 
-      {hasBackToMap && backToMapAction ? (
+      {hasBackToMap ? (
         <section className="building-cta building-flow__section">
           <div className="building-cta__content">
             <FeatureAction
               href={resolvedBackToMapHref}
               icon="map"
-              label={backToMapAction.label}
+              label={backToMapAction?.label ?? "Voltar ao Mapa"}
               variant="primary"
             />
           </div>

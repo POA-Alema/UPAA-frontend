@@ -13,7 +13,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeIndexRef = useRef(0);
   const isProgrammaticRef = useRef(false);
-  const programmaticTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const programmaticTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
     const rail = railRef.current;
