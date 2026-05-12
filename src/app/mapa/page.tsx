@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FeatureAction } from "@/components/ui/feature-action";
 import { MapPlaceholder } from "@/features/map/components/map-placeholder";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
