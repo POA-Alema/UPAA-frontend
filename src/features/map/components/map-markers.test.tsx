@@ -139,19 +139,25 @@ describe("MapMarkers", () => {
     vi.useRealTimers();
   });
 
-  it("renders the desktop sidebar after clicking a marker", () => {
-    render(<MapMarkers markers={[marker]} />);
+ it("renders the desktop sidebar after clicking a marker", () => {
+  render(<MapMarkers markers={[marker]} />);
 
-    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
+  fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    const sidebar = screen.getByRole("complementary");
+  const sidebar = screen.getByRole("complementary");
 
-    expect(sidebar).toBeInTheDocument();
-    
-    // FIX: Using a function matcher because text might be split by span/div
-    expect(screen.getByText((content) => content.includes("Centro Historico"))).toBeInTheDocument();
-    expect(within(sidebar).getByText(/1912/i)).toBeInTheDocument();
-  });
+  expect(sidebar).toBeInTheDocument();
+
+  expect(
+    within(sidebar).getAllByText(
+      /Museu de Arte do Rio Grande do Sul/i
+    )[0]
+  ).toBeInTheDocument();
+
+  expect(
+    within(sidebar).getByText(/1912/i)
+  ).toBeInTheDocument();
+});
 
   it("shows the building name in a tooltip when selected", () => {
     render(<MapMarkers markers={[marker]} />);
