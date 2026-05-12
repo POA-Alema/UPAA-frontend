@@ -44,8 +44,7 @@ function MapPopupCard({
   const router = useRouter();
   const map = useMap();
   
-  // Mantemos apenas a primeira imagem como destaque
-  const selectedAttachment: BuildingAttachment | undefined = marker.attachments[0];
+    const selectedAttachment: BuildingAttachment | undefined = marker.attachments[0];
 
   const handleSeeMore = () => {
     if (marker.routePath) router.push(marker.routePath);
@@ -63,7 +62,7 @@ function MapPopupCard({
 
   return (
     <article
-      className="flex flex-col h-full w-full bg-[#1A1A1A] text-white shadow-2xl pointer-events-auto selection:bg-[#E9C46A] selection:text-[#1A1A1A]"
+      className="flex flex-col h-full w-full bg-[#1A1A1A] text-white shadow-2xl pointer-events-auto selection:bg-[#E9C46A] selection:text-[#1A1A1A] overflow-hidden"
       onWheel={(e) => e.stopPropagation()}
     >
       {/* Header */}
@@ -71,6 +70,7 @@ function MapPopupCard({
         <h2 className="text-[1rem] font-bold text-[#E9C46A] tracking-tight leading-tight line-clamp-2">
           {variant === "sidebar" ? marker.name : t("map.mapped_building", "Edificação")}
         </h2>
+        
         {onRequestClose && (
           <button
             onClick={onRequestClose}
@@ -98,8 +98,9 @@ function MapPopupCard({
 
         <div className="px-4 flex flex-col h-full gap-4 mt-4">
           <h1 className="text-3xl font-black text-white leading-tight">{marker.name}</h1>
-          {marker.summary && <p className="text-white/70 leading-relaxed text-base font-light">{marker.summary}{marker.summary}{marker.summary}</p>}
-          {/* Badges de Informação */}
+
+          {marker.summary && <p className="text-white/70 leading-relaxed text-base font-light">{marker.summary}</p>}
+
           <div className="flex flex-wrap gap-3">
             {marker.yearLabel && (
               <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs text-white/80">
@@ -114,23 +115,24 @@ function MapPopupCard({
               </div>
             )}
           </div>
-          {/* Botões de Ação */}
+
           {marker.routePath && (
-            <button
-              onClick={handleSeeMore}
-              className="group w-full bg-[#E9C46A] text-[#1A1A1A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
+            <button 
+              onClick={handleSeeMore} 
+              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 text-[#1A1A1A]">
                 <span className="material-symbols-outlined font-bold">menu_book</span>
                 <span className="uppercase tracking-wider text-sm">{t("map.know_work", "Explorar Obra")}</span>
               </div>
               <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </button>
           )}
+
           {marker.architectPath && (
             <Link
               href={marker.architectPath}
-              className="group w-full border border-[#E9C46A]/50  font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+              className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
             >
               <div className="flex items-center gap-3 text-[#E9C46A]">
                 <span className="material-symbols-outlined">account_circle</span>
@@ -215,10 +217,15 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
         );
       })}
 
+      {/* Sidebar Desktop Ajustada */}
       {showPopups && !isMobile && selectedMarker && (
-        <div className="absolute inset-0 z-10000 pointer-events-none flex justify-end">
+        <div 
+          className="absolute h-full z-10000 pointer-events-none flex justify-end top-0 right-0"
+        >
           <aside 
-            className={`bg-[#1A1A1A] w-112.5 h-screen transition-all duration-500 shadow-2xl ${isClosing ? 'translate-x-full' : 'translate-x-0'}`}
+            className={`pointer-events-auto bg-[#1A1A1A] w-112.5 h-full transition-all duration-500 flex flex-col shadow-2xl ${
+              isClosing ? 'translate-x-full' : 'translate-x-0'
+            }`}
           >
             <MapPopupCard marker={selectedMarker} onRequestClose={closePanel} variant="sidebar" />
           </aside>
