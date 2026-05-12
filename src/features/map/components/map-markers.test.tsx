@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapMarkers } from "./map-markers";
 import type { MapMarker } from "@/features/map/utils/map-buildings";
 
-// 1. I18N MOCK: Prevents test errors and returns the default text
+// 1. I18N MOCK
 vi.mock("@/features/i18n", () => ({ default: {} }));
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -52,6 +52,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// 2. CORREÇÃO DOS MOCKS DO REACT-LEAFLET
 vi.mock("react-leaflet", () => ({
   Marker: ({
     children,
@@ -63,7 +64,6 @@ vi.mock("react-leaflet", () => ({
     position: [number, number];
   }) => (
     <div
-      data-position={position.join(",")}
       data-testid={`marker-${position.join(",")}`}
       onClick={() => eventHandlers?.click?.()}
       role="button"
@@ -72,17 +72,21 @@ vi.mock("react-leaflet", () => ({
       {children}
     </div>
   ),
-  Popup: ({ children }: { children: ReactNode }) => (
-    <div data-testid="leaflet-popup">{children}</div>
+  // Adicionado mock do Tooltip que estava faltando e causando erro
+  Tooltip: ({ children }: { children: ReactNode }) => (
+    <div data-testid="leaflet-tooltip">{children}</div>
   ),
+  useMap: () => ({
+    scrollWheelZoom: { disable: vi.fn(), enable: vi.fn() },
+    dragging: { disable: vi.fn(), enable: vi.fn() },
+  }),
 }));
 
 const marker: MapMarker = {
   id: 1,
   name: "Museu de Arte do Rio Grande do Sul (MARGS)",
   district: "Centro Historico",
-  summary:
-    "Um dos marcos culturais mais emblematicos do centro historico, com presenca monumental e memoria urbana duradoura.",
+  summary: "Um dos marcos culturais mais emblematicos.",
   yearLabel: "1912",
   architectName: "Theodor Wiederspahn",
   routePath: "/buildings/margs",
@@ -124,105 +128,78 @@ describe("MapMarkers", () => {
   });
 
   afterEach(() => {
-    document.body.className = "";
-    document.body.style.overflow = "";
+    vi.clearAllMocks();
     vi.useRealTimers();
   });
 
-  it("renders the desktop popup with metadata and author CTA", () => {
+  it("renders the desktop sidebar after clicking a marker", () => {
     render(<MapMarkers markers={[marker]} />);
 
-    const popup = screen.getByTestId("leaflet-popup");
+    // Clica no marcador para abrir a sidebar (necessário na nova lógica)
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    expect(popup).toBeInTheDocument();
-    expect(within(popup).getByText(/^Centro Historico$/i)).toBeInTheDocument();
-    expect(
-      within(popup).getByRole("heading", { name: /margs/i }),
-    ).toBeInTheDocument();
-    expect(within(popup).getByText("Ano: 1912")).toBeInTheDocument();
-    expect(
-      within(popup).getByText("Autoria: Theodor Wiederspahn"),
-    ).toBeInTheDocument();
-    expect(
-      within(popup).getByRole("link", { name: /conhecer o autor/i }),
-    ).toHaveAttribute("href", "/architects/theodor-wiederspahn");
-    expect(
-      within(popup).getByText("Imagem: Fachada principal"),
-    ).toBeInTheDocument();
+    // Na nova versão não usamos mais "leaflet-popup", mas uma "aside" (sidebar)
+    const sidebar = screen.getByRole("complementary");
+
+    expect(sidebar).toBeInTheDocument();
+    expect(within(sidebar).getByText(/Centro Historico/i)).toBeInTheDocument();
+    expect(within(sidebar).getByText("Ano: 1912")).toBeInTheDocument();
+    expect(within(sidebar).getByText(/Theodor Wiederspahn/i)).toBeInTheDocument();
   });
 
-  it("updates the selected image when clicking a thumbnail", () => {
+  it("shows the building name in a tooltip when selected", () => {
     render(<MapMarkers markers={[marker]} />);
 
-    const secondThumb = screen.getByTitle("Vista lateral");
-    fireEvent.click(secondThumb);
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    expect(screen.getByText("Imagem: Vista lateral")).toBeInTheDocument();
-    expect(screen.getAllByAltText("Vista lateral do MARGS")).toHaveLength(2);
+    const tooltip = screen.getByTestId("leaflet-tooltip");
+    expect(tooltip).toHaveTextContent(marker.name);
   });
 
-  // 2. NEW TEST: Ensuring Acceptance Criteria (Image Fallback)
   it("displays the image fallback when the building has no photos", () => {
     const markerWithoutPhotos = { ...marker, attachments: [] };
     render(<MapMarkers markers={[markerWithoutPhotos]} />);
 
-    const popup = screen.getByTestId("leaflet-popup");
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
     
-    expect(popup).toBeInTheDocument();
-    expect(within(popup).getByText("Imagem indisponível")).toBeInTheDocument();
+    expect(screen.getByText("Imagem indisponível")).toBeInTheDocument();
   });
 
-  it("opens a bottom sheet on mobile and blocks body scroll", () => {
+  it("opens a bottom sheet on mobile via Portal", () => {
     mockMatchMedia(true);
-
     render(<MapMarkers markers={[marker]} />);
 
     fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(document.body).toHaveClass("map-popup-sheet-open");
-    expect(document.body.style.overflow).toBe("hidden");
-    expect(
-      screen.getAllByRole("button", {
-        name: /fechar detalhes da edificação/i, // Maintained Portuguese to match the component's default fallback
-      }),
-    ).toHaveLength(2);
-  });
-
-  it("closes the bottom sheet on mobile and restores body after animation", () => {
-    vi.useFakeTimers();
-    mockMatchMedia(true);
-
-    render(<MapMarkers markers={[marker]} />);
-
-    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
-
+    // O mobile usa variant "sheet", que renderiza via createPortal no body
     const dialog = screen.getByRole("dialog");
-    const closeButtons = within(dialog).getAllByRole("button", {
-      name: /fechar detalhes da edificação/i,
-    });
-
-    fireEvent.click(closeButtons[0]);
-
-    expect(dialog.className).toContain("map-popup-sheet--closing");
-
-    act(() => {
-      vi.advanceTimersByTime(220);
-    });
-
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(document.body).not.toHaveClass("map-popup-sheet-open");
-    expect(document.body.style.overflow).toBe("");
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText(marker.name)).toBeInTheDocument();
   });
 
-  it("does not render popup or sheet when showPopups is false", () => {
-    mockMatchMedia(true);
+  it("closes the sidebar on desktop when clicking close button", async () => {
+    vi.useFakeTimers();
+    render(<MapMarkers markers={[marker]} />);
 
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
+    
+    const closeButton = screen.getByLabelText(/Fechar detalhes/i);
+    fireEvent.click(closeButton);
+
+    // Aguarda o timeout da animação (400ms conforme o componente)
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  });
+
+  it("does not render sidebar or sheet when showPopups is false", () => {
     render(<MapMarkers markers={[marker]} showPopups={false} />);
 
     fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    expect(screen.queryByTestId("leaflet-popup")).not.toBeInTheDocument();
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

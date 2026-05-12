@@ -19,7 +19,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "i18next": "^26.0.10",
+    "i18next": "^26.1.0",
     "leaflet": "^1.9.4",
     "next": "^15.5.2",
     "react": "^19.1.1",
