@@ -43,10 +43,9 @@ function MapPopupCard({
   const { t } = useTranslation("common");
   const router = useRouter();
   const map = useMap();
-  const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
-
-  const selectedAttachment: BuildingAttachment | undefined =
-    marker.attachments[selectedAttachmentIndex];
+  
+  // Mantemos apenas a primeira imagem como destaque
+  const selectedAttachment: BuildingAttachment | undefined = marker.attachments[0];
 
   const handleSeeMore = () => {
     if (marker.routePath) router.push(marker.routePath);
@@ -68,13 +67,10 @@ function MapPopupCard({
       onWheel={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-white/5 bg-[#1A1A1A]/80 backdrop-blur-md shrink-0 sticky top-0 z-20">
-        <div className="flex flex-col overflow-hidden mr-2">
-          <h2 className="text-xl font-bold text-[#E9C46A] !no-underline tracking-tight leading-tight line-clamp-2">
-            {variant === "sidebar" ? marker.name : t("map.mapped_building", "Edificação")}
-          </h2>
-          <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-medium mt-0.5">Patrimônio Histórico</span>
-        </div>
+      <div className="gap-1 flex items-center justify-between sticky top-0 z-20 py-1.5 px-4">
+        <h2 className="text-[1rem] font-bold text-[#E9C46A] tracking-tight leading-tight line-clamp-2">
+          {variant === "sidebar" ? marker.name : t("map.mapped_building", "Edificação")}
+        </h2>
         {onRequestClose && (
           <button
             onClick={onRequestClose}
@@ -86,12 +82,12 @@ function MapPopupCard({
       </div>
 
       {/* Área de Scroll */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent">
-        <div className="relative w-full aspect-[16/10] overflow-hidden group">
+      <div className="hover:overflow-y-auto overflow-hidden scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent pt-1.5 pb-4">
+        <div className="relative w-full aspect-16/10 overflow-hidden group">
           {selectedAttachment ? (
             <>
               <Image alt={selectedAttachment.alt} src={selectedAttachment.src} fill className="object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out" priority />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60" />
+              <div className="absolute inset-0 bg-linear-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60" />
             </>
           ) : (
             <div className="w-full h-full bg-[#222] animate-pulse flex items-center justify-center">
@@ -100,18 +96,10 @@ function MapPopupCard({
           )}
         </div>
 
-        <div className="p-8 space-y-8">
-          <section className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-[1px] bg-[#E9C46A]/50"></span>
-              <span className="text-[11px] font-bold text-[#E9C46A] uppercase tracking-[0.25em]">{marker.district || "Porto Alegre"}</span>
-            </div>
-            <h1 className="text-3xl font-black text-white leading-tight">{marker.name}</h1>
-          </section>
-
-          {marker.summary && <p className="text-white/70 leading-relaxed text-base font-light">{marker.summary}</p>}
-
-          {/* REESTABELECIDO: Badges de Informação */}
+        <div className="px-4 flex flex-col h-full gap-4 mt-4">
+          <h1 className="text-3xl font-black text-white leading-tight">{marker.name}</h1>
+          {marker.summary && <p className="text-white/70 leading-relaxed text-base font-light">{marker.summary}{marker.summary}{marker.summary}</p>}
+          {/* Badges de Informação */}
           <div className="flex flex-wrap gap-3">
             {marker.yearLabel && (
               <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs text-white/80">
@@ -126,56 +114,30 @@ function MapPopupCard({
               </div>
             )}
           </div>
-
-          {/* REESTABELECIDO: Ambos os Botões com cores fixas */}
-          <div className="flex flex-col gap-4 pt-4">
-            {marker.routePath && (
-              <button 
-                onClick={handleSeeMore} 
-                className="group w-full bg-[#E9C46A] text-[#1A1A1A] !text-[#1A1A1A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined font-bold !text-[#1A1A1A]">menu_book</span>
-                  <span className="uppercase tracking-wider text-sm !text-[#1A1A1A] !no-underline">{t("map.know_work", "Explorar Obra")}</span>
-                </div>
-                <span className="material-symbols-outlined !text-[#1A1A1A] group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              </button>
-            )}
-
-            {marker.architectPath && (
-              <Link
-                href={marker.architectPath}
-                className="group w-full border border-[#E9C46A]/50 text-[#E9C46A] !text-[#E9C46A] font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 !no-underline transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined !text-[#E9C46A]">account_circle</span>
-                  <span className="uppercase tracking-wider text-sm !text-[#E9C46A] !no-underline">{t("map.know_author", "Sobre o Autor")}</span>
-                </div>
-                <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">arrow_forward</span>
-              </Link>
-            )}
-          </div>
-
-          {/* REESTABELECIDO: Galeria de Miniaturas */}
-          {marker.attachments.length > 1 && (
-            <div className="space-y-3 pt-4 border-t border-white/5 pb-8">
-              <span className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Galeria de Imagens</span>
-              <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                {marker.attachments.map((att, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedAttachmentIndex(idx)}
-                    className={`relative shrink-0 w-28 h-20 rounded-lg overflow-hidden transition-all duration-300 bg-transparent p-0 border-none ${
-                      idx === selectedAttachmentIndex 
-                      ? "ring-2 ring-[#E9C46A] ring-offset-2 ring-offset-[#1A1A1A] scale-95 opacity-100" 
-                      : "opacity-40 hover:opacity-70"
-                    }`}
-                  >
-                    <Image src={att.src} alt={att.alt} fill className="object-cover" />
-                  </button>
-                ))}
+          {/* Botões de Ação */}
+          {marker.routePath && (
+            <button
+              onClick={handleSeeMore}
+              className="group w-full bg-[#E9C46A] text-[#1A1A1A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined font-bold">menu_book</span>
+                <span className="uppercase tracking-wider text-sm">{t("map.know_work", "Explorar Obra")}</span>
               </div>
-            </div>
+              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </button>
+          )}
+          {marker.architectPath && (
+            <Link
+              href={marker.architectPath}
+              className="group w-full border border-[#E9C46A]/50  font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+            >
+              <div className="flex items-center gap-3 text-[#E9C46A]">
+                <span className="material-symbols-outlined">account_circle</span>
+                <span className="uppercase tracking-wider text-sm">{t("map.know_author", "Sobre o Autor")}</span>
+              </div>
+              <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">arrow_forward</span>
+            </Link>
           )}
         </div>
       </div>
@@ -215,13 +177,13 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
 
   const sheet = showPopups && isMobile && selectedMarker
     ? createPortal(
-        <div className={`fixed inset-0 z-[10000] flex items-end justify-center pointer-events-none`}>
+        <div className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none`}>
           <div 
             className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${isClosing ? 'opacity-0' : 'opacity-100'}`} 
             onClick={closePanel} 
           />
           <aside 
-            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-[32px] transition-all duration-500 flex flex-col shadow-2xl ${isClosing ? 'translate-y-full' : 'translate-y-0'}`}
+            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${isClosing ? 'translate-y-full' : 'translate-y-0'}`}
           >
             <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
             <MapPopupCard marker={selectedMarker} onRequestClose={closePanel} variant="sheet" />
@@ -243,7 +205,7 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
             eventHandlers={{ click: () => { setIsClosing(false); setSelectedMarkerId(m.id); } }}
           >
             {isSelected && (
-              <Tooltip permanent direction="top" offset={[0, -28]} opacity={1} className="!bg-transparent !border-none !shadow-none !p-0">
+              <Tooltip permanent direction="top" offset={[0, -28]} opacity={1} className="bg-transparent border-none shadow-none">
                 <span className="text-[13px] font-black tracking-tight text-black uppercase" style={{ textShadow: "0px 0px 4px rgba(255, 255, 255, 1)" }}>
                   {m.name}
                 </span>
@@ -254,9 +216,9 @@ export function MapMarkers({ markers, showPopups = true }: MapMarkersProps) {
       })}
 
       {showPopups && !isMobile && selectedMarker && (
-        <div className="fixed inset-0 z-[10000] pointer-events-none flex justify-end">
+        <div className="absolute inset-0 z-10000 pointer-events-none flex justify-end">
           <aside 
-            className={`pointer-events-auto bg-[#1A1A1A] w-[450px] h-screen transition-all duration-500 flex flex-col shadow-2xl ${isClosing ? 'translate-x-full' : 'translate-x-0'}`}
+            className={`bg-[#1A1A1A] w-112.5 h-screen transition-all duration-500 shadow-2xl ${isClosing ? 'translate-x-full' : 'translate-x-0'}`}
           >
             <MapPopupCard marker={selectedMarker} onRequestClose={closePanel} variant="sidebar" />
           </aside>
