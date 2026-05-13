@@ -1,7 +1,8 @@
 "use client";
-
+import React from 'react';
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import L from "leaflet";
 import {
   mapBuildingsToMarkers,
   MapMarker,
@@ -27,7 +28,7 @@ export function MapPlaceholder() {
 
   useEffect(() => {
     async function load() {/*
-      Deixei essa parte comentada pra conseguir ver os pontos no mapa enquanto ainda não temos os dados das edificacoes
+      Deixei essa parte comentada pra conseguir ver os pontos no mapa enquanto ainda não temos os dados das edificacoes*/
       const data: Building[] = [
         {
           id: 1,
@@ -46,8 +47,8 @@ export function MapPlaceholder() {
           name: "Sem coordenada",
         },
       ];
-      */
-      const data: Building[] = [];
+      
+      //const data: Building[] = [];
       const mappedMarkers = mapBuildingsToMarkers(data);
 
       setMarkers(mappedMarkers);
@@ -58,10 +59,16 @@ export function MapPlaceholder() {
   }, []);
 
   return (
-    <div className="w-full h-[500px] relative">
+    <div className="w-full h-[500px] md:h-[600px] relative">
       <MapContainer
         center={[-30.0277, -51.2287]}
         zoom={15}
+
+        scrollWheelZoom={true}
+        dragging={true}
+        touchZoom={true}
+        doubleClickZoom={true}
+
         className="w-full h-full"
       >
         <TileLayer
