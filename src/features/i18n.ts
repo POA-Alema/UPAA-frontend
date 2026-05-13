@@ -15,7 +15,6 @@ const resources = {
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
         image_label: "Imagem"
-        
       }
     }
   },
