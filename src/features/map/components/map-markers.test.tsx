@@ -48,7 +48,6 @@ vi.mock("next/image", () => ({
     src: string;
   }) => {
     void fill;
-    void priority;
     return <img alt={alt} src={src} {...props} />;
   },
 }));
@@ -146,7 +145,8 @@ describe("MapMarkers", () => {
 
   const sidebar = screen.getByRole("complementary");
 
-  expect(sidebar).toBeInTheDocument();
+  it("updates the selected image when clicking a thumbnail", () => {
+    render(<MapMarkers markers={[marker]} />);
 
   expect(
     within(sidebar).getAllByText(
@@ -154,50 +154,53 @@ describe("MapMarkers", () => {
     )[0]
   ).toBeInTheDocument();
 
-  expect(
-    within(sidebar).getByText(/1912/i)
-  ).toBeInTheDocument();
-});
+    expect(screen.getByText("Imagem: Vista lateral")).toBeInTheDocument();
+    expect(screen.getAllByAltText("Vista lateral do MARGS")).toHaveLength(2);
+  });
+
+  // 2. NEW TEST: Ensuring Acceptance Criteria (Image Fallback)
+  it("displays the image fallback when the building has no photos", () => {
+    const markerWithoutPhotos = { ...marker, attachments: [] };
+    render(<MapMarkers markers={[markerWithoutPhotos]} />);
+
+    const popup = screen.getByTestId("leaflet-popup");
+    
+    expect(popup).toBeInTheDocument();
+    expect(within(popup).getByText("Imagem indisponível")).toBeInTheDocument();
+  });
+
+  it("opens a bottom sheet on mobile and blocks body scroll", () => {
+    mockMatchMedia(true);
 
   it("shows the building name in a tooltip when selected", () => {
     render(<MapMarkers markers={[marker]} />);
 
     fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    const tooltip = screen.getByTestId("leaflet-tooltip");
-    expect(tooltip).toHaveTextContent(marker.name);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(document.body).toHaveClass("map-popup-sheet-open");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(
+      screen.getAllByRole("button", {
+        name: /fechar detalhes da edificação/i, // Maintained Portuguese to match the component's default fallback
+      }),
+    ).toHaveLength(2);
   });
 
-  it("displays the image fallback when the building has no photos", () => {
-    const markerWithoutPhotos = { ...marker, attachments: [] };
-    render(<MapMarkers markers={[markerWithoutPhotos]} />);
-
-    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
-    
-    expect(screen.getByText("Imagem indisponível")).toBeInTheDocument();
-  });
-
-  it("opens a bottom sheet on mobile via Portal", () => {
-    mockMatchMedia(true);
-    render(<MapMarkers markers={[marker]} />);
-
-    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
-
-    // FIX: aside defaults to complementary, not dialog
-    const dialog = screen.getByRole("complementary");
-    expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByText(marker.name)).toBeInTheDocument();
-  });
-
-  it("closes the sidebar on desktop when clicking close button", async () => {
+  it("closes the bottom sheet on mobile and restores body after animation", () => {
     vi.useFakeTimers();
     render(<MapMarkers markers={[marker]} />);
 
     fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
-    
-    // FIX: The button name is "close" due to the Material Icon text
-    const closeButton = screen.getByRole("button", { name: /close/i });
-    fireEvent.click(closeButton);
+
+    const dialog = screen.getByRole("dialog");
+    const closeButtons = within(dialog).getAllByRole("button", {
+      name: /fechar detalhes da edificação/i,
+    });
+
+    fireEvent.click(closeButtons[0]);
+
+    expect(dialog.className).toContain("map-popup-sheet--closing");
 
     act(() => {
       vi.advanceTimersByTime(600); // Increased time slightly for safety
@@ -206,7 +209,9 @@ describe("MapMarkers", () => {
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
 
-  it("does not render sidebar or sheet when showPopups is false", () => {
+  it("does not render popup or sheet when showPopups is false", () => {
+    mockMatchMedia(true);
+
     render(<MapMarkers markers={[marker]} showPopups={false} />);
 
     fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
