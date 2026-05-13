@@ -1,13 +1,13 @@
-import type { EdificacaoFormData } from '@/types/edificacao';
-import { createEdificacao } from '@/services/edificacoes';
-import { EdificacaoForm } from '@/components/admin/EdificacaoForm';
+import type { BuildingFormData } from '@/types/building';
+import { createBuilding } from '@/services/buildings';
+import { BuildingForm } from '@/components/admin/BuildingForm';
 import { redirect } from 'next/navigation';
 
-export default function NewEdificacaoPage() {
-  const handleSubmit = async (data: EdificacaoFormData) => {
+export default function NewBuildingPage() {
+  const handleSubmit = async (data: BuildingFormData) => {
     'use server';
-    await createEdificacao(data);
-    redirect('/admin/edificacoes?status=created');
+    await createBuilding(data);
+    redirect('/admin/buildings?status=created');
   };
 
   return (
@@ -25,7 +25,7 @@ export default function NewEdificacaoPage() {
         </div>
 
         {/* Formulário */}
-        <EdificacaoForm onSubmit={handleSubmit} />
+        <BuildingForm onSubmit={handleSubmit} />
       </div>
     </section>
   );

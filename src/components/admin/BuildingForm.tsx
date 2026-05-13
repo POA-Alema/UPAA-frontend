@@ -1,59 +1,59 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import type { EdificacaoFormData, FonteEdificacao } from '@/types/edificacao';
+import type { BuildingFormData, BuildingSource } from '@/types/building';
 import AssetCard from './AssetCard';
 import { RichTextEditor } from './RichTextEditor';
 
-interface EdificacaoFormProps {
-  onSubmit: (data: EdificacaoFormData) => Promise<void>;
-  initialData?: EdificacaoFormData;
+interface BuildingFormProps {
+  onSubmit: (data: BuildingFormData) => Promise<void>;
+  initialData?: BuildingFormData;
   isLoading?: boolean;
 }
 
 const IMAGE_CATEGORIES = [
-  { key: 'plantaBaixa', label: 'Planta baixa' },
-  { key: 'fachadas', label: 'Fachadas' },
-  { key: 'fotosExternas', label: 'Fotos externas' },
-  { key: 'fotosInternas', label: 'Fotos internas' },
+  { key: 'floorPlan', label: 'Planta baixa' },
+  { key: 'facades', label: 'Fachadas' },
+  { key: 'exteriorPhotos', label: 'Fotos externas' },
+  { key: 'interiorPhotos', label: 'Fotos internas' },
 ] as const;
 
-function createInitialData(initialData?: EdificacaoFormData): EdificacaoFormData {
+function createInitialData(initialData?: BuildingFormData): BuildingFormData {
   return (
     initialData || {
-      titulo: '',
-      localizacao: '',
-      data: '',
-      projeto: '',
-      construcao: '',
-      ornamentosEsculturas: '',
-      areaConstituida: '',
-      ocupacaoAtual: '',
-      projetoRestauracao: '',
-      tombamento: '',
-      descricao: '',
-      autor: '',
-      fontes: [],
-      imagens: {
-        plantaBaixa: [],
-        fachadas: [],
-        fotosExternas: [],
-        fotosInternas: [],
+      title: '',
+      location: '',
+      constructionPeriod: '',
+      architect: '',
+      constructor: '',
+      ornamentsAuthor: '',
+      builtArea: '',
+      currentOccupation: '',
+      restorationAndHeritage: '',
+      heritage: '',
+      description: '',
+      author: '',
+      sources: [],
+      images: {
+        floorPlan: [],
+        facades: [],
+        exteriorPhotos: [],
+        interiorPhotos: [],
       },
     }
   );
 }
 
-export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: EdificacaoFormProps) {
-  const [formData, setFormData] = useState<EdificacaoFormData>(createInitialData(initialData));
-  const [fonteTemp, setFonteTemp] = useState<Partial<FonteEdificacao>>({});
+export function BuildingForm({ onSubmit, initialData, isLoading = false }: BuildingFormProps) {
+  const [formData, setFormData] = useState<BuildingFormData>(createInitialData(initialData));
+  const [sourceTemp, setSourceTemp] = useState<Partial<BuildingSource>>({});
   const [imagemTemp, setImagemTemp] = useState<
-    Record<(typeof IMAGE_CATEGORIES)[number]['key'], { url: string; alt: string; legenda: string }>
+    Record<(typeof IMAGE_CATEGORIES)[number]['key'], { url: string; alt: string; caption: string }>
   >({
-    plantaBaixa: { url: '', alt: '', legenda: '' },
-    fachadas: { url: '', alt: '', legenda: '' },
-    fotosExternas: { url: '', alt: '', legenda: '' },
-    fotosInternas: { url: '', alt: '', legenda: '' },
+    floorPlan: { url: '', alt: '', caption: '' },
+    facades: { url: '', alt: '', caption: '' },
+    exteriorPhotos: { url: '', alt: '', caption: '' },
+    interiorPhotos: { url: '', alt: '', caption: '' },
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -78,68 +78,68 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.titulo.trim()) {
-      newErrors.titulo = 'Título é obrigatório';
+    if (!formData.title.trim()) {
+      newErrors.title = 'Título é obrigatório';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddFonte = () => {
-    if (!fonteTemp.titulo?.trim()) {
+  const handleAddSource = () => {
+    if (!sourceTemp.title?.trim()) {
       setErrors((prev) => ({
         ...prev,
-        fonteTemp: 'Título da fonte é obrigatório',
+        sourceTemp: 'Título da fonte é obrigatório',
       }));
       return;
     }
 
-    const novaFonte: FonteEdificacao = {
+    const newSource: BuildingSource = {
       id: `fonte-${Date.now()}`,
-      titulo: fonteTemp.titulo,
-      autor: fonteTemp.autor || undefined,
-      url: fonteTemp.url || undefined,
+      title: sourceTemp.title,
+      author: sourceTemp.author || undefined,
+      url: sourceTemp.url || undefined,
     };
 
     setFormData((prev) => ({
       ...prev,
-      fontes: [...(prev.fontes || []), novaFonte],
+      sources: [...(prev.sources || []), newSource],
     }));
 
-    setFonteTemp({});
-    if (errors.fonteTemp) {
+    setSourceTemp({});
+    if (errors.sourceTemp) {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        delete newErrors.fonteTemp;
+        delete newErrors.sourceTemp;
         return newErrors;
       });
     }
   };
 
-  const handleRemoveFonte = (id: string) => {
+  const handleRemoveSource = (id: string) => {
     setFormData((prev) => ({
       ...prev,
-      fontes: (prev.fontes || []).filter((fonte) => fonte.id !== id),
+      sources: (prev.sources || []).filter((source) => source.id !== id),
     }));
   };
 
   const handleRemoveImage = (category: (typeof IMAGE_CATEGORIES)[number]['key'], imageId: string) => {
     setFormData((prev) => ({
       ...prev,
-      imagens: {
-        plantaBaixa: prev.imagens?.plantaBaixa || [],
-        fachadas: prev.imagens?.fachadas || [],
-        fotosExternas: prev.imagens?.fotosExternas || [],
-        fotosInternas: prev.imagens?.fotosInternas || [],
-        [category]: (prev.imagens?.[category] || []).filter((imagem) => imagem.id !== imageId),
+      images: {
+        floorPlan: prev.images?.floorPlan || [],
+        facades: prev.images?.facades || [],
+        exteriorPhotos: prev.images?.exteriorPhotos || [],
+        interiorPhotos: prev.images?.interiorPhotos || [],
+        [category]: (prev.images?.[category] || []).filter((image) => image.id !== imageId),
       },
     }));
   };
 
   const handleImageInputChange = (
     category: (typeof IMAGE_CATEGORIES)[number]['key'],
-    field: 'url' | 'alt' | 'legenda',
+    field: 'url' | 'alt' | 'caption',
     value: string
   ) => {
     setImagemTemp((prev) => ({
@@ -174,18 +174,18 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
 
     setFormData((prev) => ({
       ...prev,
-      imagens: {
-        plantaBaixa: prev.imagens?.plantaBaixa || [],
-        fachadas: prev.imagens?.fachadas || [],
-        fotosExternas: prev.imagens?.fotosExternas || [],
-        fotosInternas: prev.imagens?.fotosInternas || [],
+      images: {
+        floorPlan: prev.images?.floorPlan || [],
+        facades: prev.images?.facades || [],
+        exteriorPhotos: prev.images?.exteriorPhotos || [],
+        interiorPhotos: prev.images?.interiorPhotos || [],
         [category]: [
-          ...(prev.imagens?.[category] || []),
+          ...(prev.images?.[category] || []),
           {
-            id: `imagem-${category}-${Date.now()}`,
+            id: `image-${category}-${Date.now()}`,
             url: draft.url.trim(),
             alt: draft.alt.trim(),
-            legenda: draft.legenda.trim() || undefined,
+            caption: draft.caption.trim() || undefined,
           },
         ],
       },
@@ -193,7 +193,7 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
 
     setImagemTemp((prev) => ({
       ...prev,
-      [category]: { url: '', alt: '', legenda: '' },
+      [category]: { url: '', alt: '', caption: '' },
     }));
   };
 
@@ -247,166 +247,166 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label htmlFor="titulo" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="title" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Título *
             </label>
             <input
-              id="titulo"
-              name="titulo"
+              id="title"
+              name="title"
               type="text"
-              value={formData.titulo}
+              value={formData.title}
               onChange={handleInputChange}
               className={`w-full rounded-lg border px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 ${
-                errors.titulo
+                errors.title
                   ? 'border-red-500/50 bg-surface-container-high/50 focus:ring-red-500'
                   : 'border-outline-variant/30 bg-surface-container-high/50 focus:ring-primary'
               }`}
               required
             />
-            {errors.titulo && <p className="mt-1 text-sm text-red-400">{errors.titulo}</p>}
+            {errors.title && <p className="mt-1 text-sm text-red-400">{errors.title}</p>}
           </div>
 
           <div>
-            <label htmlFor="localizacao" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="location" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Localização
             </label>
             <input
-              id="localizacao"
-              name="localizacao"
+              id="location"
+              name="location"
               type="text"
-              value={formData.localizacao}
+              value={formData.location}
               onChange={handleInputChange}
               className={`w-full rounded-lg border px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 ${
-                errors.localizacao
+                errors.location
                   ? 'border-red-500/50 bg-surface-container-high/50 focus:ring-red-500'
                   : 'border-outline-variant/30 bg-surface-container-high/50 focus:ring-primary'
               }`}
             />
-            {errors.localizacao && <p className="mt-1 text-sm text-red-400">{errors.localizacao}</p>}
+            {errors.location && <p className="mt-1 text-sm text-red-400">{errors.location}</p>}
           </div>
 
           <div>
-            <label htmlFor="data" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="constructionPeriod" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Data
             </label>
             <input
-              id="data"
-              name="data"
+              id="constructionPeriod"
+              name="constructionPeriod"
               type="text"
               placeholder="Ex: 1900"
-              value={formData.data}
+              value={formData.constructionPeriod}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="projeto" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="architect" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Projeto
             </label>
             <input
-              id="projeto"
-              name="projeto"
+              id="architect"
+              name="architect"
               type="text"
-              value={formData.projeto}
+              value={formData.architect}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="construcao" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="constructor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Construção
             </label>
             <input
-              id="construcao"
-              name="construcao"
+              id="constructor"
+              name="constructor"
               type="text"
-              value={formData.construcao}
+              value={formData.constructor}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="ornamentosEsculturas" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="ornamentsAuthor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Conjunto de ornamentos e esculturas
             </label>
             <input
-              id="ornamentosEsculturas"
-              name="ornamentosEsculturas"
+              id="ornamentsAuthor"
+              name="ornamentsAuthor"
               type="text"
-              value={formData.ornamentosEsculturas}
+              value={formData.ornamentsAuthor}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="areaConstituida" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="builtArea" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Área construída
             </label>
             <input
-              id="areaConstituida"
-              name="areaConstituida"
+              id="builtArea"
+              name="builtArea"
               type="text"
-              value={formData.areaConstituida}
+              value={formData.builtArea}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="ocupacaoAtual" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="currentOccupation" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Ocupação atual
             </label>
             <input
-              id="ocupacaoAtual"
-              name="ocupacaoAtual"
+              id="currentOccupation"
+              name="currentOccupation"
               type="text"
-              value={formData.ocupacaoAtual}
+              value={formData.currentOccupation}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="projetoRestauracao" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="restorationAndHeritage" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Projeto de restauração
             </label>
             <input
-              id="projetoRestauracao"
-              name="projetoRestauracao"
+              id="restorationAndHeritage"
+              name="restorationAndHeritage"
               type="text"
-              value={formData.projetoRestauracao}
+              value={formData.restorationAndHeritage}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="tombamento" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="heritage" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Tombamento
             </label>
             <input
-              id="tombamento"
-              name="tombamento"
+              id="heritage"
+              name="heritage"
               type="text"
-              value={formData.tombamento}
+              value={formData.heritage}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label htmlFor="autor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            <label htmlFor="author" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Autor
             </label>
             <input
-              id="autor"
-              name="autor"
+              id="author"
+              name="author"
               type="text"
-              value={formData.autor}
+              value={formData.author}
               onChange={handleInputChange}
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -425,11 +425,11 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
             Descrição da Edificação (RichText)
           </label>
           <RichTextEditor
-            value={formData.descricao}
+            value={formData.description}
             onChange={(content) =>
               setFormData((prev) => ({
                 ...prev,
-                descricao: content,
+                description: content,
               }))
             }
           />
@@ -447,21 +447,21 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
 
           <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="fonteTitulo" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              <label htmlFor="sourceTitle" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
                 Título *
               </label>
               <input
-                id="fonteTitulo"
+                id="sourceTitle"
                 type="text"
-                value={fonteTemp.titulo || ''}
+                value={sourceTemp.title || ''}
                 onChange={(e) =>
-                  setFonteTemp((prev) => ({
+                  setSourceTemp((prev) => ({
                     ...prev,
-                    titulo: e.target.value,
+                    title: e.target.value,
                   }))
                 }
                 className={`w-full rounded-lg border px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 ${
-                  errors.fonteTemp
+                  errors.sourceTemp
                     ? 'border-red-500/50 bg-surface-container-high/50 focus:ring-red-500'
                     : 'border-outline-variant/30 bg-surface-container-high/50 focus:ring-primary'
                 }`}
@@ -469,17 +469,17 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
             </div>
 
             <div>
-              <label htmlFor="fonteAutor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              <label htmlFor="sourceAuthor" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
                 Autor
               </label>
               <input
-                id="fonteAutor"
+                id="sourceAuthor"
                 type="text"
-                value={fonteTemp.autor || ''}
+                value={sourceTemp.author || ''}
                 onChange={(e) =>
-                  setFonteTemp((prev) => ({
+                  setSourceTemp((prev) => ({
                     ...prev,
-                    autor: e.target.value,
+                    author: e.target.value,
                   }))
                 }
                 className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
@@ -487,15 +487,15 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
             </div>
 
             <div className="md:col-span-2">
-              <label htmlFor="fonteUrl" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+              <label htmlFor="sourceUrl" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
                 URL
               </label>
               <input
-                id="fonteUrl"
+                id="sourceUrl"
                 type="text"
-                value={fonteTemp.url || ''}
+                value={sourceTemp.url || ''}
                 onChange={(e) =>
-                  setFonteTemp((prev) => ({
+                  setSourceTemp((prev) => ({
                     ...prev,
                     url: e.target.value,
                   }))
@@ -505,11 +505,11 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
             </div>
           </div>
 
-          {errors.fonteTemp && <p className="mb-4 text-sm text-red-400">{errors.fonteTemp}</p>}
+          {errors.sourceTemp && <p className="mb-4 text-sm text-red-400">{errors.sourceTemp}</p>}
 
           <button
             type="button"
-            onClick={handleAddFonte}
+            onClick={handleAddSource}
             className="flex items-center gap-2 rounded-lg bg-primary/20 px-4 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-primary transition-all hover:bg-primary/30"
           >
             <span className="material-symbols-outlined text-sm">add</span>
@@ -517,26 +517,26 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
           </button>
         </div>
 
-        {formData.fontes && formData.fontes.length > 0 && (
+        {formData.sources && formData.sources.length > 0 && (
           <div className="space-y-3">
             <h3 className="font-headline text-lg font-bold">Fontes Adicionadas:</h3>
-            {formData.fontes.map((fonte) => (
+            {formData.sources.map((source) => (
               <div
-                key={fonte.id}
+                key={source.id}
                 className="flex items-start justify-between gap-4 rounded-lg border border-outline-variant/30 bg-surface-container-high/40 p-4"
               >
                 <div>
-                  <p className="font-headline font-bold text-on-surface">{fonte.titulo}</p>
-                  {fonte.autor && <p className="text-sm text-on-surface/70">Por: {fonte.autor}</p>}
-                  {fonte.url && (
-                    <a href={fonte.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                  <p className="font-headline font-bold text-on-surface">{source.title}</p>
+                  {source.author && <p className="text-sm text-on-surface/70">Por: {source.author}</p>}
+                  {source.url && (
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
                       Acessar
                     </a>
                   )}
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleRemoveFonte(fonte.id)}
+                  onClick={() => handleRemoveSource(source.id)}
                   className="text-red-400 transition-colors hover:text-red-300"
                 >
                   <span className="material-symbols-outlined">delete</span>
@@ -555,7 +555,7 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
 
         <div className="space-y-8">
           {IMAGE_CATEGORIES.map(({ key, label }) => {
-            const imagens = formData.imagens?.[key] || [];
+            const images = formData.images?.[key] || [];
             const draftImage = imagemTemp[key];
             const previewImage =
               draftImage.url.trim() && draftImage.alt.trim()
@@ -563,11 +563,11 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                     id: `preview-${key}`,
                     url: draftImage.url.trim(),
                     alt: draftImage.alt.trim(),
-                    legenda: draftImage.legenda.trim() || undefined,
+                    caption: draftImage.caption.trim() || undefined,
                     fallbackUrl:
-                      key === 'fachadas' || key === 'fotosExternas'
+                      key === 'facades' || key === 'exteriorPhotos'
                         ? '/images/Margs.jpg'
-                        : key === 'fotosInternas'
+                        : key === 'interiorPhotos'
                           ? '/images/Memorial RS.jpg'
                           : '/images/Margs.jpg',
                   }
@@ -578,8 +578,8 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                 <div className="mb-4">
                   <h3 className="font-headline text-lg font-bold text-on-surface">{label}</h3>
                   <p className="text-sm text-on-surface/60">
-                    {imagens.length > 0
-                      ? `${imagens.length} imagem(ns) disponível(is) nesta categoria`
+                    {images.length > 0
+                      ? `${images.length} imagem(ns) disponível(is) nesta categoria`
                       : 'Nenhuma imagem cadastrada. O formulário continua podendo ser salvo sem imagens.'}
                   </p>
                 </div>
@@ -616,8 +616,8 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                     </label>
                     <input
                       type="text"
-                      value={imagemTemp[key].legenda}
-                      onChange={(e) => handleImageInputChange(key, 'legenda', e.target.value)}
+                      value={imagemTemp[key].caption}
+                      onChange={(e) => handleImageInputChange(key, 'caption', e.target.value)}
                       className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -649,13 +649,13 @@ export function EdificacaoForm({ onSubmit, initialData, isLoading = false }: Edi
                   </div>
                 )}
 
-                {imagens.length > 0 ? (
+                {images.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {imagens.map((imagem) => (
+                    {images.map((image) => (
                       <AssetCard
-                        key={imagem.id}
-                        image={imagem}
-                        onRemove={() => handleRemoveImage(key, imagem.id)}
+                        key={image.id}
+                        image={image}
+                        onRemove={() => handleRemoveImage(key, image.id)}
                       />
                     ))}
                   </div>

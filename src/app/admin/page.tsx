@@ -19,7 +19,7 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Módulo: Edificações */}
           <Link
-            href="/admin/edificacoes"
+            href="/admin/buildings"
             className="bg-surface-container-high/40 p-8 rounded-xl border border-outline-variant/10 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
           >
             <div className="flex items-center gap-3 mb-4">

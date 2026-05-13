@@ -1,20 +1,20 @@
-import type { EdificacaoFormData } from '@/types/edificacao';
-import { getEdificacaoById, updateEdificacao } from '@/services/edificacoes';
-import { EdificacaoForm } from '@/components/admin/EdificacaoForm';
+import type { BuildingFormData } from '@/types/building';
+import { getBuildingById, updateBuilding } from '@/services/buildings';
+import { BuildingForm } from '@/components/admin/BuildingForm';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
-interface EditEdificacaoPageProps {
+interface EditBuildingPageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function EditEdificacaoPage({ params }: EditEdificacaoPageProps) {
+export default async function EditBuildingPage({ params }: EditBuildingPageProps) {
   const { id } = await params;
-  const edificacao = await getEdificacaoById(id);
+  const building = await getBuildingById(id);
 
-  if (!edificacao) {
+  if (!building) {
     return (
       <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
         <div className="max-w-4xl mx-auto text-center">
@@ -23,7 +23,7 @@ export default async function EditEdificacaoPage({ params }: EditEdificacaoPageP
           </h1>
           <p className="text-on-surface/70 mb-8">A edificação que você está procurando não existe.</p>
           <Link
-            href="/admin/edificacoes"
+            href="/admin/buildings"
             className="bg-primary text-on-primary font-headline font-bold py-3 px-6 rounded-lg shadow-xl hover:bg-primary/90 transition-all inline-flex items-center gap-2 uppercase tracking-widest text-[10px]"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
@@ -34,10 +34,10 @@ export default async function EditEdificacaoPage({ params }: EditEdificacaoPageP
     );
   }
 
-  const handleSubmit = async (data: EdificacaoFormData) => {
+  const handleSubmit = async (data: BuildingFormData) => {
     'use server';
-    await updateEdificacao(id, data);
-    redirect('/admin/edificacoes?status=updated');
+    await updateBuilding(id, data);
+    redirect('/admin/buildings?status=updated');
   };
 
   return (
@@ -46,7 +46,7 @@ export default async function EditEdificacaoPage({ params }: EditEdificacaoPageP
         {/* Header */}
         <div className="mb-12">
           <Link
-            href="/admin/edificacoes"
+            href="/admin/buildings"
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-4 uppercase tracking-widest text-[10px] font-headline"
           >
             <span className="material-symbols-outlined text-sm">arrow_back</span>
@@ -64,7 +64,7 @@ export default async function EditEdificacaoPage({ params }: EditEdificacaoPageP
         </div>
 
         {/* Formulário */}
-        <EdificacaoForm onSubmit={handleSubmit} initialData={edificacao} />
+        <BuildingForm onSubmit={handleSubmit} initialData={building} />
       </div>
     </section>
   );

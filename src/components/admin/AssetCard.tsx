@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { ImagemEdificacao } from '@/types/edificacao';
+import type { BuildingImage } from '@/types/building';
 
 interface AssetCardProps {
-  image: ImagemEdificacao;
+  image: BuildingImage;
   onRemove?: (id: string) => void;
 }
 
@@ -33,8 +33,8 @@ export default function AssetCard({ image, onRemove }: AssetCardProps) {
       <div className="space-y-3 p-4">
         <div>
           <p className="font-headline font-bold text-on-surface">{image.alt}</p>
-          {image.legenda && (
-            <p className="mt-1 text-sm text-on-surface/70">{image.legenda}</p>
+          {image.caption && (
+            <p className="mt-1 text-sm text-on-surface/70">{image.caption}</p>
           )}
         </div>
 

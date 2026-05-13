@@ -26,7 +26,7 @@ export default function DeleteButton({ id, onDelete }: DeleteButtonProps) {
         await onDelete(id);
       }
 
-      router.push("/admin/edificacoes?status=deleted");
+      router.push("/admin/buildings?status=deleted");
       router.refresh();
     } catch (error) {
       console.error(error);

@@ -24,7 +24,7 @@ export default function AdminLayout({
           </Link>
 
           <Link
-            href="/admin/edificacoes"
+            href="/admin/buildings"
             className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary"
           >
             <span className="material-symbols-outlined">domain</span>
