@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import type { ReactNode } from "react";
+import type { ReactNode, ComponentPropsWithoutRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapMarkers } from "./map-markers";
 import type { MapMarker } from "@/features/map/utils/map-buildings";
 
-// 1. CORREÇÃO DO ERRO: Mock do react-i18next com suporte à inicialização
+// 1. MOCK i18n
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string, defaultValue: string) => defaultValue,
@@ -16,12 +16,11 @@ vi.mock("react-i18next", () => ({
   },
 }));
 
-// Mock do seu arquivo de configuração local para evitar que ele tente inicializar o i18n real
 vi.mock("@/features/i18n", () => ({
   default: {},
 }));
 
-// Mocks de infraestrutura (Next.js e Leaflet)
+// Mocks de infraestrutura
 vi.mock("leaflet", () => ({
   default: {
     Icon: class Icon {
@@ -36,27 +35,37 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+// Resolve o erro de 'any' definindo tipos baseados em elementos HTML reais
 vi.mock("next/image", () => ({
-  default: ({ alt, src, fill, ...props }: any) => {
+  default: ({ alt, src, fill, priority, ...props }: ComponentPropsWithoutRef<"img"> & { fill?: boolean; priority?: boolean }) => {
     void fill;
+    void priority;
     return <img alt={alt} src={src} {...props} />;
   },
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href, ...props }: any) => (
+  default: ({ children, href, ...props }: ComponentPropsWithoutRef<"a">) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
 }));
 
+// Tipagem para o mock do react-leaflet
+interface MockMarkerProps {
+  children?: ReactNode;
+  eventHandlers?: { click?: () => void };
+  position: [number, number];
+}
+
 vi.mock("react-leaflet", () => ({
-  Marker: ({ children, eventHandlers, position }: any) => (
+  Marker: ({ children, eventHandlers, position }: MockMarkerProps) => (
     <div
       data-testid={`marker-${position.join(",")}`}
       onClick={() => eventHandlers?.click?.()}
       role="button"
+      tabIndex={0}
     >
       {children}
     </div>
@@ -84,7 +93,7 @@ const marker: MapMarker = {
 function mockMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: vi.fn().mockImplementation((query) => ({
+    value: vi.fn().mockImplementation((query: string) => ({
       matches,
       media: query,
       onchange: null,
@@ -97,7 +106,7 @@ function mockMatchMedia(matches: boolean) {
 
 describe("MapMarkers", () => {
   beforeEach(() => {
-    mockMatchMedia(false); // Simula Desktop
+    mockMatchMedia(false);
   });
 
   afterEach(() => {
@@ -112,23 +121,25 @@ describe("MapMarkers", () => {
     const mapMarker = screen.getByTestId("marker--30.02,-51.23");
     fireEvent.click(mapMarker);
 
-    // No seu código, a sidebar Desktop usa <aside>
     const sidebar = screen.getByRole("complementary");
     expect(sidebar).toBeInTheDocument();
+    
+    // CORREÇÃO DO ERRO DE MÚLTIPLOS ELEMENTOS:
+    // Procuramos o MARGS especificamente no <h1> do conteúdo principal
     expect(within(sidebar).getByRole("heading", { name: "MARGS", level: 1 })).toBeInTheDocument();
+    
     expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
     expect(within(sidebar).getByText("1912")).toBeInTheDocument();
   });
 
   it("abre a bottom sheet no mobile e bloqueia o scroll", () => {
-    mockMatchMedia(true); // Simula Mobile
+    mockMatchMedia(true);
 
     render(<MapMarkers markers={[marker]} />);
 
     const mapMarker = screen.getByTestId("marker--30.02,-51.23");
     fireEvent.click(mapMarker);
 
-    // O Portal do mobile usa role="dialog"
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(document.body).toHaveClass("map-popup-sheet-open");
     expect(document.body.style.overflow).toBe("hidden");
@@ -140,7 +151,6 @@ describe("MapMarkers", () => {
     
     fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
     
-    // Procura pelo texto definido no seu componente
     expect(screen.getByText("Imagem indisponível")).toBeInTheDocument();
   });
 
@@ -153,7 +163,6 @@ describe("MapMarkers", () => {
     const closeButton = screen.getByLabelText(/Fechar detalhes da edificação/i);
     fireEvent.click(closeButton);
 
-    // Simula a passagem do tempo do seu setTimeout (220ms)
     act(() => {
       vi.advanceTimersByTime(250);
     });
