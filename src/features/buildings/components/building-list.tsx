@@ -6,13 +6,13 @@ export function BuildingList() {
     <div className="content-grid">
       {/* TODO: Implement dynamic data fetching for building list */}
       {buildings.map((building) => (
-        <article className="info-card" key={building.slug}>
+        <article className="info-card" key={building.id}>
           <p className="meta-line">
-            {building.district} - {building.yearLabel}
+            {building.location} - {building.constructionPeriod}
           </p>
           <h3>{building.title}</h3>
-          <p>{building.summary}</p>
-          <Link className="text-link" href={`/buildings/${building.slug}`}>
+          <p>{building.description}</p>
+          <Link className="text-link" href={`/buildings/${building.id}`}>
             Ver página
           </Link>
         </article>
