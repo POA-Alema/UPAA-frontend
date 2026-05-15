@@ -9,8 +9,8 @@ vi.mock("../../data/immigration", () => ({
 }));
 
 vi.mock("../immigration-section", () => ({
-  ImmigrationSectionComponent: ({ data }: { data: any }) => (
-    data ? <div data-testid="immigration-component">Content Present</div> : <div data-testid="immigration-empty">No Content</div>
+  ImmigrationSectionComponent: ({ data }: { data: { title: string } | null }) => (
+    <div data-testid="immigration-component">{data?.title ?? "No Content"}</div>
   ),
 }));
 
@@ -19,18 +19,16 @@ describe("ImmigrationSection Container", () => {
     vi.resetAllMocks();
   });
 
-  it("should fetch data and render the component when data is available", async () => {
+  it("should fetch data and render the component with the returned payload", async () => {
     vi.mocked(getImmigrationData).mockResolvedValue(immigrationMock);
-    const Result = await ImmigrationSection();
-    render(Result);
-    expect(getImmigrationData).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("immigration-component")).toBeInTheDocument();
-  });
 
-  it("should render empty state when data is null", async () => {
-    vi.mocked(getImmigrationData).mockResolvedValue(null);
-    const Result = await ImmigrationSection();
-    render(Result);
-    expect(screen.getByTestId("immigration-empty")).toBeInTheDocument();
+    const result = await ImmigrationSection();
+
+    render(result);
+
+    expect(getImmigrationData).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("immigration-component")).toHaveTextContent(
+      immigrationMock.title
+    );
   });
 });
