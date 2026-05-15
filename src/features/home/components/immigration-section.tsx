@@ -23,6 +23,7 @@ export function ImmigrationSectionComponent({
 
   return (
     <PageSection
+      id="immigration"
       title={data.title}
       className="home-flow__section immigration-section"
     >
