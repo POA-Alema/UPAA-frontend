@@ -20,6 +20,7 @@ export default function MainContainer({ data }: MainContainerProps) {
 
   return (
     <section
+      id="intro"
       className="section-card home-flow__section"
       data-testid="landing-content"
     >

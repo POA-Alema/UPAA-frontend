@@ -23,11 +23,13 @@ const MapMarkers = dynamic(
 type MapPlaceholderProps = {
   className?: string;
   showPopups?: boolean;
+  showZoomControls?: boolean;
 };
 
 export function MapPlaceholder({
   className = "h-125",
   showPopups = true,
+  showZoomControls,
 }: MapPlaceholderProps) {
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +82,7 @@ export function MapPlaceholder({
         zoom={15}
         maxZoom={20}
         minZoom={15}
+        zoomControl={typeof showZoomControls === 'boolean' ? showZoomControls : showPopups}
         className="w-full h-full"
       >
         <TileLayer

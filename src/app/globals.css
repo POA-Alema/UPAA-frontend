@@ -12,6 +12,80 @@
   --border: rgba(255, 255, 255, 0.1);
   --shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.22);
   --shadow-strong: 0 32px 100px rgba(0, 0, 0, 0.36);
+  
+  --ui-bg: #161413;
+  --ui-accent: #D1A65B;
+  --ui-primary: #E7E1DF;
+  --ui-secondary: #100E0D;
+  --ui-surface: var(--page-background);
+  --ui-overlay: #161413bf;
+}
+
+.text-accent {
+  color: var(--accent);
+}
+.bg-accent {
+  background-color: var(--accent);
+}
+.border-accent {
+  border-color: var(--accent);
+}
+.text-primary {
+  color: var(--foreground);
+}
+.text-secondary {
+  color: var(--foreground-muted);
+}
+.selection\:bg-accent::selection {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.text-ui-primary {
+  color: var(--ui-primary);
+}
+.text-ui-secondary {
+  color: var(--ui-secondary);
+}
+.text-ui-accent {
+  color: var(--ui-accent);
+}
+.bg-ui-accent {
+  background-color: var(--ui-accent);
+}
+.bg-ui-bg {
+  background-color: var(--ui-bg);
+}
+.bg-ui-surface {
+  background-color: var(--ui-surface);
+}
+.bg-ui-overlay {
+  background-color: var(--ui-overlay);
+}
+
+.leaflet-control-zoom a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-size: 14px !important;
+  background: rgba(0,0,0,0.45) !important;
+  color: var(--foreground) !important;
+  border-radius: 6px !important;
+  transition: background 300ms ease, transform 200ms ease;
+}
+.leaflet-control-zoom a:hover {
+  background: rgba(255,255,255,0.06) !important;
+  transform: translateY(-1px);
+}
+
+.leaflet-container {
+  z-index: 0 !important;
+}
+.leaflet-pane {
+  z-index: 0 !important;
+}
+.leaflet-map-pane {
+  z-index: 0 !important;
 }
 
 * {
@@ -86,7 +160,7 @@ button {
 }
 
 .page-shell {
-  width: min(100%, 1380px);
+  width: min(100%, 1280px);
   margin: 0 auto;
   padding: 32px 20px 72px;
 }
@@ -245,6 +319,29 @@ button {
     rgba(239, 193, 115, 0.92),
     rgba(239, 193, 115, 0)
   );
+}
+
+.footer-nav-grid .nav-items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 501px) {
+  .footer-nav-grid {
+    max-width: 100% !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .footer-nav-grid .nav-items {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .footer-nav-grid .nav-items a {
+    flex: 0 0 auto;
+  }
 }
 
 .section-heading {
