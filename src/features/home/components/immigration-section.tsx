@@ -23,7 +23,8 @@ export function ImmigrationSectionComponent({
 
   return (
     <PageSection
-      title={data.title}
+      eyebrow={data.subtitle}
+      title={<strong>{data.title}</strong>}
       className="home-flow__section immigration-section"
     >
       <div className="section-divider section-divider--accent"></div>

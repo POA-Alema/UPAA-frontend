@@ -7,6 +7,9 @@ type LocalizedField = {
 
 type LandingPageRecord = {
   immigrationSection?: {
+    subtitle?: {
+      pt?: string;
+    };
     title?: {
       pt?: string;
     };
@@ -29,6 +32,7 @@ function mapImmigrationSection(
 ): ImmigrationSection | null {
   const page = Array.isArray(payload) ? payload[0] : payload;
   const section = page?.immigrationSection;
+  const subtitle = section?.subtitle?.pt?.trim();
   const title = section?.title?.pt?.trim();
   const content = section?.content?.pt?.trim();
 
@@ -42,6 +46,7 @@ function mapImmigrationSection(
     section?.image?.alt?.trim() || section?.imgSubtitle?.pt?.trim();
 
   return {
+    subtitle,
     title,
     content,
     image: imageSrc
