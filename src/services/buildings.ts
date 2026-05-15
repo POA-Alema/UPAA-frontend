@@ -12,7 +12,8 @@ const API_TIMEOUT_MS = 2_000;
  * Builds a full URL pointing to the backend's image server.
  * Used when images are served by the backend API (future integration).
  */
-function buildBackendImageUrl(path: string): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _buildBackendImageUrl(path: string): string {
   const { apiUrl } = getPublicRuntimeConfig();
   return `${apiUrl.replace(/\/$/, '')}${path}`;
 }
@@ -25,7 +26,7 @@ function createMockImage(
   caption?: string
 ): BuildingImage {
   // Mock uses local /public paths directly.
-  // use buildBackendImageUrl(path) after
+  // use _buildBackendImageUrl(path) after
   return {
     id,
     url,
