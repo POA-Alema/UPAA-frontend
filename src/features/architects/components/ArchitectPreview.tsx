@@ -12,19 +12,28 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
     <article id="architects" className="section-card section-card--dark architect-preview home-flow__section">
       <section className="architect-preview__grid">
         <div className="architect-preview__copy">
-          {architect.eyebrow ? <p className="eyebrow eyebrow--light">{architect.eyebrow}</p> : null}
+          {architect.eyebrow ? (
+            <p className="eyebrow eyebrow--light">{architect.eyebrow}</p>
+          ) : null}
 
           <h2 className="architect-title architect-title--light">
-            O Legado de <br /> <strong>{architect.title}</strong>
+            <strong>{architect.title}</strong>
           </h2>
           <div className="section-divider section-divider--accent"></div>
 
-          <RichText className="rich-text rich-text--muted" content={architect.bio} emphasizeFirstParagraph />
+          <RichText
+            className="rich-text rich-text--muted"
+            content={architect.bio}
+            emphasizeFirstParagraph
+          />
 
           {architect.details?.length ? (
             <div className="architect-detail-grid architect-detail-grid--compact">
               {architect.details.map((detail) => (
-                <article className="info-card info-card--dark" key={`${detail.label}-${detail.value}`}>
+                <article
+                  className="info-card info-card--dark"
+                  key={`${detail.label}-${detail.value}`}
+                >
                   <p className="meta-line">{detail.label}</p>
                   <h3>{detail.value}</h3>
                   {detail.subValue ? <p>{detail.subValue}</p> : null}

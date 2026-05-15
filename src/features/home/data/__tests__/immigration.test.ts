@@ -21,6 +21,7 @@ describe("getImmigrationData", () => {
         ok: true,
         json: async () => ({
           immigrationSection: {
+            subtitle: { pt: "Herança cultural, memória e formação do estado" },
             title: { pt: "A importância da imigração" },
             content: { pt: "Conteúdo teste" },
             imageURL: "/images/backend.jpg",
@@ -35,6 +36,7 @@ describe("getImmigrationData", () => {
     const result = await getImmigrationData();
 
     expect(result).toEqual({
+      subtitle: "Herança cultural, memória e formação do estado",
       title: "A importância da imigração",
       content: "Conteúdo teste",
       image: {
@@ -52,6 +54,7 @@ describe("getImmigrationData", () => {
         json: async () => ([
           {
             immigrationSection: {
+              subtitle: { pt: "Subtítulo vindo da lista" },
               title: { pt: "Cidade e memória" },
               content: { pt: "Conteúdo vindo da lista" },
               imageURL: "/images/lista.jpg",
@@ -67,6 +70,7 @@ describe("getImmigrationData", () => {
     const result = await getImmigrationData();
 
     expect(result).toEqual({
+      subtitle: "Subtítulo vindo da lista",
       title: "Cidade e memória",
       content: "Conteúdo vindo da lista",
       image: {

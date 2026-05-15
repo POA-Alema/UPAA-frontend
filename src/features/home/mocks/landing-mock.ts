@@ -1,9 +1,9 @@
 import type { LandingData } from "../types/landing";
 
 export const landingMock: LandingData = {
-  title: "O Legado Alemão na Arquitetura de Porto Alegre",
+  title: "O Legado da Arquitetura Alemã",
   description:
-    "Explorando as obras que transformaram a capital gaúcha",
+    "Explorando edifícios, memórias e instituições que marcaram o Centro Histórico de Porto Alegre.",
 };
 
 export const landingMockEmpty: LandingData = {

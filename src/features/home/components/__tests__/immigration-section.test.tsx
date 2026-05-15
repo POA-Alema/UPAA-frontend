@@ -7,6 +7,7 @@ describe("ImmigrationSectionComponent", () => {
   it("should render title and content", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
 
+    expect(screen.getByText(immigrationMock.subtitle ?? "")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
       immigrationMock.title
     );
@@ -29,6 +30,7 @@ describe("ImmigrationSectionComponent", () => {
     render(
       <ImmigrationSectionComponent
         data={{
+          subtitle: "Subtítulo válido",
           title: "Cidade e memória",
           content: "Conteúdo válido",
         }}
@@ -45,6 +47,7 @@ describe("ImmigrationSectionComponent", () => {
     render(
       <ImmigrationSectionComponent
         data={{
+          subtitle: "Subtítulo válido",
           title: "Cidade e memória",
           content: "Conteúdo válido",
           image: {
