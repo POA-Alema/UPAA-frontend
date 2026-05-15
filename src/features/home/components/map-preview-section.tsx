@@ -1,14 +1,34 @@
-import { PageSection } from "@/components/layout/page-section";
-import { FeatureAction } from "@/components/ui/feature-action";
+"use client";
+import { IntroSection } from "@/features/home/components/intro-section";
 import { MapPlaceholder } from "@/features/map/components/map-placeholder";
 
 export function MapPreviewSection() {
+  const translations = {
+    en: {
+      mapPreviewAltText: "Preview map of Porto Alegre with a focus on some germanic buildings",
+      mapCTAButton: "Explore Map",
+
+    },
+    de: {
+      mapPreviewAltText: "Vorschaukarte von Porto Alegre mit Schwerpunkt auf einigen germanischen Gebäuden",
+      mapCTAButton: "Karte Erkunden",
+    },
+    pt: {
+      mapPreviewAltText: "Mapa de Porto Alegre com destaque para alguns edifícios de estilo germânico.",
+      mapCTAButton: "Explorar Mapa"
+    },
+
+  }
   return (
-    <PageSection className="home-flow__section" eyebrow="Mapa" title="Mapa" description="Descrição">
-      <MapPlaceholder />
-      <div className="section-actions">
-        <FeatureAction icon="map" label="Abrir mapa" variant="secondary" />
+    <section className="home-flow__section home-map-preview">
+      <IntroSection />
+
+      <div
+        aria-label={translations.pt.mapPreviewAltText}
+        className="w-full h-80 relative overflow-hidden rounded-3xl shadow-lg"
+      >
+        <MapPlaceholder className="h-full" showPopups={false} />
       </div>
-    </PageSection>
+    </section>
   );
 }
