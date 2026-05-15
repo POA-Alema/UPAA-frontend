@@ -3,9 +3,16 @@ export type LandingData = {
   description: string;
 };
 
-export type LandingPageApiResponse = {
+type LocalizedField = {
+  pt?: string;
+};
+
+export type LandingPageRecord = {
   id?: string;
-  mainTitle?: string;
-  subtitle?: string;
+  mainTitle?: LocalizedField;
+  subtitle?: LocalizedField;
+  updatedAt?: string;
   updated_at?: string;
 };
+
+export type LandingPageApiResponse = LandingPageRecord | LandingPageRecord[];

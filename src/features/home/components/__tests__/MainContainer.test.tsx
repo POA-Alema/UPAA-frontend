@@ -55,29 +55,34 @@ describe("MainContainer (Landing Page)", () => {
   it("deve mockar API e testar sucesso", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        id: "66b4f1f82cc4b99c6d7e1001",
-        mainTitle: "O Legado da Arquitetura Alemã",
-        subtitle:
-          "Explorando edifícios, memórias e instituições que marcaram o Centro Histórico de Porto Alegre.",
-      }),
+      json: async () => [
+        {
+          id: "66b4f1f82cc4b99c6d7e1001",
+          mainTitle: {
+            pt: "Uma Porto Alegre alemã",
+          },
+          subtitle: {
+            pt: "Arquitetura, memória e cidade a partir do legado de Theodor Wiederspahn.",
+          },
+        },
+      ],
     } as Response);
 
     const data = await getLandingData();
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.objectContaining({
-        href: "http://localhost:8080/landingPage?lang=pt",
+        href: "http://localhost:8080/landing-page?lang=pt",
       }),
       {
-        cache: "no-store",
+        next: { revalidate: 3600 },
       }
     );
 
     expect(data).toEqual({
-      title: "O Legado da Arquitetura Alemã",
+      title: "Uma Porto Alegre alemã",
       description:
-        "Explorando edifícios, memórias e instituições que marcaram o Centro Histórico de Porto Alegre.",
+        "Arquitetura, memória e cidade a partir do legado de Theodor Wiederspahn.",
     });
   });
 
@@ -96,10 +101,18 @@ describe("MainContainer (Landing Page)", () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        mainTitle: "",
-        subtitle: "",
+        mainTitle: { pt: "" },
+        subtitle: { pt: "" },
       }),
     } as Response);
+
+    const data = await getLandingData();
+
+    expect(data).toEqual(landingMock);
+  });
+
+  it("deve testar erro de API quando a requisição falha", async () => {
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error("network error"));
 
     const data = await getLandingData();
 
