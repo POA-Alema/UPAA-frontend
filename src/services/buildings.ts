@@ -2,6 +2,7 @@ import { getPublicRuntimeConfig } from '@/lib/config';
 import type { ImageCategory, Building, BuildingFormData, BuildingImage } from '@/types/building';
 
 const ENDPOINT_CANDIDATES = [
+  '/buildings',
   '/admin/edificacoes',
   '/api/admin/edificacoes',
   '/edificacoes',
@@ -282,7 +283,20 @@ async function requestBuildingsApi<T>(
       });
 
       if (!response.ok) {
-        continue;
+        // try to extract message from the body, then throw so callers can fall back
+        try {
+          const bodyText = await response.text();
+          let msg = bodyText;
+          try {
+            const json = JSON.parse(bodyText);
+            msg = json.message || JSON.stringify(json);
+          } catch {
+            // ignore
+          }
+          throw new Error(`API error ${response.status}: ${msg}`);
+        } catch (err) {
+          throw err;
+        }
       }
 
       if (init?.expectJson === false || response.status === 204) {
@@ -296,6 +310,115 @@ async function requestBuildingsApi<T>(
   }
 
   throw new Error('Nenhum endpoint de edificações respondeu com sucesso.');
+}
+
+/* Adapters: map API <-> FormData (best-effort)
+   These provide a bridge between the frontend form shape and the backend API shape.
+*/
+function mapMediaGalleryToImages(mediaGallery: any[] | undefined) {
+  const result = {
+    floorPlan: [] as BuildingImage[],
+    facades: [] as BuildingImage[],
+    exteriorPhotos: [] as BuildingImage[],
+    interiorPhotos: [] as BuildingImage[],
+  };
+
+  if (!Array.isArray(mediaGallery)) return result;
+
+  for (const item of mediaGallery) {
+    const img = normalizeImage({ id: item.id ?? item.url ?? '', url: item.url ?? item.path, alt: item.alt ?? '' }, 0);
+    const type = (item.type || '').toLowerCase();
+    if (type.includes('planta') || type.includes('floor')) result.floorPlan.push(img);
+    else if (type.includes('fachada') || type.includes('facade')) result.facades.push(img);
+    else if (type.includes('interna') || type.includes('interior')) result.interiorPhotos.push(img);
+    else result.exteriorPhotos.push(img);
+  }
+
+  return result;
+}
+
+function mapImagesToMediaGallery(images?: ImageCategory | null) {
+  const out: any[] = [];
+  if (!images) return out;
+
+  const push = (list: BuildingImage[], type: string) => {
+    for (const img of list) {
+      out.push({ id: img.id, url: img.url, alt: img.alt, caption: img.caption, type });
+    }
+  };
+
+  push(images.floorPlan ?? [], 'planta_baixa');
+  push(images.facades ?? [], 'fachada');
+  push(images.interiorPhotos ?? [], 'interna');
+  push(images.exteriorPhotos ?? [], 'externa');
+
+  return out;
+}
+
+function fromApiBuildingToFormData(api: any): BuildingFormData {
+  const title = api?.name?.pt ?? api?.name ?? api?.title ?? '';
+  const location = api?.location?.pt ?? api?.location ?? '';
+  const description = api?.description?.pt ?? api?.description ?? '';
+  const sources = Array.isArray(api?.sources)
+    ? api.sources.map((s: any, i: number) => ({ id: s.id ?? `s-${i}`, title: s.title ?? String(s), author: s.author, url: s.url }))
+    : [];
+
+  return {
+    title,
+    location,
+    description,
+    constructionPeriod: api?.constructionPeriod,
+    architect: api?.architect?.name ?? api?.architect ?? api?.architectId,
+    constructor: api?.constructor,
+    ornamentsAuthor: api?.ornamentsAuthor,
+    builtArea: api?.builtArea,
+    currentOccupation: api?.currentOccupation,
+    restorationAndHeritage: api?.restorationAndHeritage,
+    heritage: api?.heritage,
+    author: api?.author,
+    sources,
+    images: mapMediaGalleryToImages(api?.mediaGallery),
+  };
+}
+
+function fromFormDataToApiDto(data: BuildingFormData) {
+  // Only include fields the user provided. Do NOT fabricate DB ids or audit fields.
+  const imagesUrls = [] as string[];
+  if (data.images) {
+    imagesUrls.push(...((data.images.floorPlan ?? []).map((i) => i.url) as string[]));
+    imagesUrls.push(...((data.images.facades ?? []).map((i) => i.url) as string[]));
+    imagesUrls.push(...((data.images.exteriorPhotos ?? []).map((i) => i.url) as string[]));
+    imagesUrls.push(...((data.images.interiorPhotos ?? []).map((i) => i.url) as string[]));
+  }
+
+  const dto: Record<string, unknown> = {};
+
+  if (data.title !== undefined) dto.title = data.title;
+  if (data.description !== undefined) dto.description = data.description;
+  if (data.author !== undefined) dto.author = data.author;
+  if (imagesUrls.length > 0) dto.images = imagesUrls;
+  if (data.location !== undefined) dto.location = data.location;
+  if (data.constructionPeriod !== undefined) dto.constructionPeriod = data.constructionPeriod;
+  if (data.ornamentsAuthor !== undefined) dto.ornamentsAuthor = data.ornamentsAuthor;
+  if (data.builtArea !== undefined) dto.builtArea = data.builtArea;
+  if (data.currentOccupation !== undefined) dto.currentOccupation = data.currentOccupation;
+  if (data.restorationAndHeritage !== undefined) dto.restorationAndHeritage = data.restorationAndHeritage;
+  if (data.heritage !== undefined) dto.heritage = data.heritage;
+  if (data.sources !== undefined) dto.sources = (data.sources ?? []).map((s) => s.title ?? String(s));
+
+  // advanced/front-provided optional fields: include only when user explicitly provided them
+  // (BuildingForm stores them in meta and merges before calling service)
+  // supported keys: slug, qrCodeKey, architectId, coordinates, history, createdById, updatedById
+  const possibleAdvanced = (data as any) as Record<string, unknown>;
+  if (possibleAdvanced.slug) dto.slug = possibleAdvanced.slug;
+  if (possibleAdvanced.qrCodeKey) dto.qrCodeKey = possibleAdvanced.qrCodeKey;
+  if (possibleAdvanced.architectId) dto.architectId = possibleAdvanced.architectId;
+  if (possibleAdvanced.coordinates) dto.coordinates = possibleAdvanced.coordinates;
+  if (possibleAdvanced.history) dto.history = possibleAdvanced.history;
+  if (possibleAdvanced.createdById) dto.createdById = possibleAdvanced.createdById;
+  if (possibleAdvanced.updatedById) dto.updatedById = possibleAdvanced.updatedById;
+
+  return dto;
 }
 
 export async function getBuildings(): Promise<Building[]> {
@@ -322,12 +445,16 @@ export async function getBuildingById(id: string): Promise<Building | null> {
 
 export async function createBuilding(data: BuildingFormData): Promise<Building> {
   try {
-    const response = await requestBuildingsApi<Building>('', {
+    const response = await requestBuildingsApi<any>('', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(fromFormDataToApiDto(data)),
     });
 
-    return response ? normalizeBuilding(response) : createMock(data);
+    if (!response) return createMock(data);
+
+    const form = fromApiBuildingToFormData(response);
+    const built: Building = normalizeBuilding({ ...form, id: response.id ?? response._id ?? '', createdAt: response.createdAt, updatedAt: response.updatedAt });
+    return built;
   } catch {
     return createMock(data);
   }
@@ -335,12 +462,16 @@ export async function createBuilding(data: BuildingFormData): Promise<Building> 
 
 export async function updateBuilding(id: string, data: BuildingFormData): Promise<Building> {
   try {
-    const response = await requestBuildingsApi<Building>(`/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
+    const response = await requestBuildingsApi<any>(`/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(fromFormDataToApiDto(data)),
     });
 
-    return response ? normalizeBuilding(response) : updateMock(id, data);
+    if (!response) return updateMock(id, data);
+
+    const form = fromApiBuildingToFormData(response);
+    const built: Building = normalizeBuilding({ ...form, id: response.id ?? response._id ?? id, createdAt: response.createdAt, updatedAt: response.updatedAt });
+    return built;
   } catch {
     return updateMock(id, data);
   }

@@ -46,6 +46,16 @@ function createInitialData(initialData?: BuildingFormData): BuildingFormData {
 
 export function BuildingForm({ onSubmit, initialData, isLoading = false }: BuildingFormProps) {
   const [formData, setFormData] = useState<BuildingFormData>(createInitialData(initialData));
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [meta, setMeta] = useState<Record<string, any>>({
+    slug: undefined,
+    qrCodeKey: undefined,
+    architectId: undefined,
+    coordinates: { lat: undefined, lng: undefined },
+    history: undefined,
+    createdById: undefined,
+    updatedById: undefined,
+  });
   const [sourceTemp, setSourceTemp] = useState<Partial<BuildingSource>>({});
   const [imagemTemp, setImagemTemp] = useState<
     Record<(typeof IMAGE_CATEGORIES)[number]['key'], { url: string; alt: string; caption: string }>
@@ -207,7 +217,9 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false }: Build
 
     startTransition(async () => {
       try {
-        await onSubmit(formData);
+        // merge meta (advanced) fields into payload; cast to any because form shape is extended
+        const payload = { ...(formData as any), ...meta } as unknown as BuildingFormData;
+        await onSubmit(payload as any);
         setSubmitMessage({
           type: 'success',
           text: initialData ? 'Edificação atualizada com sucesso!' : 'Edificação criada com sucesso!',
@@ -411,6 +423,113 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false }: Build
               className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="mb-12 border-b border-outline-variant/20 pb-12">
+        <legend className="mb-8 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
+          <span className="h-[2px] w-12 bg-primary"></span>
+          Campos Avançados (opcional)
+        </legend>
+
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((s) => !s)}
+            className="mb-4 rounded-lg bg-primary/10 px-3 py-2 text-primary"
+          >
+            {showAdvanced ? 'Ocultar campos avançados' : 'Mostrar campos avançados'}
+          </button>
+
+          {showAdvanced && (
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Slug</label>
+                <input
+                  type="text"
+                  value={meta.slug ?? ''}
+                  onChange={(e) => setMeta((m) => ({ ...m, slug: e.target.value }))}
+                  className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">QR Code Key</label>
+                <input
+                  type="text"
+                  value={meta.qrCodeKey ?? ''}
+                  onChange={(e) => setMeta((m) => ({ ...m, qrCodeKey: e.target.value }))}
+                  className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Architect ID</label>
+                <input
+                  type="text"
+                  value={meta.architectId ?? ''}
+                  onChange={(e) => setMeta((m) => ({ ...m, architectId: e.target.value }))}
+                  className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Coordinates lat</label>
+                  <input
+                    type="number"
+                    value={meta.coordinates?.lat ?? ''}
+                    onChange={(e) =>
+                      setMeta((m) => ({ ...m, coordinates: { ...(m.coordinates ?? {}), lat: Number(e.target.value) } }))
+                    }
+                    className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Coordinates lng</label>
+                  <input
+                    type="number"
+                    value={meta.coordinates?.lng ?? ''}
+                    onChange={(e) =>
+                      setMeta((m) => ({ ...m, coordinates: { ...(m.coordinates ?? {}), lng: Number(e.target.value) } }))
+                    }
+                    className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-4 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Histórico (RichText)</label>
+                <RichTextEditor
+                  value={meta.history ?? ''}
+                  onChange={(content) => setMeta((m) => ({ ...m, history: content }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Created By ID</label>
+                  <input
+                    type="text"
+                    value={meta.createdById ?? ''}
+                    onChange={(e) => setMeta((m) => ({ ...m, createdById: e.target.value }))}
+                    className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Updated By ID</label>
+                  <input
+                    type="text"
+                    value={meta.updatedById ?? ''}
+                    onChange={(e) => setMeta((m) => ({ ...m, updatedById: e.target.value }))}
+                    className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </fieldset>
 
