@@ -18,7 +18,7 @@ Sua obra marcou a paisagem urbana da capital ga√∫cha, com projetos ligados a pr√
     },
     details: [
       {
-        label: "Origem",
+        label: "Origem", 
         value: "Wiesbaden, Alemanha",
         subValue: "Nascimento: 1878",
       },
