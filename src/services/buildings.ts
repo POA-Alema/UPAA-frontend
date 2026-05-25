@@ -166,11 +166,13 @@ function createMockBuildings(): Building[] {
 const mockBuildings: Building[] = createMockBuildings();
 let nextId = mockBuildings.length + 1;
 
+const DEFAULT_FALLBACK_IMAGE = '/images/Margs.jpg';
+
 function normalizeImage(image: Partial<BuildingImage>, index: number): BuildingImage {
   return {
     id: image.id ?? `image-${index + 1}`,
-    url: image.url ?? image.fallbackUrl ?? '/images/Margs.jpg',
-    fallbackUrl: image.fallbackUrl,
+    url: image.url ?? image.fallbackUrl ?? DEFAULT_FALLBACK_IMAGE,
+    fallbackUrl: image.fallbackUrl ?? DEFAULT_FALLBACK_IMAGE,
     alt: image.alt ?? 'Imagem da edificação',
     caption: image.caption,
   };
@@ -190,8 +192,10 @@ function normalizeBuilding(building: Partial<Building>): Building {
     id: building.id ?? '',
     title: building.title ?? '',
     location: building.location ?? '',
+    coordinates: building.coordinates,
     constructionPeriod: building.constructionPeriod,
     architect: building.architect,
+    architectId: building.architectId,
     constructor: building.constructor,
     ornamentsAuthor: building.ornamentsAuthor,
     builtArea: building.builtArea,
@@ -199,6 +203,7 @@ function normalizeBuilding(building: Partial<Building>): Building {
     restorationAndHeritage: building.restorationAndHeritage,
     heritage: building.heritage,
     description: building.description,
+    history: building.history,
     author: building.author,
     sources: building.sources ?? [],
     images: normalizeImages(building.images),
@@ -271,8 +276,9 @@ async function requestBuildingsApi<T>(
   for (const endpoint of ENDPOINT_CANDIDATES) {
     const url = `${baseUrl}${endpoint}${pathSuffix}`;
 
+    let response: Response;
     try {
-      const response = await fetch(url, {
+      response = await fetch(url, {
         ...init,
         signal: AbortSignal.timeout(API_TIMEOUT_MS),
         headers: {
@@ -281,32 +287,29 @@ async function requestBuildingsApi<T>(
         },
         cache: 'no-store',
       });
-
-      if (!response.ok) {
-        // try to extract message from the body, then throw so callers can fall back
-        try {
-          const bodyText = await response.text();
-          let msg = bodyText;
-          try {
-            const json = JSON.parse(bodyText);
-            msg = json.message || JSON.stringify(json);
-          } catch {
-            // ignore
-          }
-          throw new Error(`API error ${response.status}: ${msg}`);
-        } catch (err) {
-          throw err;
-        }
-      }
-
-      if (init?.expectJson === false || response.status === 204) {
-        return null;
-      }
-
-      return (await response.json()) as T;
     } catch {
+      // Network error or timeout — try next endpoint candidate
       continue;
     }
+
+    // Endpoint is reachable: honour the HTTP status, do NOT try other candidates
+    if (!response.ok) {
+      const bodyText = await response.text();
+      let msg = bodyText;
+      try {
+        const json = JSON.parse(bodyText);
+        msg = Array.isArray(json.message) ? json.message.join('; ') : (json.message || JSON.stringify(json));
+      } catch {
+        // ignore parse error
+      }
+      throw new Error(`Erro ${response.status}: ${msg}`);
+    }
+
+    if (init?.expectJson === false || response.status === 204) {
+      return null;
+    }
+
+    return (await response.json()) as T;
   }
 
   throw new Error('Nenhum endpoint de edificações respondeu com sucesso.');
@@ -315,7 +318,8 @@ async function requestBuildingsApi<T>(
 /* Adapters: map API <-> FormData (best-effort)
    These provide a bridge between the frontend form shape and the backend API shape.
 */
-function mapMediaGalleryToImages(mediaGallery: any[] | undefined) {
+
+function mapMediaGalleryToImages(mediaGallery: Record<string, unknown>[] | undefined) {
   const result = {
     floorPlan: [] as BuildingImage[],
     facades: [] as BuildingImage[],
@@ -326,8 +330,14 @@ function mapMediaGalleryToImages(mediaGallery: any[] | undefined) {
   if (!Array.isArray(mediaGallery)) return result;
 
   for (const item of mediaGallery) {
-    const img = normalizeImage({ id: item.id ?? item.url ?? '', url: item.url ?? item.path, alt: item.alt ?? '' }, 0);
-    const type = (item.type || '').toLowerCase();
+    const raw = String(item['url'] ?? item['path'] ?? item['src'] ?? '');
+    const img = normalizeImage({
+      id: String(item['id'] ?? raw ?? ''),
+      url: raw || DEFAULT_FALLBACK_IMAGE,
+      alt: extractLocalizedString(item['alt']) ?? extractLocalizedString(item['description']) ?? extractLocalizedString(item['caption']) ?? 'Imagem da edificação',
+      caption: extractLocalizedString(item['caption']) || undefined,
+    }, 0);
+    const type = String(item['type'] ?? '').toLowerCase();
     if (type.includes('planta') || type.includes('floor')) result.floorPlan.push(img);
     else if (type.includes('fachada') || type.includes('facade')) result.facades.push(img);
     else if (type.includes('interna') || type.includes('interior')) result.interiorPhotos.push(img);
@@ -337,52 +347,70 @@ function mapMediaGalleryToImages(mediaGallery: any[] | undefined) {
   return result;
 }
 
-function mapImagesToMediaGallery(images?: ImageCategory | null) {
-  const out: any[] = [];
-  if (!images) return out;
 
-  const push = (list: BuildingImage[], type: string) => {
-    for (const img of list) {
-      out.push({ id: img.id, url: img.url, alt: img.alt, caption: img.caption, type });
-    }
-  };
-
-  push(images.floorPlan ?? [], 'planta_baixa');
-  push(images.facades ?? [], 'fachada');
-  push(images.interiorPhotos ?? [], 'interna');
-  push(images.exteriorPhotos ?? [], 'externa');
-
-  return out;
+function extractLocalizedString(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'string') {
+    const s = value.trim();
+    return s && s !== '[object Object]' ? s : undefined;
+  }
+  if (typeof value === 'object') {
+    const obj = value as Record<string, string>;
+    const s = (obj.pt ?? obj.en ?? obj.de ?? '').trim();
+    return s && s !== '[object Object]' ? s : undefined;
+  }
+  return undefined;
 }
 
-function fromApiBuildingToFormData(api: any): BuildingFormData {
-  const title = api?.name?.pt ?? api?.name ?? api?.title ?? '';
-  const location = api?.location?.pt ?? api?.location ?? '';
-  const description = api?.description?.pt ?? api?.description ?? '';
-  const sources = Array.isArray(api?.sources)
-    ? api.sources.map((s: any, i: number) => ({ id: s.id ?? `s-${i}`, title: s.title ?? String(s), author: s.author, url: s.url }))
+function fromApiBuildingToFormData(api: Record<string, unknown>): BuildingFormData {
+  const sources = Array.isArray(api?.['sources'])
+    ? (api['sources'] as Record<string, unknown>[]).map((s, i) => ({ id: String(s['id'] ?? `s-${i}`), title: String(s['title'] ?? ''), author: s['author'] as string | undefined, url: s['url'] as string | undefined }))
     : [];
 
+  const coords = api['coordinates'] as { lat?: number; lng?: number } | undefined;
+  const architect = api['architect'] as { name?: unknown; id?: string } | undefined;
+  const mediaGallery = Array.isArray(api['mediaGallery'])
+    ? (api['mediaGallery'] as Record<string, unknown>[])
+    : undefined;
+
   return {
-    title,
-    location,
-    description,
-    constructionPeriod: api?.constructionPeriod,
-    architect: api?.architect?.name ?? api?.architect ?? api?.architectId,
-    constructor: api?.constructor,
-    ornamentsAuthor: api?.ornamentsAuthor,
-    builtArea: api?.builtArea,
-    currentOccupation: api?.currentOccupation,
-    restorationAndHeritage: api?.restorationAndHeritage,
-    heritage: api?.heritage,
-    author: api?.author,
+    title: extractLocalizedString(api['name']) ?? extractLocalizedString(api['title']) ?? '',
+    location: extractLocalizedString(api['location']) ?? '',
+    coordinates: coords?.lat != null || coords?.lng != null
+      ? { lat: coords?.lat as number, lng: coords?.lng as number }
+      : undefined,
+    description: extractLocalizedString(api['description']) ?? '',
+    constructionPeriod: extractLocalizedString(api['constructionPeriod']),
+    architect: architect?.name ? extractLocalizedString(architect.name) : extractLocalizedString(api['architect']),
+    architectId: architect?.id ?? (api['architectId'] as string | undefined),
+    // backend stores construction company in DB field "constructor" but sends it via DTO field "author"
+    constructor: extractLocalizedString(api['constructor']) ?? extractLocalizedString(api['author']),
+    ornamentsAuthor: extractLocalizedString(api['ornamentsAuthor']),
+    builtArea: extractLocalizedString(api['builtArea']),
+    currentOccupation: extractLocalizedString(api['currentOccupation']),
+    restorationAndHeritage: extractLocalizedString(api['restorationAndHeritage']),
+    heritage: extractLocalizedString(api['heritage']),
+    history: extractLocalizedString(api['history']),
+    author: extractLocalizedString(api['author']),
     sources,
-    images: mapMediaGalleryToImages(api?.mediaGallery),
+    images: mapMediaGalleryToImages(mediaGallery),
   };
+}
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function generateQrCodeKey(slug: string): string {
+  return `POA-${slug.substring(0, 12).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
 }
 
 function fromFormDataToApiDto(data: BuildingFormData) {
-  // Only include fields the user provided. Do NOT fabricate DB ids or audit fields.
   const imagesUrls = [] as string[];
   if (data.images) {
     imagesUrls.push(...((data.images.floorPlan ?? []).map((i) => i.url) as string[]));
@@ -391,11 +419,20 @@ function fromFormDataToApiDto(data: BuildingFormData) {
     imagesUrls.push(...((data.images.interiorPhotos ?? []).map((i) => i.url) as string[]));
   }
 
-  const dto: Record<string, unknown> = {};
+  const possibleAdvanced = data as unknown as Record<string, unknown>;
+
+  const slug = (possibleAdvanced.slug as string | undefined) || generateSlug(data.title);
+  const qrCodeKey = (possibleAdvanced.qrCodeKey as string | undefined) || generateQrCodeKey(slug);
+
+  const dto: Record<string, unknown> = {
+    slug,
+    qrCodeKey,
+  };
 
   if (data.title !== undefined) dto.title = data.title;
   if (data.description !== undefined) dto.description = data.description;
-  if (data.author !== undefined) dto.author = data.author;
+  // backend stores the construction company in the "constructor" db field via dto.author
+  if (data.constructor !== undefined) dto.author = data.constructor;
   if (imagesUrls.length > 0) dto.images = imagesUrls;
   if (data.location !== undefined) dto.location = data.location;
   if (data.constructionPeriod !== undefined) dto.constructionPeriod = data.constructionPeriod;
@@ -403,18 +440,11 @@ function fromFormDataToApiDto(data: BuildingFormData) {
   if (data.builtArea !== undefined) dto.builtArea = data.builtArea;
   if (data.currentOccupation !== undefined) dto.currentOccupation = data.currentOccupation;
   if (data.restorationAndHeritage !== undefined) dto.restorationAndHeritage = data.restorationAndHeritage;
+  if (data.coordinates?.lat != null || data.coordinates?.lng != null) dto.coordinates = data.coordinates;
   if (data.heritage !== undefined) dto.heritage = data.heritage;
+  if (data.history !== undefined) dto.history = data.history;
   if (data.sources !== undefined) dto.sources = (data.sources ?? []).map((s) => s.title ?? String(s));
-
-  // advanced/front-provided optional fields: include only when user explicitly provided them
-  // (BuildingForm stores them in meta and merges before calling service)
-  // supported keys: slug, qrCodeKey, architectId, coordinates, history, createdById, updatedById
-  const possibleAdvanced = (data as any) as Record<string, unknown>;
-  if (possibleAdvanced.slug) dto.slug = possibleAdvanced.slug;
-  if (possibleAdvanced.qrCodeKey) dto.qrCodeKey = possibleAdvanced.qrCodeKey;
-  if (possibleAdvanced.architectId) dto.architectId = possibleAdvanced.architectId;
-  if (possibleAdvanced.coordinates) dto.coordinates = possibleAdvanced.coordinates;
-  if (possibleAdvanced.history) dto.history = possibleAdvanced.history;
+  if (data.architectId) dto.architectId = data.architectId;
   if (possibleAdvanced.createdById) dto.createdById = possibleAdvanced.createdById;
   if (possibleAdvanced.updatedById) dto.updatedById = possibleAdvanced.updatedById;
 
@@ -423,12 +453,15 @@ function fromFormDataToApiDto(data: BuildingFormData) {
 
 export async function getBuildings(): Promise<Building[]> {
   try {
-    const response = await requestBuildingsApi<Building[]>('');
+    const response = await requestBuildingsApi<Record<string, unknown>[]>('');
     if (!response) {
       return getMockList();
     }
 
-    return response.map(normalizeBuilding);
+    return response.map((api) => {
+      const form = fromApiBuildingToFormData(api);
+      return normalizeBuilding({ ...form, id: (api['id'] ?? api['_id'] ?? '') as string, createdAt: api['createdAt'] as Date | undefined, updatedAt: api['updatedAt'] as Date | undefined });
+    });
   } catch {
     return getMockList();
   }
@@ -436,8 +469,10 @@ export async function getBuildings(): Promise<Building[]> {
 
 export async function getBuildingById(id: string): Promise<Building | null> {
   try {
-    const response = await requestBuildingsApi<Building>(`/${id}`);
-    return response ? normalizeBuilding(response) : null;
+    const response = await requestBuildingsApi<Record<string, unknown>>(`/${id}`);
+    if (!response) return null;
+    const form = fromApiBuildingToFormData(response);
+    return normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? id) as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
   } catch {
     return getMockById(id);
   }
@@ -445,7 +480,7 @@ export async function getBuildingById(id: string): Promise<Building | null> {
 
 export async function createBuilding(data: BuildingFormData): Promise<Building> {
   try {
-    const response = await requestBuildingsApi<any>('', {
+    const response = await requestBuildingsApi<Record<string, unknown>>('', {
       method: 'POST',
       body: JSON.stringify(fromFormDataToApiDto(data)),
     });
@@ -453,7 +488,7 @@ export async function createBuilding(data: BuildingFormData): Promise<Building> 
     if (!response) return createMock(data);
 
     const form = fromApiBuildingToFormData(response);
-    const built: Building = normalizeBuilding({ ...form, id: response.id ?? response._id ?? '', createdAt: response.createdAt, updatedAt: response.updatedAt });
+    const built: Building = normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? '') as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
     return built;
   } catch {
     return createMock(data);
@@ -462,7 +497,7 @@ export async function createBuilding(data: BuildingFormData): Promise<Building> 
 
 export async function updateBuilding(id: string, data: BuildingFormData): Promise<Building> {
   try {
-    const response = await requestBuildingsApi<any>(`/${id}`, {
+    const response = await requestBuildingsApi<Record<string, unknown>>(`/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(fromFormDataToApiDto(data)),
     });
@@ -470,7 +505,7 @@ export async function updateBuilding(id: string, data: BuildingFormData): Promis
     if (!response) return updateMock(id, data);
 
     const form = fromApiBuildingToFormData(response);
-    const built: Building = normalizeBuilding({ ...form, id: response.id ?? response._id ?? id, createdAt: response.createdAt, updatedAt: response.updatedAt });
+    const built: Building = normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? id) as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
     return built;
   } catch {
     return updateMock(id, data);

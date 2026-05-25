@@ -1,5 +1,6 @@
 import type { BuildingFormData } from '@/types/building';
 import { getBuildingById, updateBuilding } from '@/services/buildings';
+import { getArchitects } from '@/services/architects';
 import { BuildingForm } from '@/components/admin/BuildingForm';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -12,7 +13,7 @@ interface EditBuildingPageProps {
 
 export default async function EditBuildingPage({ params }: EditBuildingPageProps) {
   const { id } = await params;
-  const building = await getBuildingById(id);
+  const [building, architects] = await Promise.all([getBuildingById(id), getArchitects()]);
 
   if (!building) {
     return (
@@ -64,7 +65,7 @@ export default async function EditBuildingPage({ params }: EditBuildingPageProps
         </div>
 
         {/* Formulário */}
-        <BuildingForm onSubmit={handleSubmit} initialData={building} />
+        <BuildingForm onSubmit={handleSubmit} initialData={building} architects={architects} />
       </div>
     </section>
   );
