@@ -1,9 +1,12 @@
 import type { BuildingFormData } from '@/types/building';
 import { createBuilding } from '@/services/buildings';
+import { getArchitects } from '@/services/architects';
 import { BuildingForm } from '@/components/admin/BuildingForm';
 import { redirect } from 'next/navigation';
 
-export default function NewBuildingPage() {
+export default async function NewBuildingPage() {
+  const architects = await getArchitects();
+
   const handleSubmit = async (data: BuildingFormData) => {
     'use server';
     await createBuilding(data);
@@ -25,7 +28,7 @@ export default function NewBuildingPage() {
         </div>
 
         {/* Formulário */}
-        <BuildingForm onSubmit={handleSubmit} />
+        <BuildingForm onSubmit={handleSubmit} architects={architects} />
       </div>
     </section>
   );
