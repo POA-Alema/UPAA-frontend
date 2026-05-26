@@ -32,6 +32,10 @@ export type MapMarker = {
   position: [number, number];
 };
 
+export function buildBuildingRoute(slug: string): string {
+  return `/buildings/${slug}`;
+}
+
 export function mapBuildingsToMarkers(buildings: Building[]): MapMarker[] {
   return buildings
     .filter((b) => b.latitude != null && b.longitude != null)
@@ -43,7 +47,7 @@ export function mapBuildingsToMarkers(buildings: Building[]): MapMarker[] {
       summary: b.summary,
       yearLabel: b.yearLabel,
       architectName: b.architectName,
-      routePath: b.slug ? `/buildings/${b.slug}` : undefined,
+      routePath: b.slug ? buildBuildingRoute(b.slug) : undefined,
       architectPath: b.architectPath,
       attachments: b.attachments ?? [],
       position: [b.latitude!, b.longitude!],

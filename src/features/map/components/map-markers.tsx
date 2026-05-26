@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import L from "leaflet";
 import { Marker, Tooltip, useMap } from "react-leaflet";
-import { useRouter } from "next/navigation";
 
 import type {
   BuildingAttachment,
@@ -43,15 +42,10 @@ function MapPopupCard({
   onRequestClose?: () => void;
 }) {
   const { t } = useTranslation("common");
-  const router = useRouter();
   const map = useMap();
 
   const selectedAttachment: BuildingAttachment | undefined =
     marker.attachments[0];
-
-  const handleSeeMore = () => {
-    if (marker.routePath) router.push(marker.routePath);
-  };
 
   useEffect(() => {
     if (!map) return;
@@ -147,9 +141,10 @@ function MapPopupCard({
           </div>
 
           {marker.routePath && (
-            <button
-              onClick={handleSeeMore}
-              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
+            <Link
+              href={marker.routePath}
+              aria-label={`${t("map.know_work", "Conhecer a obra")}: ${marker.name}`}
+              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all no-underline min-h-12"
             >
               <div className="flex items-center gap-3 text-[#1A1A1A]">
                 <span className="material-symbols-outlined font-bold">
@@ -164,7 +159,7 @@ function MapPopupCard({
               <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
                 arrow_forward
               </span>
-            </button>
+            </Link>
           )}
 
           {marker.architectPath && (

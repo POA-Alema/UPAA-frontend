@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { mapBuildingsToMarkers } from "./map-buildings";
+import { buildBuildingRoute, mapBuildingsToMarkers } from "./map-buildings";
+
+describe("buildBuildingRoute", () => {
+  it("deve montar a rota de detalhe a partir do slug", () => {
+    expect(buildBuildingRoute("museu-x")).toBe("/buildings/museu-x");
+  });
+});
 
 describe("mapBuildingsToMarkers", () => {
   it("deve retornar apenas edificacoes com coordenadas validas", () => {

@@ -29,12 +29,6 @@ vi.mock("leaflet", () => ({
   },
 }));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}));
-
 // Resolve o erro de 'any' definindo tipos baseados em elementos HTML reais
 vi.mock("next/image", () => ({
   default: ({ alt, src, fill, priority, ...props }: ComponentPropsWithoutRef<"img"> & { fill?: boolean; priority?: boolean }) => {
@@ -130,6 +124,19 @@ describe("MapMarkers", () => {
     
     expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
     expect(within(sidebar).getByText("1912")).toBeInTheDocument();
+  });
+
+  it("renderiza CTA acessivel para a rota de detalhe da edificacao", () => {
+    render(<MapMarkers markers={[marker]} />);
+
+    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
+
+    const sidebar = screen.getByRole("complementary");
+    const cta = within(sidebar).getByRole("link", {
+      name: /Conhecer a obra: MARGS/i,
+    });
+
+    expect(cta).toHaveAttribute("href", "/buildings/margs");
   });
 
   it("abre a bottom sheet no mobile e bloqueia o scroll", () => {
