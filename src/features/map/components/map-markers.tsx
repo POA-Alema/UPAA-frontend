@@ -198,7 +198,10 @@ export function MapMarkers({
   showPopups = true,
 }: MapMarkersProps) {
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
+  // const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
+  const [selectedMarkerId, setSelectedMarkerId] = useState<
+    MapMarker["id"] | null
+  >(null);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {

@@ -14,7 +14,11 @@ const resources = {
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
-        image_label: "Imagem"
+        image_label: "Imagem",
+        loading: "Carregando dados do mapa.",
+        empty: "Nenhum ponto disponivel para exibir.",
+        load_error: "Nao foi possivel carregar os dados do mapa.",
+        fallback: "Dados reais indisponiveis. Exibindo pontos de referencia."
         
       }
     }
@@ -31,7 +35,11 @@ const resources = {
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
-        image_label: "Image"
+        image_label: "Image",
+        loading: "Loading map data.",
+        empty: "No points available to display.",
+        load_error: "Unable to load map data.",
+        fallback: "Live data unavailable. Showing reference points."
       }
     }
   },
@@ -47,7 +55,11 @@ const resources = {
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
-        image_label: "Bild"
+        image_label: "Bild",
+        loading: "Kartendaten werden geladen.",
+        empty: "Keine Punkte zum Anzeigen verfÃ¼gbar.",
+        load_error: "Kartendaten konnten nicht geladen werden.",
+        fallback: "Echtzeitdaten nicht verfÃ¼gbar. Referenzpunkte werden angezeigt."
       }
     }
   }
