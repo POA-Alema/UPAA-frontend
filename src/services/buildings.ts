@@ -3,9 +3,6 @@ import type { ImageCategory, Building, BuildingFormData, BuildingImage } from '@
 
 const ENDPOINT_CANDIDATES = [
   '/buildings',
-  '/admin/edificacoes',
-  '/api/admin/edificacoes',
-  '/edificacoes',
 ] as const;
 const API_TIMEOUT_MS = 2_000;
 
@@ -443,7 +440,11 @@ function fromFormDataToApiDto(data: BuildingFormData) {
   if (data.coordinates?.lat != null || data.coordinates?.lng != null) dto.coordinates = data.coordinates;
   if (data.heritage !== undefined) dto.heritage = data.heritage;
   if (data.history !== undefined) dto.history = data.history;
-  if (data.sources !== undefined) dto.sources = (data.sources ?? []).map((s) => s.title ?? String(s));
+  if (data.sources !== undefined) dto.sources = (data.sources ?? []).map((s) => ({
+    title: s.title,
+    ...(s.author ? { author: s.author } : {}),
+    ...(s.url ? { url: s.url } : {}),
+  }));
   if (data.architectId) dto.architectId = data.architectId;
   if (possibleAdvanced.createdById) dto.createdById = possibleAdvanced.createdById;
   if (possibleAdvanced.updatedById) dto.updatedById = possibleAdvanced.updatedById;
@@ -479,46 +480,32 @@ export async function getBuildingById(id: string): Promise<Building | null> {
 }
 
 export async function createBuilding(data: BuildingFormData): Promise<Building> {
-  try {
-    const response = await requestBuildingsApi<Record<string, unknown>>('', {
-      method: 'POST',
-      body: JSON.stringify(fromFormDataToApiDto(data)),
-    });
+  const response = await requestBuildingsApi<Record<string, unknown>>('', {
+    method: 'POST',
+    body: JSON.stringify(fromFormDataToApiDto(data)),
+  });
 
-    if (!response) return createMock(data);
+  if (!response) throw new Error('Nenhuma resposta do servidor ao criar edificação.');
 
-    const form = fromApiBuildingToFormData(response);
-    const built: Building = normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? '') as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
-    return built;
-  } catch {
-    return createMock(data);
-  }
+  const form = fromApiBuildingToFormData(response);
+  return normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? '') as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
 }
 
 export async function updateBuilding(id: string, data: BuildingFormData): Promise<Building> {
-  try {
-    const response = await requestBuildingsApi<Record<string, unknown>>(`/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(fromFormDataToApiDto(data)),
-    });
+  const response = await requestBuildingsApi<Record<string, unknown>>(`/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(fromFormDataToApiDto(data)),
+  });
 
-    if (!response) return updateMock(id, data);
+  if (!response) throw new Error('Nenhuma resposta do servidor ao atualizar edificação.');
 
-    const form = fromApiBuildingToFormData(response);
-    const built: Building = normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? id) as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
-    return built;
-  } catch {
-    return updateMock(id, data);
-  }
+  const form = fromApiBuildingToFormData(response);
+  return normalizeBuilding({ ...form, id: (response['id'] ?? response['_id'] ?? id) as string, createdAt: response['createdAt'] as Date | undefined, updatedAt: response['updatedAt'] as Date | undefined });
 }
 
 export async function deleteBuilding(id: string): Promise<void> {
-  try {
-    await requestBuildingsApi(`/${id}`, {
-      method: 'DELETE',
-      expectJson: false,
-    });
-  } catch {
-    deleteMock(id);
-  }
+  await requestBuildingsApi(`/${id}`, {
+    method: 'DELETE',
+    expectJson: false,
+  });
 }
