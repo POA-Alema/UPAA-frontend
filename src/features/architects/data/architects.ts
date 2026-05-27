@@ -71,7 +71,7 @@ function hasRequiredArchitectFields(
     architect.id &&
       architect.slug &&
       architect.title &&
-      architect.bioSummary !== undefined && 
+      architect.bioSummary !== undefined &&
       architect.bio
   );
 }
