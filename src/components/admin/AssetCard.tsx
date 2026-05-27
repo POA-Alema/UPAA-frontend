@@ -10,17 +10,11 @@ interface AssetCardProps {
 }
 
 export default function AssetCard({ image, onRemove }: AssetCardProps) {
-  const [src, setSrc] = useState(image.url);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    setSrc(image.url);
+    setFailed(false);
   }, [image.url]);
-
-  const handleError = () => {
-    if (image.fallbackUrl && src !== image.fallbackUrl) {
-      setSrc(image.fallbackUrl);
-    }
-  };
 
   return (
     <article className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-high/40">
@@ -35,7 +29,19 @@ export default function AssetCard({ image, onRemove }: AssetCardProps) {
           onError={handleError}
         />
       </div>
-
+      {failed ? (
+        <div className="flex h-56 w-full flex-col items-center justify-center gap-2 bg-surface-container-high/60 text-on-surface/40">
+          <span className="material-symbols-outlined text-4xl">image_not_supported</span>
+          <span className="text-xs">Imagem indisponível</span>
+        </div>
+      ) : (
+        <img
+          src={image.url}
+          alt={image.alt}
+          className="h-56 w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
       <div className="space-y-3 p-4">
         <div>
           <p className="font-headline font-bold text-on-surface">{image.alt}</p>

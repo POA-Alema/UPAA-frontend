@@ -2,7 +2,7 @@ type PublicRuntimeConfig = {
   apiUrl: string;
 };
 
-const DEFAULT_API_URL = 'http://localhost:8080';
+const DEFAULT_API_URL = 'http://localhost:3001';
 
 export function getPublicRuntimeConfig(): PublicRuntimeConfig {
   return {
