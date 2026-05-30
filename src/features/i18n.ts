@@ -14,6 +14,8 @@ const resources = {
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
+        open_route: "Abrir rota",
+        open_route_aria: "Abrir rota em aplicativo de navegação",
         image_label: "Imagem"
         
       }
@@ -31,6 +33,8 @@ const resources = {
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
+        open_route: "Open route",
+        open_route_aria: "Open route in navigation app",
         image_label: "Image"
       }
     }
@@ -47,6 +51,8 @@ const resources = {
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
+        open_route: "Route öffnen",
+        open_route_aria: "Route in Navigations-App öffnen",
         image_label: "Bild"
       }
     }

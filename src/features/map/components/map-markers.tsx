@@ -15,6 +15,7 @@ import type {
   BuildingAttachment,
   MapMarker,
 } from "@/features/map/utils/map-buildings";
+import { buildExternalRouteUrl } from "@/features/map/utils/external-route";
 
 // Ícones
 const defaultIcon = new L.Icon({
@@ -48,6 +49,8 @@ function MapPopupCard({
 
   const selectedAttachment: BuildingAttachment | undefined =
     marker.attachments[0];
+  const [latitude, longitude] = marker.position;
+  const externalRouteUrl = buildExternalRouteUrl({ latitude, longitude });
 
   const handleSeeMore = () => {
     if (marker.routePath) router.push(marker.routePath);
@@ -165,6 +168,31 @@ function MapPopupCard({
                 arrow_forward
               </span>
             </button>
+          )}
+
+          {externalRouteUrl && (
+            <a
+              href={externalRouteUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label={t(
+                "map.open_route_aria",
+                "Abrir rota em aplicativo de navegacao",
+              )}
+              className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+            >
+              <div className="flex items-center gap-3 text-[#E9C46A]">
+                <span className="material-symbols-outlined">route</span>
+
+                <span className="uppercase tracking-wider text-sm">
+                  {t("map.open_route", "Abrir rota")}
+                </span>
+              </div>
+
+              <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
+                arrow_forward
+              </span>
+            </a>
           )}
 
           {marker.architectPath && (

@@ -24,6 +24,8 @@ export type Building = {
   id: string;
   title: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   constructionPeriod?: string;
   architect?: string;
   constructor?: string;
