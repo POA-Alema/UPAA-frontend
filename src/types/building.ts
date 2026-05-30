@@ -22,6 +22,7 @@ export interface BuildingSource {
 
 export type Building = {
   id: string;
+  slug?: string;
   title: string;
   location: string;
   latitude?: number;

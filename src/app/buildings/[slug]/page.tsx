@@ -12,7 +12,7 @@ type BuildingDetailPageProps = {
 
 export async function generateStaticParams() {
   return buildings.map((building) => ({
-    slug: building.id
+    slug: building.slug ?? building.id
   }));
 }
 
