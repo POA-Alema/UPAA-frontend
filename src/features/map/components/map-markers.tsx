@@ -17,7 +17,6 @@ import type {
 } from "@/features/map/utils/map-buildings";
 import { buildExternalRouteUrl } from "@/features/map/utils/external-route";
 
-// Ícones
 const defaultIcon = new L.Icon({
   iconUrl: "/map-marker.svg",
   iconSize: [28, 40],
@@ -82,7 +81,7 @@ function MapPopupCard({
 
         {onRequestClose && (
           <button
-            aria-label="Fechar detalhes da edificação"
+            aria-label={t("map.close_details", "Fechar detalhes da edificação")}
             onClick={onRequestClose}
             className="group p-2 hover:bg-white/10 transition-all flex items-center justify-center rounded-full border-none bg-transparent shrink-0"
           >
@@ -177,7 +176,7 @@ function MapPopupCard({
               rel="noreferrer noopener"
               aria-label={t(
                 "map.open_route_aria",
-                "Abrir rota em aplicativo de navegacao",
+                "Abrir rota em aplicativo de navegação",
               )}
               className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
             >

@@ -30,7 +30,7 @@ export function BuildingRouteLink({
       rel="noreferrer noopener"
       aria-label={t(
         "map.open_route_aria",
-        "Abrir rota em aplicativo de navegacao",
+        "Abrir rota em aplicativo de navegação",
       )}
       className={
         className ??

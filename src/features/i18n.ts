@@ -17,7 +17,12 @@ const resources = {
         open_route: "Abrir rota",
         open_route_aria: "Abrir rota em aplicativo de navegação",
         image_label: "Imagem"
-        
+      },
+      building: {
+        section_title: "Edificação",
+        map_title: "Mapa",
+        map_placeholder:
+          "Integração com o mapa será conectada assim que a feature correspondente estiver disponível."
       }
     }
   },
@@ -36,6 +41,12 @@ const resources = {
         open_route: "Open route",
         open_route_aria: "Open route in navigation app",
         image_label: "Image"
+      },
+      building: {
+        section_title: "Building",
+        map_title: "Map",
+        map_placeholder:
+          "Map integration will be connected as soon as the corresponding feature is available."
       }
     }
   },
@@ -54,6 +65,12 @@ const resources = {
         open_route: "Route öffnen",
         open_route_aria: "Route in Navigations-App öffnen",
         image_label: "Bild"
+      },
+      building: {
+        section_title: "Gebäude",
+        map_title: "Karte",
+        map_placeholder:
+          "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht."
       }
     }
   }
@@ -63,7 +80,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en',// DEFAULT LANGUAGE - TESTS
+    lng: 'en',
     fallbackLng: 'de',
     interpolation: {
       escapeValue: false
