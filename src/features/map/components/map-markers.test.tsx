@@ -1,67 +1,62 @@
 /* eslint-disable @next/next/no-img-element */
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import type { ReactNode, ComponentPropsWithoutRef } from "react";
+import type {
+  AnchorHTMLAttributes,
+  ImgHTMLAttributes,
+  ReactNode,
+} from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapMarkers } from "./map-markers";
 import type { MapMarker } from "@/features/map/utils/map-buildings";
 
-// 1. MOCK i18n
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string, defaultValue: string) => defaultValue,
-  }),
-  initReactI18next: {
-    type: "3rdParty",
-    init: vi.fn(),
-  },
-}));
-
-vi.mock("@/features/i18n", () => ({
-  default: {},
-}));
-
-// Mocks de infraestrutura
 vi.mock("leaflet", () => ({
   default: {
     Icon: class Icon {
-      constructor() {}
+      constructor(public options: unknown) {}
     },
   },
 }));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}));
-
-// Resolve o erro de 'any' definindo tipos baseados em elementos HTML reais
 vi.mock("next/image", () => ({
-  default: ({ alt, src, fill, priority, ...props }: ComponentPropsWithoutRef<"img"> & { fill?: boolean; priority?: boolean }) => {
+  default: ({
+    alt,
+    src,
+    fill,
+    ...props
+  }: ImgHTMLAttributes<HTMLImageElement> & {
+    fill?: boolean;
+    src: string;
+  }) => {
     void fill;
-    void priority;
+
     return <img alt={alt} src={src} {...props} />;
   },
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href, ...props }: ComponentPropsWithoutRef<"a">) => (
+  default: ({
+    children,
+    href,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
 }));
 
-// Tipagem para o mock do react-leaflet
-interface MockMarkerProps {
-  children?: ReactNode;
-  eventHandlers?: { click?: () => void };
-  position: [number, number];
-}
-
 vi.mock("react-leaflet", () => ({
-  Marker: ({ children, eventHandlers, position }: MockMarkerProps) => (
+  Marker: ({
+    children,
+    eventHandlers,
+    position,
+  }: {
+    children: ReactNode;
+    eventHandlers?: { click?: () => void };
+    position: [number, number];
+  }) => (
     <div
+      data-position={position.join(",")}
       data-testid={`marker-${position.join(",")}`}
       onClick={() => eventHandlers?.click?.()}
       role="button"
@@ -70,35 +65,47 @@ vi.mock("react-leaflet", () => ({
       {children}
     </div>
   ),
-  Tooltip: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  useMap: () => ({
-    scrollWheelZoom: { disable: vi.fn(), enable: vi.fn() },
-    dragging: { disable: vi.fn(), enable: vi.fn() },
-  }),
+  Popup: ({ children }: { children: ReactNode }) => (
+    <div data-testid="leaflet-popup">{children}</div>
+  ),
 }));
 
 const marker: MapMarker = {
   id: 1,
-  name: "MARGS",
-  district: "Centro Histórico",
-  summary: "Um museu histórico emblemático.",
+  name: "Museu de Arte do Rio Grande do Sul (MARGS)",
+  district: "Centro Historico",
+  summary:
+    "Um dos marcos culturais mais emblematicos do centro historico, com presenca monumental e memoria urbana duradoura.",
   yearLabel: "1912",
   architectName: "Theodor Wiederspahn",
-  routePath: "/buildings/margs",
+  routePath: "/buildings/margs?returnTo=%2Fmapa",
   architectPath: "/architects/theodor-wiederspahn",
-  attachments: [{ src: "/margs.jpg", alt: "Fachada", caption: "Fachada" }],
-  position: [-30.02, -51.23],
+  attachments: [
+    {
+      src: "/images/margs-1.jpg",
+      alt: "Fachada principal do MARGS",
+      caption: "Fachada principal",
+    },
+    {
+      src: "/images/margs-2.jpg",
+      alt: "Vista lateral do MARGS",
+      caption: "Vista lateral",
+    },
+  ],
+  position: [-30.029111, -51.231694],
 };
 
 function mockMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
+    value: vi.fn().mockImplementation(() => ({
       matches,
-      media: query,
+      media: "(max-width: 820px)",
       onchange: null,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
       dispatchEvent: vi.fn(),
     })),
   });
@@ -115,58 +122,92 @@ describe("MapMarkers", () => {
     vi.useRealTimers();
   });
 
-  it("renderiza a sidebar no desktop ao clicar em um marcador", () => {
+  it("renderiza o popup desktop com metadados e CTA do autor", () => {
     render(<MapMarkers markers={[marker]} />);
 
-    const mapMarker = screen.getByTestId("marker--30.02,-51.23");
-    fireEvent.click(mapMarker);
+    const popup = screen.getByTestId("leaflet-popup");
 
-    const sidebar = screen.getByRole("complementary");
-    expect(sidebar).toBeInTheDocument();
-    
-    // CORREÇÃO DO ERRO DE MÚLTIPLOS ELEMENTOS:
-    // Procuramos o MARGS especificamente no <h1> do conteúdo principal
-    expect(within(sidebar).getByRole("heading", { name: "MARGS", level: 1 })).toBeInTheDocument();
-    
-    expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
-    expect(within(sidebar).getByText("1912")).toBeInTheDocument();
+    expect(popup).toBeInTheDocument();
+    expect(within(popup).getByText(/^Centro Historico$/i)).toBeInTheDocument();
+    expect(
+      within(popup).getByRole("heading", { name: /margs/i }),
+    ).toBeInTheDocument();
+    expect(within(popup).getByText("Ano: 1912")).toBeInTheDocument();
+    expect(
+      within(popup).getByText("Autoria: Theodor Wiederspahn"),
+    ).toBeInTheDocument();
+    expect(
+      within(popup).getByRole("link", { name: /conhecer o autor/i }),
+    ).toHaveAttribute("href", "/architects/theodor-wiederspahn");
+    expect(
+      within(popup).getByRole("link", { name: /conhecer a obra/i }),
+    ).toHaveAttribute("href", "/buildings/margs?returnTo=%2Fmapa");
+    expect(
+      within(popup).getByText("Imagem: Fachada principal"),
+    ).toBeInTheDocument();
   });
 
-  it("abre a bottom sheet no mobile e bloqueia o scroll", () => {
+  it("atualiza a imagem selecionada ao clicar em um thumbnail", () => {
+    render(<MapMarkers markers={[marker]} />);
+
+    const secondThumb = screen.getByTitle("Vista lateral");
+    fireEvent.click(secondThumb);
+
+    expect(screen.getByText("Imagem: Vista lateral")).toBeInTheDocument();
+    expect(screen.getAllByAltText("Vista lateral do MARGS")).toHaveLength(2);
+  });
+
+  it("abre um bottom sheet no mobile e bloqueia o scroll do body", () => {
     mockMatchMedia(true);
 
     render(<MapMarkers markers={[marker]} />);
 
-    const mapMarker = screen.getByTestId("marker--30.02,-51.23");
-    fireEvent.click(mapMarker);
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(document.body).toHaveClass("map-popup-sheet-open");
     expect(document.body.style.overflow).toBe("hidden");
+    expect(
+      screen.getAllByRole("button", {
+        name: /fechar detalhes da edificacao/i,
+      }),
+    ).toHaveLength(2);
   });
 
-  it("exibe fallback de imagem quando não há anexos", () => {
-    const markerEmpty = { ...marker, attachments: [] };
-    render(<MapMarkers markers={[markerEmpty]} />);
-    
-    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
-    
-    expect(screen.getByText("Imagem indisponível")).toBeInTheDocument();
-  });
-
-  it("fecha a sidebar após o delay da animação", async () => {
+  it("fecha o bottom sheet no mobile e restaura o body apos a animacao", () => {
     vi.useFakeTimers();
+    mockMatchMedia(true);
+
     render(<MapMarkers markers={[marker]} />);
 
-    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
-    
-    const closeButton = screen.getByLabelText(/Fechar detalhes da edificação/i);
-    fireEvent.click(closeButton);
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
 
-    act(() => {
-      vi.advanceTimersByTime(250);
+    const dialog = screen.getByRole("dialog");
+    const closeButtons = within(dialog).getAllByRole("button", {
+      name: /fechar detalhes da edificacao/i,
     });
 
-    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    fireEvent.click(closeButtons[0]);
+
+    expect(dialog.className).toContain("map-popup-sheet--closing");
+
+    act(() => {
+      vi.advanceTimersByTime(220);
+    });
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.body).not.toHaveClass("map-popup-sheet-open");
+    expect(document.body.style.overflow).toBe("");
+  });
+
+  it("nao exibe popup nem sheet quando showPopups for falso", () => {
+    mockMatchMedia(true);
+
+    render(<MapMarkers markers={[marker]} showPopups={false} />);
+
+    fireEvent.click(screen.getByTestId("marker--30.029111,-51.231694"));
+
+    expect(screen.queryByTestId("leaflet-popup")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

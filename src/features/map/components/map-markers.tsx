@@ -1,281 +1,320 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
-import "@/features/i18n";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import L from "leaflet";
-import { Marker, Tooltip, useMap } from "react-leaflet";
-import { useRouter } from "next/navigation";
-
+import { Marker, Popup } from "react-leaflet";
 import type {
   BuildingAttachment,
   MapMarker,
 } from "@/features/map/utils/map-buildings";
 
-// Ícones
-const defaultIcon = new L.Icon({
+const icon = new L.Icon({
   iconUrl: "/map-marker.svg",
   iconSize: [28, 40],
   iconAnchor: [14, 40],
   popupAnchor: [0, -34],
 });
 
-const selectedIcon = new L.Icon({
-  iconUrl: "/map-marker.svg",
-  iconSize: [44, 60],
-  iconAnchor: [22, 60],
-  popupAnchor: [0, -52],
-  className:
-    "filter drop-shadow-[0_0_12px_rgba(233,196,106,1)] transition-all duration-300",
-});
+type Props = {
+  markers: MapMarker[];
+  showPopups?: boolean;
+};
+
+type MapPopupCardProps = {
+  marker: MapMarker;
+  variant?: "popup" | "sheet";
+  onRequestClose?: () => void;
+};
+
+const MAP_POPUP_SUMMARY_CHARACTER_LIMIT = 220;
+
+function getPopupSummaryPreview(summary: string) {
+  if (summary.length <= MAP_POPUP_SUMMARY_CHARACTER_LIMIT) {
+    return {
+      isTruncated: false,
+      text: summary,
+    };
+  }
+
+  return {
+    isTruncated: true,
+    text: `${summary.slice(0, MAP_POPUP_SUMMARY_CHARACTER_LIMIT).trimEnd()}...`,
+  };
+}
 
 function MapPopupCard({
   marker,
   variant = "popup",
   onRequestClose,
-}: {
-  marker: MapMarker;
-  variant?: "popup" | "sheet" | "sidebar";
-  onRequestClose?: () => void;
-}) {
-  const { t } = useTranslation("common");
-  const router = useRouter();
-  const map = useMap();
+}: MapPopupCardProps) {
+  const [selectedAttachmentIndex, setSelectedAttachmentIndex] = useState(0);
 
   const selectedAttachment: BuildingAttachment | undefined =
-    marker.attachments[0];
-
-  const handleSeeMore = () => {
-    if (marker.routePath) router.push(marker.routePath);
-  };
-
-  useEffect(() => {
-    if (!map) return;
-
-    map.scrollWheelZoom.disable();
-    map.dragging.disable();
-
-    return () => {
-      map.scrollWheelZoom.enable();
-      map.dragging.enable();
-    };
-  }, [map]);
+    marker.attachments[selectedAttachmentIndex];
+  const summaryPreview = marker.summary
+    ? getPopupSummaryPreview(marker.summary)
+    : null;
 
   return (
     <article
-      className="flex flex-col h-full w-full bg-[#1A1A1A] text-white shadow-2xl pointer-events-auto selection:bg-[#E9C46A] selection:text-[#1A1A1A] overflow-hidden"
-      onWheel={(e) => e.stopPropagation()}
+      className={`map-popup-card${
+        variant === "sheet" ? " map-popup-card--sheet" : ""
+      }`}
+      onTouchMove={
+        variant === "sheet" ? (event) => event.stopPropagation() : undefined
+      }
+      onWheel={
+        variant === "sheet" ? (event) => event.stopPropagation() : undefined
+      }
     >
-      <div className="gap-1 flex items-center justify-between sticky top-0 z-20 py-1.5 px-4">
-        <h2 className="text-[1rem] font-bold text-[#E9C46A] tracking-tight leading-tight line-clamp-2">
-          {variant === "sidebar"
-            ? marker.name
-            : t("map.mapped_building", "Edificação")}
-        </h2>
-
-        {onRequestClose && (
-          <button
-            aria-label="Fechar detalhes da edificação"
-            onClick={onRequestClose}
-            className="group p-2 hover:bg-white/10 transition-all flex items-center justify-center rounded-full border-none bg-transparent shrink-0"
-          >
-            <span className="material-symbols-outlined text-[#E9C46A] text-2xl group-hover:rotate-90 transition-transform duration-300">
-              close
-            </span>
-          </button>
-        )}
-      </div>
-
-      <div className="hover:overflow-y-auto overflow-hidden scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent pt-1.5 pb-4">
-        <div className="relative w-full aspect-16/10 overflow-hidden group">
-          {selectedAttachment ? (
-            <>
-              <Image
-                alt={selectedAttachment.alt}
-                src={selectedAttachment.src}
-                fill
-                className="object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
-                priority
-              />
-
-              <div className="absolute inset-0 bg-linear-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60" />
-            </>
-          ) : (
-            <div className="w-full h-full bg-[#222] animate-pulse flex items-center justify-center">
-              <span className="text-white/20 italic text-sm">
-                {t("map.image_unavailable", "Imagem indisponível")}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="px-4 flex flex-col h-full gap-4 mt-4">
-          <h1 className="text-3xl font-black text-white leading-tight">
-            {marker.name}
-          </h1>
-
-          {marker.summary && (
-            <p className="text-white/70 leading-relaxed text-base font-light">
-              {marker.summary}
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-3">
-            {marker.yearLabel && (
-              <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs text-white/80">
-                <span className="text-[#E9C46A] font-bold mr-2">
-                  {t("map.year", "Ano")}:
-                </span>
-
-                {marker.yearLabel}
-              </div>
-            )}
-
-            {marker.architectName && (
-              <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs text-white/80">
-                <span className="text-[#E9C46A] font-bold mr-2">
-                  {t("map.author", "Arquiteto")}:
-                </span>
-
-                {marker.architectName}
-              </div>
-            )}
-          </div>
-
-          {marker.routePath && (
+      {variant === "sheet" ? (
+        <div className="map-popup-card__sheet-header">
+          <div
+            className="map-popup-card__sheet-handle"
+            aria-hidden="true"
+          ></div>
+          {onRequestClose ? (
             <button
-              onClick={handleSeeMore}
-              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
+              aria-label="Fechar detalhes da edificacao"
+              className="map-popup-card__sheet-close"
+              onClick={onRequestClose}
+              type="button"
             >
-              <div className="flex items-center gap-3 text-[#1A1A1A]">
-                <span className="material-symbols-outlined font-bold">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {selectedAttachment ? (
+        <a
+          className="map-popup-card__media"
+          href={selectedAttachment.src}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <Image
+            alt={selectedAttachment.alt}
+            className="map-popup-card__image"
+            src={selectedAttachment.src}
+            fill
+            sizes="320px"
+          />
+          <div className="map-popup-card__media-overlay"></div>
+        </a>
+      ) : null}
+
+      <div className="map-popup-card__body">
+        <p className="map-popup-card__eyebrow">
+          {marker.district ?? "Edificacao mapeada"}
+        </p>
+        <h3 className="map-popup-card__title">{marker.name}</h3>
+
+        {summaryPreview ? (
+          <p className="map-popup-card__summary">
+            {summaryPreview.text}{" "}
+            {summaryPreview.isTruncated ? (
+              <button
+                aria-disabled="true"
+                className="map-popup-card__summary-link"
+                title={
+                  marker.routePath
+                    ? `${marker.routePath}`
+                    : "Pagina da edificacao ainda nao disponivel"
+                }
+                type="button"
+              >
+                Ver Mais
+              </button>
+            ) : null}
+          </p>
+        ) : null}
+
+        {marker.yearLabel || marker.architectName ? (
+          <div className="map-popup-card__meta">
+            {marker.yearLabel ? (
+              <span className="map-popup-card__meta-item">
+                Ano: {marker.yearLabel}
+              </span>
+            ) : null}
+            {marker.architectName ? (
+              <span className="map-popup-card__meta-item">
+                Autoria: {marker.architectName}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        {marker.routePath || marker.architectPath ? (
+          <div className="map-popup-card__actions">
+            {marker.routePath ? (
+              <Link
+                className="map-popup-card__action map-popup-card__action--secondary"
+                href={marker.routePath}
+              >
+                <span className="material-symbols-outlined map-popup-card__action-icon">
                   menu_book
                 </span>
+                <span>Conhecer a obra</span>
+              </Link>
+            ) : null}
 
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_work", "Explorar Obra")}
-                </span>
-              </div>
-
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
-                arrow_forward
-              </span>
-            </button>
-          )}
-
-          {marker.architectPath && (
-            <Link
-              href={marker.architectPath}
-              className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
-            >
-              <div className="flex items-center gap-3 text-[#E9C46A]">
-                <span className="material-symbols-outlined">
+            {marker.architectPath ? (
+              <Link
+                className="map-popup-card__action map-popup-card__action--secondary"
+                href={marker.architectPath}
+              >
+                <span className="material-symbols-outlined map-popup-card__action-icon">
                   account_circle
                 </span>
+                <span>Conhecer o autor</span>
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
 
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_author", "Sobre o Autor")}
-                </span>
-              </div>
+        {marker.attachments.length > 1 ? (
+          <div className="map-popup-card__gallery">
+            {marker.attachments.map((attachment, index) => (
+              <button
+                className={`map-popup-card__thumb${
+                  index === selectedAttachmentIndex
+                    ? " map-popup-card__thumb--active"
+                    : ""
+                }`}
+                key={`${marker.id}-${attachment.src}-${index}`}
+                onClick={() => setSelectedAttachmentIndex(index)}
+                title={attachment.caption ?? attachment.alt}
+                type="button"
+              >
+                <Image
+                  alt={attachment.alt}
+                  className="map-popup-card__thumb-image"
+                  src={attachment.src}
+                  fill
+                  sizes="64px"
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
 
-              <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
-                arrow_forward
-              </span>
-            </Link>
-          )}
-        </div>
+        {selectedAttachment?.caption ? (
+          <p className="map-popup-card__caption">
+            Imagem: {selectedAttachment.caption}
+          </p>
+        ) : null}
       </div>
     </article>
   );
 }
 
-type MapMarkersProps = {
-  markers: MapMarker[];
-  showPopups?: boolean;
-};
-
-export function MapMarkers({
-  markers,
-  showPopups = true,
-}: MapMarkersProps) {
+export function MapMarkers({ markers, showPopups = true }: Props) {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
-  const [isClosing, setIsClosing] = useState(false);
+  const [isSheetClosing, setIsSheetClosing] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 820px)");
+    const mediaQuery = window.matchMedia("(max-width: 820px)");
+    const syncViewport = () => {
+      const mobile = mediaQuery.matches;
 
-    const sync = () => setIsMobile(mq.matches);
+      setIsMobile(mobile);
 
-    sync();
+      if (!mobile) {
+        setSelectedMarkerId(null);
+      }
+    };
 
-    mq.addEventListener("change", sync);
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
 
-    return () => mq.removeEventListener("change", sync);
+    return () => {
+      mediaQuery.removeEventListener("change", syncViewport);
+    };
   }, []);
 
   useEffect(() => {
-    if (isMobile && selectedMarkerId) {
-      document.body.classList.add("map-popup-sheet-open");
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.classList.remove("map-popup-sheet-open");
-      document.body.style.overflow = "";
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showPopups || !isMobile || selectedMarkerId == null) {
+      return;
     }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.classList.add("map-popup-sheet-open");
+    document.body.style.overflow = "hidden";
 
     return () => {
       document.body.classList.remove("map-popup-sheet-open");
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
-  }, [isMobile, selectedMarkerId]);
+  }, [isMobile, selectedMarkerId, showPopups]);
 
-  const closePanel = () => {
-    setIsClosing(true);
+  const selectedMarker =
+    selectedMarkerId != null
+      ? (markers.find((marker) => marker.id === selectedMarkerId) ?? null)
+      : null;
 
-    setTimeout(() => {
+  function openSheet(markerId: number) {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+
+    setIsSheetClosing(false);
+    setSelectedMarkerId(markerId);
+  }
+
+  function closeSheet() {
+    setIsSheetClosing(true);
+
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+
+    closeTimeoutRef.current = setTimeout(() => {
       setSelectedMarkerId(null);
-      setIsClosing(false);
+      setIsSheetClosing(false);
+      closeTimeoutRef.current = null;
     }, 220);
-  };
-
-  const selectedMarker = selectedMarkerId
-    ? markers.find((m) => m.id === selectedMarkerId)
-    : null;
+  }
 
   const sheet =
     showPopups && isMobile && selectedMarker
       ? createPortal(
           <div
+            className={`map-popup-sheet${
+              isSheetClosing ? " map-popup-sheet--closing" : ""
+            }`}
             role="dialog"
             aria-modal="true"
-            className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
-              isClosing ? "map-popup-sheet--closing" : ""
-            }`}
           >
-            <div
-              className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
-                isClosing ? "opacity-0" : "opacity-100"
-              }`}
-              onClick={closePanel}
-            />
+            <button
+              aria-label="Fechar detalhes da edificacao"
+              className="map-popup-sheet__backdrop"
+              onClick={closeSheet}
+              type="button"
+            ></button>
 
-            <aside
-              className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
-                isClosing ? "translate-y-full" : "translate-y-0"
-              }`}
-            >
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
-
+            <div className="map-popup-sheet__panel">
               <MapPopupCard
+                key={selectedMarker.id}
                 marker={selectedMarker}
-                onRequestClose={closePanel}
+                onRequestClose={closeSheet}
                 variant="sheet"
               />
-            </aside>
+            </div>
           </div>,
           document.body,
         )
@@ -283,58 +322,28 @@ export function MapMarkers({
 
   return (
     <>
-      {markers.map((m) => {
-        const isSelected = selectedMarkerId === m.id;
-
-        return (
-          <Marker
-            key={m.id}
-            position={m.position}
-            icon={isSelected ? selectedIcon : defaultIcon}
-            eventHandlers={{
-              click: () => {
-                setIsClosing(false);
-                setSelectedMarkerId(m.id);
-              },
-            }}
-          >
-            {isSelected && (
-              <Tooltip
-                permanent
-                direction="top"
-                offset={[0, -28]}
-                opacity={1}
-                className="bg-transparent border-none shadow-none"
-              >
-                <span
-                  className="text-[13px] font-black tracking-tight text-black uppercase"
-                  style={{
-                    textShadow: "0px 0px 4px rgba(255, 255, 255, 1)",
-                  }}
-                >
-                  {m.name}
-                </span>
-              </Tooltip>
-            )}
-          </Marker>
-        );
-      })}
-
-      {showPopups && !isMobile && selectedMarker && (
-        <div className="absolute h-full z-10000 pointer-events-none flex justify-end top-0 right-0">
-          <aside
-            className={`pointer-events-auto bg-[#1A1A1A] w-112.5 h-full transition-all duration-500 flex flex-col shadow-2xl ${
-              isClosing ? "translate-x-full" : "translate-x-0"
-            }`}
-          >
-            <MapPopupCard
-              marker={selectedMarker}
-              onRequestClose={closePanel}
-              variant="sidebar"
-            />
-          </aside>
-        </div>
-      )}
+      {markers.map((marker) => (
+        <Marker
+          key={marker.id}
+          position={marker.position}
+          icon={icon}
+          eventHandlers={
+            showPopups && isMobile
+              ? {
+                  click: () => {
+                    openSheet(marker.id);
+                  },
+                }
+              : undefined
+          }
+        >
+          {showPopups && !isMobile ? (
+            <Popup>
+              <MapPopupCard marker={marker} />
+            </Popup>
+          ) : null}
+        </Marker>
+      ))}
 
       {sheet}
     </>
