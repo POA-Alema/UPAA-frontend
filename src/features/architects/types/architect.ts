@@ -24,6 +24,7 @@ export interface ArchitectCharacteristic {
 export interface ArchitectWork {
   title: string;
   image?: ArchitectImage;
+  href?: string;
 }
 
 export interface Architect {
@@ -50,4 +51,5 @@ export interface ArchitectPreviewProps {
 
 export interface ArchitectPageProps {
   architect: Architect;
+  backToMapHref?: string;
 }

@@ -1,58 +1,57 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageSection } from '@/components/layout/page-section';
-import { BuildingDetailPanel } from '@/features/buildings/components/building-detail-panel';
-import { buildings, getBuildingBySlug } from '@/data/buildings';
+import { notFound } from "next/navigation";
+import { BuildingPage } from "@/features/buildings/components/BuildingPage";
+import {
+  getBuildingBySlug,
+  listBuildings,
+} from "@/features/buildings/data/buildings";
+import { resolveBuildingBackToMapHref } from "@/features/buildings/utils/navigation";
 
 type BuildingDetailPageProps = {
-  params: Promise<{
-    slug: string;
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{
+    returnTo?: string | string[];
   }>;
 };
 
-export async function generateStaticParams() {
-  return buildings.map((building) => ({
-    slug: building.id
-  }));
-}
-
-export async function generateMetadata({
-  params
-}: BuildingDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: BuildingDetailPageProps) {
   const { slug } = await params;
-  const building = getBuildingBySlug(slug);
+  const building = await getBuildingBySlug(slug);
 
   if (!building) {
     return {
-      title: 'Edificação não encontrada | UPAA Frontend'
+      title: "Edificação não encontrada",
     };
   }
 
   return {
-    title: `${building.title} | UPAA Frontend`,
-    description: `Estrutura inicial da página ${building.title}.`
+    title: `${building.title} | Uma Porto Alegre Alemã`,
+    description: building.summary,
   };
 }
 
+export async function generateStaticParams() {
+  const buildings = await listBuildings();
+  return buildings.map((building) => ({
+    slug: building.slug,
+  }));
+}
+
 export default async function BuildingDetailPage({
-  params
+  params,
+  searchParams,
 }: BuildingDetailPageProps) {
   const { slug } = await params;
-  const building = getBuildingBySlug(slug);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const building = await getBuildingBySlug(slug);
 
   if (!building) {
     notFound();
   }
 
   return (
-    <main className="page-shell">
-      <PageSection
-        eyebrow="Edificação"
-        title={building.title}
-        description="Descrição"
-      >
-        <BuildingDetailPanel building={building} />
-      </PageSection>
-    </main>
+    <BuildingPage
+      backToMapHref={resolveBuildingBackToMapHref(resolvedSearchParams)}
+      building={building}
+    />
   );
 }
