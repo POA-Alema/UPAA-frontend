@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import type { LatLngExpression } from "leaflet";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 
@@ -34,6 +35,9 @@ export function MapPlaceholder({
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [userPosition, setUserPosition] = useState<LatLngExpression | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -52,6 +56,7 @@ export function MapPlaceholder({
         if (!isMounted) {
           return;
         }
+
         setMarkers(mappedMarkers);
         setHasError(false);
       } catch {
@@ -75,6 +80,29 @@ export function MapPlaceholder({
     };
   }, []);
 
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserPosition([
+          position.coords.latitude,
+          position.coords.longitude,
+        ]);
+      },
+      () => {
+        setUserPosition(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+  }, []);
+
   return (
     <div className={`w-full relative ${className}`}>
       <MapContainer
@@ -82,7 +110,11 @@ export function MapPlaceholder({
         zoom={15}
         maxZoom={20}
         minZoom={15}
-        zoomControl={typeof showZoomControls === 'boolean' ? showZoomControls : showPopups}
+        zoomControl={
+          typeof showZoomControls === "boolean"
+            ? showZoomControls
+            : showPopups
+        }
         className="w-full h-full"
       >
         <TileLayer
@@ -92,7 +124,11 @@ export function MapPlaceholder({
           maxZoom={20}
         />
 
-        <MapMarkers markers={markers} showPopups={showPopups} />
+        <MapMarkers
+          markers={markers}
+          showPopups={showPopups}
+          userPosition={userPosition}
+        />
       </MapContainer>
 
       {!loading && markers.length === 0 && !hasError && (
