@@ -1,67 +1,79 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BuildingImage } from "../types/building";
 
 interface BuildingGalleryProps {
   items: BuildingImage[];
 }
 
+function buildPages(count: number): number[] {
+  if (count <= 4) return [0];
+  const result: number[] = [];
+  for (let i = 0; i + 4 <= count; i += 4) result.push(i);
+  const last = count - 4;
+  if (result[result.length - 1] !== last) result.push(last);
+  return result;
+}
+
 export function BuildingGallery({ items }: BuildingGalleryProps) {
   const railRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeIndexRef = useRef(0);
+  const pages = useMemo(() => buildPages(items.length), [items.length]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageIndexRef = useRef(0);
   const isProgrammaticRef = useRef(false);
   const programmaticTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
+  const scrollToItemIndex = useCallback((index: number, behavior: ScrollBehavior) => {
     const rail = railRef.current;
     if (!rail) return;
     const card = rail.children[index] as HTMLElement | undefined;
     if (!card) return;
-    const targetLeft = card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2;
     isProgrammaticRef.current = true;
     clearTimeout(programmaticTimerRef.current);
-    programmaticTimerRef.current = setTimeout(() => {
-      isProgrammaticRef.current = false;
-    }, 600);
-    rail.scrollTo({ left: Math.max(0, targetLeft), behavior });
-    activeIndexRef.current = index;
-    setActiveIndex(index);
+    programmaticTimerRef.current = setTimeout(() => { isProgrammaticRef.current = false; }, 600);
+    rail.scrollTo({ left: card.offsetLeft, behavior });
   }, []);
 
+  const goToPage = useCallback((pi: number) => {
+    const idx = pages[pi];
+    if (idx === undefined) return;
+    scrollToItemIndex(idx, "smooth");
+    pageIndexRef.current = pi;
+    setPageIndex(pi);
+  }, [pages, scrollToItemIndex]);
+
   const scroll = useCallback((direction: "left" | "right") => {
-    const next =
-      direction === "right"
-        ? (activeIndexRef.current + 1) % items.length
-        : (activeIndexRef.current - 1 + items.length) % items.length;
-    scrollToIndex(next, "instant");
-  }, [items.length, scrollToIndex]);
+    const next = direction === "right"
+      ? Math.min(pageIndexRef.current + 1, pages.length - 1)
+      : Math.max(pageIndexRef.current - 1, 0);
+    goToPage(next);
+  }, [pages.length, goToPage]);
 
   useEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
-
     const onScroll = () => {
       if (isProgrammaticRef.current) return;
-      const railRect = rail.getBoundingClientRect();
-      const railCenter = railRect.left + railRect.width / 2;
-      let closest = 0;
+      const scrollLeft = rail.scrollLeft;
+      let closestPage = 0;
       let minDist = Infinity;
-      Array.from(rail.children).forEach((child, i) => {
-        const cardRect = child.getBoundingClientRect();
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const dist = Math.abs(cardCenter - railCenter);
-        if (dist < minDist) { minDist = dist; closest = i; }
+      pages.forEach((startIdx, pi) => {
+        const card = rail.children[startIdx] as HTMLElement | undefined;
+        if (!card) return;
+        const dist = Math.abs(card.offsetLeft - scrollLeft);
+        if (dist < minDist) { minDist = dist; closestPage = pi; }
       });
-      activeIndexRef.current = closest;
-      setActiveIndex(closest);
+      pageIndexRef.current = closestPage;
+      setPageIndex(closestPage);
     };
-
     rail.addEventListener("scroll", onScroll, { passive: true });
     return () => rail.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [pages]);
+
+  const isFirst = pageIndex === 0;
+  const isLast = pageIndex === pages.length - 1;
 
   return (
     <div className="building-gallery__wrapper">
@@ -74,7 +86,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
                 className="building-gallery-card__image"
                 fill
                 priority={index === 0}
-                sizes="(max-width: 768px) 80vw, 360px"
+                sizes="(max-width: 820px) 75vw, 25vw"
                 src={item.src}
               />
             </div>
@@ -91,6 +103,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
         <button
           aria-label="Anterior"
           className="building-gallery__nav-btn"
+          disabled={isFirst}
           onClick={() => scroll("left")}
           type="button"
         >
@@ -98,8 +111,8 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
         </button>
 
         <div className="building-gallery__indicators" role="tablist">
-          {items.map((_, index) => {
-            const dist = Math.abs(index - activeIndex);
+          {pages.map((_, pi) => {
+            const dist = Math.abs(pi - pageIndex);
             if (dist > 2) return null;
             const sizeClass =
               dist === 0
@@ -109,11 +122,11 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
                   : "building-gallery__dot--far";
             return (
               <button
-                aria-label={`Ir para foto ${index + 1}`}
-                aria-selected={index === activeIndex}
+                aria-label={`Ir para página ${pi + 1}`}
+                aria-selected={pi === pageIndex}
                 className={`building-gallery__dot ${sizeClass}`}
-                key={index}
-                onClick={() => scrollToIndex(index)}
+                key={pi}
+                onClick={() => goToPage(pi)}
                 role="tab"
                 type="button"
               />
@@ -124,6 +137,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
         <button
           aria-label="Próximo"
           className="building-gallery__nav-btn"
+          disabled={isLast}
           onClick={() => scroll("right")}
           type="button"
         >
