@@ -1514,10 +1514,10 @@ button:focus-visible {
   position: relative;
   display: flex;
   gap: 20px;
-  padding: 8px max(24px, calc((100vw - 1220px) / 2)) 24px;
+  padding: 8px 0 24px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-left: max(24px, calc((100vw - 1220px) / 2));
+  scroll-padding-left: 0;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -1527,9 +1527,9 @@ button:focus-visible {
 }
 
 .building-gallery-card {
-  flex: 0 0 320px;
+  flex: 0 0 calc(25% - 15px);
   margin: 0;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
 }
 
 .building-gallery-card__media {
@@ -1579,9 +1579,14 @@ button:focus-visible {
   transition: border-color 0.2s, color 0.2s;
 }
 
-.building-gallery__nav-btn:hover {
+.building-gallery__nav-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.building-gallery__nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .building-gallery__nav-btn .material-symbols-outlined {
@@ -1814,6 +1819,7 @@ button:focus-visible {
 
   .building-gallery-card {
     flex-basis: 75vw;
+    scroll-snap-align: center;
   }
 }
 

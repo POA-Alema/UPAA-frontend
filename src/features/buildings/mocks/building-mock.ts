@@ -81,6 +81,31 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         alt: "Vista interna do hall central do MARGS",
         caption: "Fotos internas",
       },
+      {
+        src: "/images/margs/escadaria_interna.jpeg",
+        alt: "Escadaria interna do MARGS",
+        caption: "Escadaria interna",
+      },
+      {
+        src: "/images/margs/teto.jpeg",
+        alt: "Teto do MARGS",
+        caption: "Teto",
+      },
+      {
+        src: "/images/margs/superior.jpeg",
+        alt: "Vista da parte superior superior do MARGS",
+        caption: "Vista da parte superior",
+      },
+      {
+        src: "/images/margs/esculturas.jpeg",
+        alt: "Esculturas internas do MARGS",
+        caption: "Esculturas internas",
+      },
+      {
+        src: "/images/margs/esculturas2.jpeg",
+        alt: "Esculturas internas do MARGS",
+        caption: "Esculturas internas",
+      }
     ],
     architectCta: {
       description:
