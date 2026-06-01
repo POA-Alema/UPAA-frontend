@@ -24,10 +24,10 @@ export default function MainContainer({ data }: MainContainerProps) {
       className="section-card home-flow__section"
       data-testid="landing-content"
     >
-      <h2 className="section-title" style={{ maxWidth: "none" }}>
+      <h2 className="section-title section-title--full">
         <strong>{data.title}</strong>
       </h2>
-      <p className="section-copy" style={{ color: "var(--accent)", maxWidth: "none" }}>{data.description}</p>
+      <p className="section-copy section-copy--accent">{data.description}</p>
     </section>
   );
 }

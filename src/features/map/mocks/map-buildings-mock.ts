@@ -13,7 +13,7 @@ export const mapBuildingsMock: Building[] = [
     architectPath: "/architects/theodor-wiederspahn",
     attachments: [
       {
-        src: "/images/Margs.jpg",
+        src: "/images/margs/Margs.jpg",
         alt: "Fachada historica com ornamentos classicos",
         caption: "Visão externa do MARGS.",
       },
