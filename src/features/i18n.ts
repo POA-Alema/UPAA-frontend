@@ -14,8 +14,12 @@ const resources = {
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
-        image_label: "Imagem"
-        
+        image_label: "Imagem",
+        alert_recentered_outside_limit: "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
+        alert_recentered_permission_denied: "Permissão de geolocalização negada. Exibindo o mapa centralizado no Centro Histórico.",
+        alert_geolocation_unavailable: "Geolocalização não disponível. Exibindo o mapa centralizado no Centro Histórico.",
+        no_markers_message: "Nenhum ponto disponivel para exibir.",
+        load_error_message: "Nao foi possivel carregar os dados do mapa.",
       }
     }
   },
@@ -31,7 +35,12 @@ const resources = {
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
-        image_label: "Image"
+        image_label: "Image",
+        alert_recentered_outside_limit: "You are outside the useful map area. Recentering to the Historic Center.",
+        alert_recentered_permission_denied: "Location permission denied. Showing the map centered on the Historic Center.",
+        alert_geolocation_unavailable: "Geolocation unavailable. Showing the map centered on the Historic Center.",
+        no_markers_message: "No points available to display.",
+        load_error_message: "Unable to load the map data.",
       }
     }
   },
@@ -47,7 +56,12 @@ const resources = {
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
-        image_label: "Bild"
+        image_label: "Bild",
+        alert_recentered_outside_limit: "Sie befinden sich außerhalb des nützlichen Kartenbereichs. Karte wird auf das historische Zentrum zentriert.",
+        alert_recentered_permission_denied: "Standortberechtigung verweigert. Karte wird auf das historische Zentrum zentriert.",
+        alert_geolocation_unavailable: "Geolokalisierung nicht verfügbar. Karte wird auf das historische Zentrum zentriert.",
+        no_markers_message: "Keine Punkte zum Anzeigen verfügbar.",
+        load_error_message: "Karten-Daten konnten nicht geladen werden.",
       }
     }
   }
