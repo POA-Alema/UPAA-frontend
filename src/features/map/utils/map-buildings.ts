@@ -1,3 +1,5 @@
+import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
+
 export type BuildingAttachment = {
   src: string;
   alt: string;
@@ -43,7 +45,7 @@ export function mapBuildingsToMarkers(buildings: Building[]): MapMarker[] {
       summary: b.summary,
       yearLabel: b.yearLabel,
       architectName: b.architectName,
-      routePath: b.slug ? `/buildings/${b.slug}` : undefined,
+      routePath: b.slug ? buildBuildingDetailHref(b.slug) : undefined,
       architectPath: b.architectPath,
       attachments: b.attachments ?? [],
       position: [b.latitude!, b.longitude!],

@@ -1,10 +1,14 @@
 {
-  "packageLockSha256": "38F5E3261B95F6348B7E2C339373E3294A98FE188EC704D7B93380E4DC9F8E3C",
+  "packageLockSha256": "7A9760787CF62315673A58479417C7EB74D82A5E4659551A272C54B237C17A75",
   "dependencies": {
+    "@tiptap/react": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
+    "i18next": "^26.0.8",
     "leaflet": "^1.9.4",
     "next": "^15.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-i18next": "^17.0.6",
     "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
@@ -20,11 +24,11 @@
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.24.0",
     "eslint-config-next": "^15.5.2",
-    "jsdom": "^29.0.2",
+    "jsdom": "^29.1.1",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.1",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.4"
   }
 }
