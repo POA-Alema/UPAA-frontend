@@ -84,7 +84,7 @@ const marker: MapMarker = {
   summary: "Um museu histórico emblemático.",
   yearLabel: "1912",
   architectName: "Theodor Wiederspahn",
-  routePath: "/buildings/margs",
+  routePath: "/buildings/margs?returnTo=%2Fmapa",
   architectPath: "/architects/theodor-wiederspahn",
   attachments: [{ src: "/margs.jpg", alt: "Fachada", caption: "Fachada" }],
   position: [-30.02, -51.23],
@@ -118,16 +118,11 @@ describe("MapMarkers", () => {
   it("renderiza a sidebar no desktop ao clicar em um marcador", () => {
     render(<MapMarkers markers={[marker]} />);
 
-    const mapMarker = screen.getByTestId("marker--30.02,-51.23");
-    fireEvent.click(mapMarker);
+    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
 
     const sidebar = screen.getByRole("complementary");
     expect(sidebar).toBeInTheDocument();
-    
-    // CORREÇÃO DO ERRO DE MÚLTIPLOS ELEMENTOS:
-    // Procuramos o MARGS especificamente no <h1> do conteúdo principal
     expect(within(sidebar).getByRole("heading", { name: "MARGS", level: 1 })).toBeInTheDocument();
-    
     expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
     expect(within(sidebar).getByText("1912")).toBeInTheDocument();
   });
