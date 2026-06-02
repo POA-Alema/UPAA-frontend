@@ -34,25 +34,16 @@ const selectedIcon = new L.Icon({
 
 const userLocationIcon = L.divIcon({
   className: "",
-  html: `
-    <div style="
-      width: 24px;
-      height: 24px;
-      background: #2563eb;
-      border: 4px solid #ffffff;
-      border-radius: 9999px;
-      box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.25);
-    "></div>
-  `,
+  html: `<div class="w-6 h-6 bg-blue-600 border-4 border-white rounded-full shadow-[0_0_0_8px_rgba(37,99,235,0.25)]"></div>`,
   iconSize: [24, 24],
   iconAnchor: [12, 12],
 });
 
 function MapPopupCard({
-                        marker,
-                        variant = "popup",
-                        onRequestClose,
-                      }: {
+  marker,
+  variant = "popup",
+  onRequestClose,
+}: {
   marker: MapMarker;
   variant?: "popup" | "sheet" | "sidebar";
   onRequestClose?: () => void;
@@ -210,12 +201,12 @@ type MapMarkersProps = {
   userPosition?: LatLngExpression | null;
 };
 
-export function MapMarkers(
-  {
+export function MapMarkers({
   markers,
   showPopups = true,
   userPosition = null,
-  }:MapMarkersProps){
+}: MapMarkersProps) {
+  const { t } = useTranslation("common");
   const [isMobile, setIsMobile] = useState(false);
   const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -300,7 +291,7 @@ export function MapMarkers(
       {userPosition && (
         <Marker position={userPosition} icon={userLocationIcon}>
           <Tooltip permanent direction="top" offset={[0, -18]}>
-            Você está aqui
+            {t("map.you_are_here")}
           </Tooltip>
         </Marker>
       )}

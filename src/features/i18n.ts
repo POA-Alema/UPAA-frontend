@@ -14,8 +14,8 @@ const resources = {
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
-        image_label: "Imagem"
-        
+        image_label: "Imagem",
+        you_are_here: "Você está aqui",
       }
     }
   },
@@ -31,7 +31,8 @@ const resources = {
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
-        image_label: "Image"
+        image_label: "Image",
+        you_are_here: "You are here"
       }
     }
   },
@@ -47,7 +48,8 @@ const resources = {
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
-        image_label: "Bild"
+        image_label: "Bild",
+        you_are_here: "Du bist hier"
       }
     }
   }
