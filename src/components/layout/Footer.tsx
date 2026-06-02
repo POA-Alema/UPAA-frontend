@@ -1,8 +1,7 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 type Props = { minimized?: boolean };
 
@@ -18,47 +17,47 @@ export default function Footer({ minimized }: Props) {
 
   const translations: Record<string, LangBundle> = {
     pt: {
-      title: 'Uma Porto Alegre Alemã',
-      subtitle: 'Explorando a herança arquitetônica alemã no centro histórico de Porto Alegre.',
+      title: "Uma Porto Alegre Alemã",
+      subtitle: "Explorando a herança arquitetônica alemã no centro histórico de Porto Alegre.",
       sections: {
-        intro: 'Introdução',
-        immigration: 'Imigração',
-        'map-preview': 'Mapa',
-        architects: 'Arquitetos',
+        intro: "Introdução",
+        immigration: "Imigração",
+        "map-preview": "Mapa",
+        architects: "Arquitetos",
       },
-      projectLine: 'Projeto Acadêmico desenvolvido na PUCRS'
+      projectLine: "Projeto Acadêmico desenvolvido na PUCRS"
     },
     en: {
-      title: 'A Germanic Porto Alegre',
-      subtitle: 'Exploring Germanic architectural heritage in Porto Alegre historic center.',
+      title: "A Germanic Porto Alegre",
+      subtitle: "Exploring Germanic architectural heritage in Porto Alegre historic center.",
       sections: {
-        intro: 'Intro',
-        immigration: 'Immigration',
-        'map-preview': 'Map',
-        architects: 'Architects',
+        intro: "Intro",
+        immigration: "Immigration",
+        "map-preview": "Map",
+        architects: "Architects",
       },
-      projectLine: 'Academic project developed at PUCRS'
+      projectLine: "Academic project developed at PUCRS"
     },
     de: {
-      title: 'Ein deutsches Porto Alegre',
-      subtitle: 'Erkunden des deutsch beeinflussten architektonischen Erbes im historischen Zentrum von Porto Alegre.',
+      title: "Ein deutsches Porto Alegre",
+      subtitle: "Erkunden des deutsch beeinflussten architektonischen Erbes im historischen Zentrum von Porto Alegre.",
       sections: {
-        intro: 'Einführung',
-        immigration: 'Immigration',
-        'map-preview': 'Karte',
-        architects: 'Architekten',
+        intro: "Einführung",
+        immigration: "Immigration",
+        "map-preview": "Karte",
+        architects: "Architekten",
       },
-      projectLine: 'Akademisches Projekt an der PUCRS'
+      projectLine: "Akademisches Projekt an der PUCRS"
     }
   };
 
-  const lang = i18n?.language ?? 'pt';
+  const lang = i18n?.language ?? "pt";
 
   const sections = [
-    { id: 'intro' },
-    { id: 'immigration' },
-    { id: 'map-preview' },
-    { id: 'architects' }
+    { id: "intro" },
+    { id: "immigration" },
+    { id: "map-preview" },
+    { id: "architects" }
   ];
 
   function renderNavGrid() {
@@ -67,7 +66,7 @@ export default function Footer({ minimized }: Props) {
         <div className="grid grid-cols-3 gap-4 text-center nav-items">
           {sections.map(function (s, idx) {
             const label = (translations[lang] && translations[lang].sections && translations[lang].sections[s.id]) || s.id;
-            const extra = idx === 3 ? 'col-start-2' : '';
+            const extra = idx === 3 ? "col-start-2" : "";
             return (
               <Link
                 key={s.id}
@@ -84,12 +83,12 @@ export default function Footer({ minimized }: Props) {
   }
 
   function handleMinClick(id: string) {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
     window.location.href = `/#${id}`;
@@ -129,7 +128,7 @@ export default function Footer({ minimized }: Props) {
         </div>
 
         <div className="w-full">
-          <div className="h-px my-4" style={{ background: 'var(--foreground)' }} />
+          <div className="h-px my-4" style={{ background: "var(--foreground)" }} />
         </div>
 
         <div className="w-full text-center text-primary text-xs leading-4 font-medium">{(translations[lang] && translations[lang].projectLine) || translations.pt.projectLine}</div>

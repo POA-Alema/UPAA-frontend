@@ -148,71 +148,65 @@ function MapPopupCard({
             )}
           </div>
 
-          {marker.routePath && (
-            <button
-              onClick={handleSeeMore}
-              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all"
-            >
-              <div className="flex items-center gap-3 text-[#1A1A1A]">
-                <span className="material-symbols-outlined font-bold">
-                  menu_book
-                </span>
-
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_work", "Explorar Obra")}
-                </span>
-              </div>
-
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
-                arrow_forward
-              </span>
-            </button>
-          )}
-
-          {externalRouteUrl && (
-            <a
-              href={externalRouteUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-              aria-label={t(
-                "map.open_route_aria",
-                "Abrir rota em aplicativo de navegação",
+          {(marker.routePath || externalRouteUrl || marker.architectPath) && (
+            <div className="flex flex-col gap-3">
+              {marker.routePath && (
+                <button
+                  onClick={handleSeeMore}
+                  className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 transition-all"
+                >
+                  <div className="flex items-center gap-3 text-[#E9C46A]">
+                    <span className="material-symbols-outlined">menu_book</span>
+                    <span className="uppercase tracking-wider text-sm">
+                      {t("map.know_work", "Explorar Obra")}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+                    arrow_forward
+                  </span>
+                </button>
               )}
-              className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
-            >
-              <div className="flex items-center gap-3 text-[#E9C46A]">
-                <span className="material-symbols-outlined">route</span>
 
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.open_route", "Abrir rota")}
-                </span>
-              </div>
+              {externalRouteUrl && (
+                <a
+                  href={externalRouteUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={t(
+                    "map.open_route_aria",
+                    "Abrir rota em aplicativo de navegação",
+                  )}
+                  className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+                >
+                  <div className="flex items-center gap-3 text-[#E9C46A]">
+                    <span className="material-symbols-outlined">route</span>
+                    <span className="uppercase tracking-wider text-sm">
+                      {t("map.open_route", "Abrir rota")}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
+                    arrow_forward
+                  </span>
+                </a>
+              )}
 
-              <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
-                arrow_forward
-              </span>
-            </a>
-          )}
-
-          {marker.architectPath && (
-            <Link
-              href={marker.architectPath}
-              className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
-            >
-              <div className="flex items-center gap-3 text-[#E9C46A]">
-                <span className="material-symbols-outlined">
-                  account_circle
-                </span>
-
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_author", "Sobre o Autor")}
-                </span>
-              </div>
-
-              <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
-                arrow_forward
-              </span>
-            </Link>
+              {marker.architectPath && (
+                <Link
+                  href={marker.architectPath}
+                  className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+                >
+                  <div className="flex items-center gap-3 text-[#E9C46A]">
+                    <span className="material-symbols-outlined">account_circle</span>
+                    <span className="uppercase tracking-wider text-sm">
+                      {t("map.know_author", "Sobre o Autor")}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
+                    arrow_forward
+                  </span>
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>
