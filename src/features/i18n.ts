@@ -16,13 +16,15 @@ const resources = {
         know_author: "Conhecer o autor",
         open_route: "Abrir rota",
         open_route_aria: "Abrir rota em aplicativo de navegação",
-        image_label: "Imagem"
+        image_label: "Imagem",
+        you_are_here: "Você está aqui",
       },
       building: {
         section_title: "Edificação",
         map_title: "Mapa",
         map_placeholder:
           "Integração com o mapa será conectada assim que a feature correspondente estiver disponível."
+      },
       }
     }
   },
@@ -40,13 +42,15 @@ const resources = {
         know_author: "Discover the author",
         open_route: "Open route",
         open_route_aria: "Open route in navigation app",
-        image_label: "Image"
+        image_label: "Image",
+        you_are_here: "You are here"
       },
       building: {
         section_title: "Building",
         map_title: "Map",
         map_placeholder:
           "Map integration will be connected as soon as the corresponding feature is available."
+      },
       }
     }
   },
@@ -64,13 +68,15 @@ const resources = {
         know_author: "Den Autor kennenlernen",
         open_route: "Route öffnen",
         open_route_aria: "Route in Navigations-App öffnen",
-        image_label: "Bild"
+        image_label: "Bild",
+        you_are_here: "Du bist hier"
       },
       building: {
         section_title: "Gebäude",
         map_title: "Karte",
         map_placeholder:
           "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht."
+      },
       }
     }
   }
