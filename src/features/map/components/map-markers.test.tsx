@@ -26,6 +26,7 @@ vi.mock("leaflet", () => ({
     Icon: class Icon {
       constructor() {}
     },
+    divIcon: vi.fn(() => ({})),
   },
 }));
 
@@ -118,11 +119,13 @@ describe("MapMarkers", () => {
   it("renderiza a sidebar no desktop ao clicar em um marcador", () => {
     render(<MapMarkers markers={[marker]} />);
 
-    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
+    const mapMarker = screen.getByTestId("marker--30.02,-51.23");
+    fireEvent.click(mapMarker);
 
     const sidebar = screen.getByRole("complementary");
     expect(sidebar).toBeInTheDocument();
     expect(within(sidebar).getByRole("heading", { name: "MARGS", level: 1 })).toBeInTheDocument();
+
     expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
     expect(within(sidebar).getByText("1912")).toBeInTheDocument();
   });
@@ -143,9 +146,9 @@ describe("MapMarkers", () => {
   it("exibe fallback de imagem quando não há anexos", () => {
     const markerEmpty = { ...marker, attachments: [] };
     render(<MapMarkers markers={[markerEmpty]} />);
-    
+
     fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
-    
+
     expect(screen.getByText("Imagem indisponível")).toBeInTheDocument();
   });
 
@@ -154,7 +157,7 @@ describe("MapMarkers", () => {
     render(<MapMarkers markers={[marker]} />);
 
     fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
-    
+
     const closeButton = screen.getByLabelText(/Fechar detalhes da edificação/i);
     fireEvent.click(closeButton);
 

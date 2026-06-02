@@ -210,11 +210,12 @@ type MapMarkersProps = {
   userPosition?: LatLngExpression | null;
 };
 
-export function MapMarkers({
-                             markers,
-                             showPopups = true,
-                             userPosition = null,
-                           }: MapMarkersProps) {
+export function MapMarkers(
+  {
+  markers,
+  showPopups = true,
+  userPosition = null,
+  }:MapMarkersProps){
   const [isMobile, setIsMobile] = useState(false);
   const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);

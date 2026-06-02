@@ -85,7 +85,7 @@ export function MapPlaceholder({
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         setUserPosition([
           position.coords.latitude,
@@ -101,6 +101,9 @@ export function MapPlaceholder({
         maximumAge: 0,
       },
     );
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   return (
