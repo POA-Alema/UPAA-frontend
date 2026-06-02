@@ -374,6 +374,10 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-4xl font-body">
+      <p className="mb-8 text-sm text-on-surface/50">
+        Campos marcados com <span className="text-primary">*</span> são obrigatórios.
+      </p>
+
       {submitMessage && (
         <div
           className={`mb-8 rounded-lg border p-4 ${
@@ -501,7 +505,7 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
 
           <div id="field-architect">
             <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
-              Arquiteto
+              Arquiteto *
             </label>
             <ArchitectSelect
               architects={architects}

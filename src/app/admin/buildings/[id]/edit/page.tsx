@@ -3,6 +3,7 @@ import { getBuildingById, updateBuilding } from '@/services/buildings';
 import { getArchitects } from '@/services/architects';
 import { BuildingForm } from '@/components/admin/BuildingForm';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 
 interface EditBuildingPageProps {
@@ -38,6 +39,9 @@ export default async function EditBuildingPage({ params }: EditBuildingPageProps
   const handleSubmit = async (data: BuildingFormData) => {
     'use server';
     await updateBuilding(id, data);
+    revalidatePath(`/admin/buildings/${id}/edit`);
+    revalidatePath(`/admin/buildings/${id}`);
+    revalidatePath('/admin/buildings');
     redirect('/admin/buildings?status=updated');
   };
 
