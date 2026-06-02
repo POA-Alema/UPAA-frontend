@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import L from "leaflet";
+import L, { type LatLngExpression } from "leaflet";
 import { Marker, Tooltip, useMap } from "react-leaflet";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,6 @@ import type {
   MapMarker,
 } from "@/features/map/utils/map-buildings";
 
-// Ícones
 const defaultIcon = new L.Icon({
   iconUrl: "/map-marker.svg",
   iconSize: [28, 40],
@@ -31,6 +30,13 @@ const selectedIcon = new L.Icon({
   popupAnchor: [0, -52],
   className:
     "filter drop-shadow-[0_0_12px_rgba(233,196,106,1)] transition-all duration-300",
+});
+
+const userLocationIcon = L.divIcon({
+  className: "",
+  html: `<div class="w-6 h-6 bg-blue-600 border-4 border-white rounded-full shadow-[0_0_0_8px_rgba(37,99,235,0.25)]"></div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 function MapPopupCard({
@@ -192,12 +198,15 @@ function MapPopupCard({
 type MapMarkersProps = {
   markers: MapMarker[];
   showPopups?: boolean;
+  userPosition?: LatLngExpression | null;
 };
 
 export function MapMarkers({
   markers,
   showPopups = true,
+  userPosition = null,
 }: MapMarkersProps) {
+  const { t } = useTranslation("common");
   const [isMobile, setIsMobile] = useState(false);
   const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -245,40 +254,48 @@ export function MapMarkers({
   const sheet =
     showPopups && isMobile && selectedMarker
       ? createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
+            isClosing ? "map-popup-sheet--closing" : ""
+          }`}
+        >
           <div
-            role="dialog"
-            aria-modal="true"
-            className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
-              isClosing ? "map-popup-sheet--closing" : ""
+            className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
+              isClosing ? "opacity-0" : "opacity-100"
+            }`}
+            onClick={closePanel}
+          />
+
+          <aside
+            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
+              isClosing ? "translate-y-full" : "translate-y-0"
             }`}
           >
-            <div
-              className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
-                isClosing ? "opacity-0" : "opacity-100"
-              }`}
-              onClick={closePanel}
+            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
+
+            <MapPopupCard
+              marker={selectedMarker}
+              onRequestClose={closePanel}
+              variant="sheet"
             />
-
-            <aside
-              className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
-                isClosing ? "translate-y-full" : "translate-y-0"
-              }`}
-            >
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
-
-              <MapPopupCard
-                marker={selectedMarker}
-                onRequestClose={closePanel}
-                variant="sheet"
-              />
-            </aside>
-          </div>,
-          document.body,
-        )
+          </aside>
+        </div>,
+        document.body,
+      )
       : null;
 
   return (
     <>
+      {userPosition && (
+        <Marker position={userPosition} icon={userLocationIcon}>
+          <Tooltip permanent direction="top" offset={[0, -18]}>
+            {t("map.you_are_here")}
+          </Tooltip>
+        </Marker>
+      )}
+
       {markers.map((m) => {
         const isSelected = selectedMarkerId === m.id;
 
