@@ -42,6 +42,10 @@ export function useLanguage(): UseLanguageReturn {
     setReady(true);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const setLocale = useCallback((next: SupportedLocale) => {
     persistLocale(next);
     setLocaleState(next);

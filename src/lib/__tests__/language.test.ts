@@ -2,11 +2,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   DEFAULT_LOCALE,
   detectBrowserLocale,
+  I18NEXT_LANGUAGE_STORAGE_KEY,
   LANGUAGE_STORAGE_KEY,
   persistLocale,
   readPersistedLocale,
   resolveLocale,
   SUPPORTED_LOCALES,
+  toI18nLanguage,
 } from '../language';
 
 describe('resolveLocale', () => {
@@ -17,9 +19,15 @@ describe('resolveLocale', () => {
   });
 
   it('maps base language code to a supported locale', () => {
+    expect(resolveLocale('pt-PT')).toBe('pt-BR');
     expect(resolveLocale('de-AT')).toBe('de');
     expect(resolveLocale('en-US')).toBe('en');
     expect(resolveLocale('en-GB')).toBe('en');
+  });
+
+  it('normalizes locale casing before resolving', () => {
+    expect(resolveLocale('pt-br')).toBe('pt-BR');
+    expect(resolveLocale('EN-us')).toBe('en');
   });
 
   it('falls back to DEFAULT_LOCALE for unsupported languages', () => {
@@ -77,7 +85,7 @@ describe('detectBrowserLocale', () => {
 
   it('falls back to DEFAULT_LOCALE for fully unsupported browser language', () => {
     mockNavigator(['fr-FR']);
-    expect(detectBrowserLocale()).toBe(DEFAULT_LOCALE);
+    expect(detectBrowserLocale()).toBeNull();
   });
 
   it('picks first matching locale from navigator.languages list', () => {
@@ -111,11 +119,17 @@ describe('localStorage persistence', () => {
   it('persistLocale saves the locale to localStorage', () => {
     persistLocale('de');
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('de');
+    expect(localStorage.getItem(I18NEXT_LANGUAGE_STORAGE_KEY)).toBe('de');
   });
 
   it('readPersistedLocale returns the previously persisted locale', () => {
     persistLocale('en');
     expect(readPersistedLocale()).toBe('en');
+  });
+
+  it('readPersistedLocale reads the existing i18next key as fallback', () => {
+    localStorage.setItem(I18NEXT_LANGUAGE_STORAGE_KEY, 'pt');
+    expect(readPersistedLocale()).toBe('pt-BR');
   });
 
   it('readPersistedLocale returns null for an unsupported stored value', () => {
@@ -139,5 +153,16 @@ describe('localStorage persistence', () => {
 
     Storage.prototype.setItem = setItem;
     Storage.prototype.getItem = getItem;
+  });
+});
+
+describe('toI18nLanguage', () => {
+  it('maps pt-BR to the i18next resource key', () => {
+    expect(toI18nLanguage('pt-BR')).toBe('pt');
+  });
+
+  it('keeps resource keys for en and de', () => {
+    expect(toI18nLanguage('en')).toBe('en');
+    expect(toI18nLanguage('de')).toBe('de');
   });
 });

@@ -6,24 +6,32 @@ export const DEFAULT_LOCALE: SupportedLocale = 'pt-BR';
 
 export const LANGUAGE_STORAGE_KEY = 'upaa:locale';
 
-export function resolveLocale(
-  locale?: string | null,
-): SupportedLocale {
+export const I18NEXT_LANGUAGE_STORAGE_KEY = 'i18nextLng';
+
+const LOCALE_BY_LANGUAGE: Record<string, SupportedLocale> = {
+  pt: 'pt-BR',
+  en: 'en',
+  de: 'de',
+};
+
+export function resolveLocale(locale?: string | null): SupportedLocale {
   if (!locale) {
     return DEFAULT_LOCALE;
   }
 
-  if (SUPPORTED_LOCALES.includes(locale as SupportedLocale)) {
-    return locale as SupportedLocale;
-  }
-
-  const baseLanguage = locale.split('-')[0];
-
-  const matchedLocale = SUPPORTED_LOCALES.find(
-    (supportedLocale) => supportedLocale === baseLanguage,
+  const normalizedLocale = locale.trim();
+  const exactLocale = SUPPORTED_LOCALES.find(
+    (supportedLocale) =>
+      supportedLocale.toLowerCase() === normalizedLocale.toLowerCase(),
   );
 
-  return matchedLocale ?? DEFAULT_LOCALE;
+  if (exactLocale) {
+    return exactLocale;
+  }
+
+  const baseLanguage = normalizedLocale.split('-')[0].toLowerCase();
+
+  return LOCALE_BY_LANGUAGE[baseLanguage] ?? DEFAULT_LOCALE;
 }
 
 export function detectBrowserLocale(): SupportedLocale | null {
@@ -36,26 +44,21 @@ export function detectBrowserLocale(): SupportedLocale | null {
     : [navigator.language];
 
   for (const language of browserLanguages) {
-    const resolvedLocale = resolveLocale(language);
+    const baseLanguage = language.split('-')[0].toLowerCase();
+    const resolvedLocale = LOCALE_BY_LANGUAGE[baseLanguage];
 
-    const isSupported = SUPPORTED_LOCALES.includes(resolvedLocale);
-
-    if (
-      isSupported &&
-      (language.startsWith('pt') ||
-        language.startsWith('en') ||
-        language.startsWith('de'))
-    ) {
+    if (resolvedLocale) {
       return resolvedLocale;
     }
   }
 
-  return DEFAULT_LOCALE;
+  return null;
 }
 
 export function persistLocale(locale: SupportedLocale): void {
   try {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, locale);
+    localStorage.setItem(I18NEXT_LANGUAGE_STORAGE_KEY, toI18nLanguage(locale));
   } catch {
     // ignore storage errors
   }
@@ -63,18 +66,32 @@ export function persistLocale(locale: SupportedLocale): void {
 
 export function readPersistedLocale(): SupportedLocale | null {
   try {
-    const storedLocale = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const storedLocale =
+      localStorage.getItem(LANGUAGE_STORAGE_KEY) ??
+      localStorage.getItem(I18NEXT_LANGUAGE_STORAGE_KEY);
 
     if (!storedLocale) {
       return null;
     }
 
-    const isSupported = SUPPORTED_LOCALES.includes(
-      storedLocale as SupportedLocale,
+    const normalizedLocale = storedLocale.trim();
+    const exactLocale = SUPPORTED_LOCALES.find(
+      (supportedLocale) =>
+        supportedLocale.toLowerCase() === normalizedLocale.toLowerCase(),
     );
 
-    return isSupported ? (storedLocale as SupportedLocale) : null;
+    if (exactLocale) {
+      return exactLocale;
+    }
+
+    const baseLanguage = normalizedLocale.split('-')[0].toLowerCase();
+
+    return LOCALE_BY_LANGUAGE[baseLanguage] ?? null;
   } catch {
     return null;
   }
+}
+
+export function toI18nLanguage(locale: SupportedLocale): string {
+  return locale === 'pt-BR' ? 'pt' : locale;
 }

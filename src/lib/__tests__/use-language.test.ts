@@ -30,6 +30,7 @@ describe('useLanguage — initialization with saved locale', () => {
     expect(result.current.ready).toBe(true);
     expect(result.current.locale).toBe('de');
     expect(result.current.source).toBe('persisted');
+    expect(document.documentElement.lang).toBe('de');
   });
 
   it('resolves to en when en is persisted', async () => {
@@ -62,7 +63,7 @@ describe('useLanguage — initialization without saved locale', () => {
     await act(async () => {});
 
     expect(result.current.locale).toBe('pt-BR');
-    expect(result.current.source).toBe('browser');
+    expect(result.current.source).toBe('default');
   });
 
   it('uses default locale and source when navigator is unavailable (SSR-like)', async () => {
