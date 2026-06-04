@@ -4,10 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import "@/features/i18n";
 import MenuToggle from "@/components/ui/MenuToggle";
+import { resolveLocale, toI18nLanguage } from "@/lib/language";
+import { useLanguage } from "@/lib/use-language";
+
 const Header = function Header() {
   const pathname = usePathname() || "/";
   const { i18n } = useTranslation();
+  const { locale, ready, setLocale, source } = useLanguage();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
@@ -76,7 +81,7 @@ const Header = function Header() {
     }
   };
 
-  const lang = i18n?.language ?? "pt";
+  const lang = toI18nLanguage(locale);
 
   const isLanding = pathname === "/";
   const actionHref = isLanding ? "/mapa" : "/";
@@ -90,16 +95,8 @@ const Header = function Header() {
   ];
 
   function changeLang(lng: string) {
-    if (i18n?.changeLanguage) {
-      i18n.changeLanguage(lng).catch(function () {});
-    }
-    try {
-      localStorage.setItem("i18nextLng", lng);
-    } catch {
-      // TODO: Handle error (e.g. show notification to user).
-      // This can fail if the user has disabled localStorage or in private browsing mode.
-      console.warn("Could not save language preference");
-    }
+    setLocale(resolveLocale(lng));
+    setOpen(false);
   };
 
   function scrollToSection(id: string) {
@@ -149,6 +146,17 @@ const Header = function Header() {
       document.removeEventListener("keydown", handleKeydown);
     };
   }, [open]);
+
+  useEffect(function () {
+    if (!ready || !i18n?.changeLanguage) {
+      return;
+    }
+
+    const nextLanguage = toI18nLanguage(locale);
+    if (i18n.language !== nextLanguage) {
+      i18n.changeLanguage(nextLanguage).catch(function () {});
+    }
+  }, [i18n, locale, ready]);
 
   return (
     <header className="w-full sticky top-0 z-50 bg-ui-surface text-white border-b border-zinc-800 shadow-md backdrop-blur-sm">
@@ -204,25 +212,35 @@ const Header = function Header() {
                 <button
                   onClick={() => { changeLang("pt"); }}
                   className="flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105"
-                  aria-pressed={i18n.language === "pt"}
+                  aria-describedby="language-source"
+                  aria-pressed={lang === "pt"}
                 >
                   {(translations[lang] && translations[lang].languages && translations[lang].languages.pt) || "Português"}
                 </button>
                 <button
                   onClick={() => { changeLang("de"); }}
                   className="flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105"
-                  aria-pressed={i18n.language === "de"}
+                  aria-describedby="language-source"
+                  aria-pressed={lang === "de"}
                 >
                   {(translations[lang] && translations[lang].languages && translations[lang].languages.de) || "Deutsch"}
                 </button>
                 <button
                   onClick={() => { changeLang("en"); }}
                   className="flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105"
-                  aria-pressed={i18n.language === "en"}
+                  aria-describedby="language-source"
+                  aria-pressed={lang === "en"}
                 >
                   {(translations[lang] && translations[lang].languages && translations[lang].languages.en) || "English"}
                 </button>
               </div>
+              <span className="sr-only" id="language-source">
+                {source === "persisted"
+                  ? "Idioma definido pelo usuário"
+                  : source === "browser"
+                    ? "Idioma detectado pelo navegador"
+                    : "Idioma padrão aplicado"}
+              </span>
             </div>
           </div>
       </div>
