@@ -10,10 +10,10 @@ export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
       {/* TODO: Implement dynamic data fetching for building details */}
       <article className="info-card">
         <p className="meta-line">
-          {building.district} - {building.yearLabel}
+          {building.location} - {building.constructionPeriod}
         </p>
         <h3>Edificação</h3>
-        <p>{building.summary}</p>
+        <p>{building.description}</p>
       </article>
       <article className="info-card">
         <h3>Mapa</h3>

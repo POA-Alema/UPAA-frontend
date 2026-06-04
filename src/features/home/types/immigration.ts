@@ -1,5 +1,6 @@
 export type ImmigrationSection = {
-  eyebrow: string;
+  subtitle?: string;
+  title: string;
   content: string;
   image?: {
     src: string;

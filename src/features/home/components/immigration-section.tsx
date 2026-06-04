@@ -1,6 +1,9 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 import { RichText } from "@/components/content/rich-text";
 import { PageSection } from "@/components/layout/page-section";
+import { immigrationMock } from "../mocks/immigration-mock";
 import type { ImmigrationSection } from "../types/immigration";
 
 type ImmigrationSectionComponentProps = {
@@ -10,22 +13,23 @@ type ImmigrationSectionComponentProps = {
 export function ImmigrationSectionComponent({
   data,
 }: ImmigrationSectionComponentProps) {
-  if (!data || !data.content) {
+  const [hasImageError, setHasImageError] = useState(false);
+
+  if (!data || !data.title?.trim() || !data.content?.trim()) {
     return null;
   }
 
+  const image = hasImageError ? immigrationMock.image : data.image ?? immigrationMock.image;
+
   return (
     <PageSection
-      eyebrow={data.eyebrow}
-      title={
-        <>
-          A Importância da <strong>Imigração Alemã</strong> para o Estado
-        </>
-      }
+      id="immigration"
+      eyebrow={data.subtitle}
+      title={<strong>{data.title}</strong>}
       className="home-flow__section immigration-section"
     >
       <div className="section-divider section-divider--accent"></div>
-
+    
       <RichText
         content={data.content}
         emphasizeFirstParagraph
@@ -33,16 +37,16 @@ export function ImmigrationSectionComponent({
         data-testid="immigration-content"
       />
 
-      {data.image ? (
+      {image ? (
         <figure className="immigration-section__media">
           <div className="architect-image-frame immigration-section__image-frame">
-            <Image
-              src={data.image.src}
-              alt={data.image.alt}
-              width={900}
-              height={675}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.src}
+              alt={image.alt}
               className="architect-image immigration-section__image"
               data-testid="immigration-image"
+              onError={() => setHasImageError(true)}
             />
           </div>
         </figure>
