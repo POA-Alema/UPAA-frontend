@@ -137,6 +137,12 @@ describe("MapMarkers", () => {
 
     expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
     expect(within(sidebar).getByText("1912")).toBeInTheDocument();
+    expect(
+      within(sidebar).getByRole("link", { name: /explorar obra/i }),
+    ).toHaveAttribute("href", "/buildings/margs?returnTo=%2Fmapa");
+    expect(
+      within(sidebar).getByRole("link", { name: /sobre o autor/i }),
+    ).toHaveAttribute("href", "/architects/theodor-wiederspahn");
   });
 
   it("abre a bottom sheet no mobile e bloqueia o scroll", () => {

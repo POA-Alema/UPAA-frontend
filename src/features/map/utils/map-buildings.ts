@@ -34,6 +34,10 @@ export type MapMarker = {
   position: [number, number];
 };
 
+export function buildBuildingDetailPath(slug: string) {
+  return `/buildings/${slug}`;
+}
+
 export function mapBuildingsToMarkers(buildings: Building[]): MapMarker[] {
   return buildings
     .filter((b) => b.latitude != null && b.longitude != null)
