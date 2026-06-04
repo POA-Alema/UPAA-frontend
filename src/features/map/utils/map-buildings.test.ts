@@ -80,7 +80,7 @@ describe("mapBuildingsToMarkers", () => {
       summary: "Descricao curta da obra",
       yearLabel: "1912",
       architectName: "Theodor Wiederspahn",
-      routePath: "/buildings/museu-x",
+      routePath: "/buildings/museu-x?returnTo=%2Fmapa",
       architectPath: "/architects/theodor-wiederspahn",
       position: [-30.01, -51.22],
     });

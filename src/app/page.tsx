@@ -2,9 +2,8 @@ import { Suspense } from "react";
 import { ArchitectPreview } from "@/features/architects/components/ArchitectPreview";
 import { getFeaturedArchitect } from "@/features/architects/data/architects";
 import { LandingContent } from "@/features/home/components/landing-content";
+import { ImmigrationSection } from "@/features/home/components/immigration-section-container";
 import { MapPreviewSection } from "@/features/home/components/map-preview-section";
-import { ImmigrationSectionComponent } from "@/features/home/components/immigration-section";
-import { immigrationMock } from "@/features/home/mocks/immigration-mock";
 import MainContainerSkeleton from "@/components/layout/MainContainerSkeleton";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -21,7 +20,7 @@ export default async function HomePage() {
             <LandingContent />
           </Suspense>
           <MapPreviewSection />
-          <ImmigrationSectionComponent data={immigrationMock} />
+          <ImmigrationSection />
           {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
         </div>
       </main>
