@@ -22,9 +22,7 @@ const resources = {
       building: {
         section_title: "Edificação",
         map_title: "Mapa",
-        map_placeholder:
-          "Integração com o mapa será conectada assim que a feature correspondente estiver disponível."
-      },
+        map_placeholder: "Integração com o mapa será conectada assim que a feature correspondente estiver disponível."
       }
     }
   },
@@ -48,9 +46,7 @@ const resources = {
       building: {
         section_title: "Building",
         map_title: "Map",
-        map_placeholder:
-          "Map integration will be connected as soon as the corresponding feature is available."
-      },
+        map_placeholder: "Map integration will be connected as soon as the corresponding feature is available."
       }
     }
   },
@@ -58,7 +54,7 @@ const resources = {
     common: {
       map: {
         close_details: "Gebäudedetails schließen",
-        image_unavailable: "Bild nicht verfügbar",
+        image_unavailable: "Bild não disponível",
         mapped_building: "Kartiertes Gebäude",
         page_unavailable: "Gebäudeseite noch nicht verfügbar",
         see_more: "Mehr sehen",
@@ -74,13 +70,11 @@ const resources = {
       building: {
         section_title: "Gebäude",
         map_title: "Karte",
-        map_placeholder:
-          "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht."
-      },
+        map_placeholder: "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht."
       }
     }
   }
-};
+}; 
 
 i18n
   .use(initReactI18next)

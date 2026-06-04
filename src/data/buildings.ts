@@ -11,6 +11,7 @@ export const buildings: Building[] = mapBuildingsMock.map((building) => ({
   description: building.summary,
   latitude: building.latitude,
   longitude: building.longitude,
+  constructor: building.architectName ?? 'Autor desconhecido', 
 }));
 
 export function getBuildingBySlug(slug: string) {

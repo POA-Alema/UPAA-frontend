@@ -99,7 +99,8 @@ function MapPopupCard({
         )}
       </div>
 
-      <div className="hover:overflow-y-auto overflow-hidden scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent pt-1.5 pb-4">
+      {/* ALTERAÇÃO AQUI: Mudado para overflow-y-auto por padrão e adicionado flex-1 para o scroll fluir no mobile */}
+      <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent pt-1.5 pb-4">
         <div className="relative w-full aspect-16/10 overflow-hidden group">
           {selectedAttachment ? (
             <>
@@ -280,36 +281,36 @@ export function MapMarkers({
   const sheet =
     showPopups && isMobile && selectedMarker
       ? createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
-            isClosing ? "map-popup-sheet--closing" : ""
-          }`}
-        >
           <div
-            className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
-              isClosing ? "opacity-0" : "opacity-100"
-            }`}
-            onClick={closePanel}
-          />
-
-          <aside
-            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
-              isClosing ? "translate-y-full" : "translate-y-0"
+            role="dialog"
+            aria-modal="true"
+            className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
+              isClosing ? "map-popup-sheet--closing" : ""
             }`}
           >
-            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
-
-            <MapPopupCard
-              marker={selectedMarker}
-              onRequestClose={closePanel}
-              variant="sheet"
+            <div
+              className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
+                isClosing ? "opacity-0" : "opacity-100"
+              }`}
+              onClick={closePanel}
             />
-          </aside>
-        </div>,
-        document.body,
-      )
+
+            <aside
+              className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
+                isClosing ? "translate-y-full" : "translate-y-0"
+              }`}
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
+
+              <MapPopupCard
+                marker={selectedMarker}
+                onRequestClose={closePanel}
+                variant="sheet"
+              />
+            </aside>
+          </div>,
+          document.body,
+        )
       : null;
 
   return (

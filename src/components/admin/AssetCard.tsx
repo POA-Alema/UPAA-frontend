@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image'; // 1. Importado o componente do Next.js
 import type { BuildingImage } from '@/types/building';
 
 interface AssetCardProps {
@@ -23,12 +24,17 @@ export default function AssetCard({ image, onRemove }: AssetCardProps) {
 
   return (
     <article className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-high/40">
-      <img
-        src={src}
-        alt={image.alt}
-        className="h-56 w-full object-cover"
-        onError={handleError}
-      />
+      {/* 2. Substituído <img> por <Image /> com as propriedades necessárias */}
+      <div className="relative h-56 w-full">
+        <Image
+          src={src}
+          alt={image.alt}
+          fill // Faz a imagem ocupar todo o espaço do container pai de 56px de altura
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Ajuda o Next.js a baixar o tamanho ideal de imagem
+          className="object-cover"
+          onError={handleError}
+        />
+      </div>
 
       <div className="space-y-3 p-4">
         <div>
