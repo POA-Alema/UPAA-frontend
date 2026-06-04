@@ -151,7 +151,7 @@ function MapPopupCard({
               {marker.routePath && (
                 <Link
                   href={marker.routePath}
-                  className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 no-underline transition-all"
+                  className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 no-underline text-white transition-all"
                 >
                   <div className="flex items-center gap-3 text-[#E9C46A]">
                     <span className="material-symbols-outlined">menu_book</span>
@@ -159,7 +159,7 @@ function MapPopupCard({
                       {t("map.know_work", "Explorar Obra")}
                     </span>
                   </div>
-                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+                  <span className="material-symbols-outlined text-white group-hover:translate-x-1 transition-transform">
                     arrow_forward
                   </span>
                 </Link>
