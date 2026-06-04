@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import L, { type LatLngExpression } from "leaflet";
 import { Marker, Tooltip, useMap } from "react-leaflet";
-import { useRouter } from "next/navigation";
 
 import type {
   BuildingAttachment,
@@ -49,15 +48,10 @@ function MapPopupCard({
   onRequestClose?: () => void;
 }) {
   const { t } = useTranslation("common");
-  const router = useRouter();
   const map = useMap();
 
   const selectedAttachment: BuildingAttachment | undefined =
     marker.attachments[0];
-
-  const handleSeeMore = () => {
-    if (marker.routePath) router.push(marker.routePath);
-  };
 
   useEffect(() => {
     if (!map) return;
@@ -155,9 +149,9 @@ function MapPopupCard({
           {(marker.routePath || marker.architectPath) && (
             <div className="flex flex-col gap-3">
               {marker.routePath && (
-                <button
-                  onClick={handleSeeMore}
-                  className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 transition-all"
+                <Link
+                  href={marker.routePath}
+                  className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 no-underline text-white transition-all"
                 >
                   <div className="flex items-center gap-3 text-[#E9C46A]">
                     <span className="material-symbols-outlined">menu_book</span>
@@ -165,10 +159,10 @@ function MapPopupCard({
                       {t("map.know_work", "Explorar Obra")}
                     </span>
                   </div>
-                  <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+                  <span className="material-symbols-outlined text-white group-hover:translate-x-1 transition-transform">
                     arrow_forward
                   </span>
-                </button>
+                </Link>
               )}
 
               {marker.architectPath && (
