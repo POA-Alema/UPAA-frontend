@@ -5,10 +5,10 @@ const resources = {
   pt: {
     common: {
       map: {
-        close_details: "Fechar detalhes da edificacao",
-        image_unavailable: "Imagem indisponivel",
-        mapped_building: "Edificacao mapeada",
-        page_unavailable: "Pagina da edificacao ainda nao disponivel",
+        close_details: "Fechar detalhes da edificação",
+        image_unavailable: "Imagem indisponível",
+        mapped_building: "Edificação mapeada",
+        page_unavailable: "Página da edificação ainda não disponível",
         see_more: "Ver mais",
         year: "Ano",
         author: "Autoria",

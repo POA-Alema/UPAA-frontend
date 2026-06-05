@@ -10,7 +10,7 @@ const translations: Record<string, string> = {
   "map.mapped_building": "Edificação",
   "map.year": "Ano",
   "map.author": "Arquiteto",
-  "map.know_work": "Explorar Obra",
+  "map.know_work": "Conhecer a obra",
   "map.know_author": "Sobre o Autor",
   "map.open_route": "Abrir rota",
   "map.open_route_aria": "Abrir rota em aplicativo de navegação",
@@ -186,7 +186,7 @@ describe("MapMarkers", () => {
 
     fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
 
-    const closeButton = screen.getByLabelText(/Fechar detalhes da edificacao/i);
+    const closeButton = screen.getByLabelText(/Fechar detalhes da edificação/i);
     fireEvent.click(closeButton);
 
     act(() => {
