@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 
 export default function AdminLayout({
   children,
@@ -18,24 +18,7 @@ export default function AdminLayout({
           Admin
         </h1>
 
-        {/* Links ficam lado a lado no mobile (flex-row) e em lista no desktop (md:flex-col) */}
-        <nav className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
-          <Link
-            href="/admin"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-surface-container-high transition-colors whitespace-nowrap"
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            Dashboard
-          </Link>
-
-          <Link
-            href="/admin/buildings"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary whitespace-nowrap"
-          >
-            <span className="material-symbols-outlined">domain</span>
-            Edificações
-          </Link>
-        </nav>
+        <AdminSidebarNav />
       </aside>
 
       {/* Conteúdo Principal */}

@@ -34,6 +34,24 @@ export default function AdminPage() {
               Gerencie todas as edificações cadastradas, crie novas e edite existentes.
             </p>
           </Link>
+
+          {/* Módulo: Landing Page */}
+          <Link
+            href="/admin/landing-page"
+            className="bg-surface-container-high/40 p-8 rounded-xl border border-outline-variant/10 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span className="material-symbols-outlined text-primary text-2xl">
+                title
+              </span>
+              <h2 className="font-headline font-bold text-xl text-on-surface">
+                Landing Page
+              </h2>
+            </div>
+            <p className="text-on-surface-variant text-sm">
+              Edite as seções, imagens, textos e instituições em destaque da página inicial.
+            </p>
+          </Link>
         </div>
       </div>
     </section>
