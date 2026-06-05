@@ -12,6 +12,9 @@
 
 ## Screenshots (when applicable)
 
+- Adicione aqui as telas de Figma usadas como referência, especialmente as telas de mapa e o painel de informações.
+- Para US22-FE86, inclua prints dos estados de: permissão negada, dentro do limite e fora do limite.
+
 ## How to Test
 <!-- Provide instructions on how to test this PR -->
 <!-- Example: -->
