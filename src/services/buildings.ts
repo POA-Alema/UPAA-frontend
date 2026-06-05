@@ -279,20 +279,38 @@ function fromFormDataToApiDto(data: BuildingFormData) {
 }
 
 export async function getBuildings(): Promise<Building[]> {
-  const response = await requestBuildingsApi<Record<string, unknown>[]>('');
-  if (!response) return [];
+  try {
+    const response = await requestBuildingsApi<Record<string, unknown>[]>('');
+    if (!response) return [];
 
-  // GET only returns architectId; resolve the name from the architects list.
-  const architectNames = new Map((await getArchitects()).map((a) => [a.id, a.name]));
+    let architectNames = new Map<string, string>();
 
-  return response.map((api) => {
-    const form = fromApiBuildingToFormData(api);
-    const building = normalizeBuilding({ ...form, id: (api['id'] ?? api['_id'] ?? '') as string, createdAt: pickField(api, 'createdAt', 'created_at') as Date | undefined, updatedAt: pickField(api, 'updatedAt', 'updated_at') as Date | undefined });
-    if (!building.architect && building.architectId) {
-      building.architect = architectNames.get(building.architectId) ?? building.architect;
+    try {
+      architectNames = new Map((await getArchitects()).map((a) => [a.id, a.name]));
+    } catch (error) {
+      console.warn('[buildings] getArchitects failed:', error);
     }
-    return building;
-  });
+
+    return response.map((api) => {
+      const form = fromApiBuildingToFormData(api);
+
+      const building = normalizeBuilding({
+        ...form,
+        id: (api['id'] ?? api['_id'] ?? '') as string,
+        createdAt: pickField(api, 'createdAt', 'created_at') as Date | undefined,
+        updatedAt: pickField(api, 'updatedAt', 'updated_at') as Date | undefined
+      });
+
+      if (!building.architect && building.architectId) {
+        building.architect = architectNames.get(building.architectId) ?? building.architect;
+      }
+
+      return building;
+    });
+  } catch (error) {
+    console.warn('[buildings] getBuildings failed:', error);
+    return [];
+  }
 }
 
 export async function getBuildingById(id: string): Promise<Building | null> {
