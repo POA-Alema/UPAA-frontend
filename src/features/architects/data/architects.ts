@@ -1,8 +1,21 @@
 import { architectsMock } from "../mocks/architect-mock";
 import type { Architect } from "../types/architect";
 
+const ARCHITECTS_ENDPOINT = "/architects";
+
 type LocalizedField = {
   pt?: string;
+};
+
+type ArchitectApiRecord = Partial<Architect> & {
+  name?: string;
+  nome?: string;
+  biography?: string;
+  biografia?: string;
+  summary?: string;
+  resumo?: string;
+  imageUrl?: string;
+  imageURL?: string;
 };
 
 type LandingPageRecord = {
@@ -35,6 +48,94 @@ function extractSlug(target?: string): string | undefined {
   const segments = target.split("/").filter(Boolean);
 
   return segments.at(-1);
+}
+
+function getApiBaseUrl(): string | null {
+  return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || null;
+}
+
+function hasRequiredArchitectFields(
+  architect: Partial<Architect>
+): architect is Architect {
+  return Boolean(
+    architect.id &&
+      architect.slug &&
+      architect.title &&
+      architect.bioSummary !== undefined && 
+      architect.bio
+  );
+}
+
+function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
+  const title = record.title?.trim() || record.name?.trim() || record.nome?.trim();
+  const slug = record.slug?.trim();
+  const bio =
+    record.bio?.trim() ||
+    record.biography?.trim() ||
+    record.biografia?.trim();
+  const bioSummary =
+    record.bioSummary?.trim() ||
+    record.summary?.trim() ||
+    record.resumo?.trim() ||
+    "";
+  const imageSrc =
+    record.image?.src?.trim() ||
+    record.imageUrl?.trim() ||
+    record.imageURL?.trim();
+
+  const architect: Partial<Architect> = {
+    id: record.id ? String(record.id) : slug,
+    slug,
+    eyebrow: record.eyebrow,
+    title,
+    bioSummary,
+    bio,
+    image: imageSrc
+      ? {
+          src: imageSrc,
+          alt: record.image?.alt || title || "",
+          caption: record.image?.caption,
+        }
+      : record.image,
+    actions: record.actions,
+    details: record.details,
+    characteristics: record.characteristics,
+    works: record.works,
+    ctaDescription: record.ctaDescription,
+  };
+
+  return hasRequiredArchitectFields(architect) ? architect : null;
+}
+
+async function fetchArchitectsFromApi(): Promise<Architect[] | null> {
+  const baseUrl = getApiBaseUrl();
+
+  if (!baseUrl) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}${ARCHITECTS_ENDPOINT}`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as
+      | ArchitectApiRecord
+      | ArchitectApiRecord[];
+    const records = Array.isArray(payload) ? payload : [payload];
+    const architects = records
+      .map((record) => mapArchitectFromApi(record))
+      .filter((architect): architect is Architect => Boolean(architect));
+
+    return architects;
+  } catch (error) {
+    console.error("[architects] fetchArchitectsFromApi failed:", error);
+    return null;
+  }
 }
 
 function mapFeaturedArchitect(
@@ -83,8 +184,7 @@ function mapFeaturedArchitect(
 }
 
 export async function listArchitects(): Promise<Architect[]> {
-  // TODO: Replace mock data with CMS-backed source when the content layer becomes available.
-  return architectsMock;
+  return (await fetchArchitectsFromApi()) ?? architectsMock;
 }
 
 export async function getArchitectBySlug(slug: string): Promise<Architect | null> {
@@ -94,7 +194,7 @@ export async function getArchitectBySlug(slug: string): Promise<Architect | null
 
 export async function getFeaturedArchitect(): Promise<Architect | null> {
   const fallback = architectsMock[0] ?? null;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const baseUrl = getApiBaseUrl();
 
   if (!fallback || !baseUrl) {
     return fallback;
