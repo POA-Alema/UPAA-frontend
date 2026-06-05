@@ -225,14 +225,15 @@ export async function updateLandingPageData(data: LandingPageData): Promise<Land
     });
 
     if (!response.ok) {
-      // If server responded with error, return local data
-      return getLocalData();
+      throw new Error('Erro ao salvar no servidor. As alterações foram preservadas localmente.');
     }
 
     const payload = await response.json();
     return payload || getLocalData();
   } catch (error) {
-    console.warn('API error updating landing page. Saved changes to local storage fallback.', error);
-    return getLocalData();
+    if (error instanceof Error && error.message.includes('salvar no servidor')) {
+      throw error;
+    }
+    throw new Error('Servidor indisponível. As alterações foram preservadas localmente.');
   }
 }

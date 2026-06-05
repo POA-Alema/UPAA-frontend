@@ -110,4 +110,39 @@ describe('landingPage service', () => {
       })
     );
   });
+
+  it('should throw and preserve local data when API returns error response', async () => {
+    const updateData: LandingPageData = {
+      ...INITIAL_LANDING_PAGE_DATA,
+      id: 'existing-id',
+      mainTitle: { pt: 'Título que falhou no servidor' },
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 500 })
+    );
+
+    await expect(updateLandingPageData(updateData)).rejects.toThrow(
+      'Erro ao salvar no servidor. As alterações foram preservadas localmente.'
+    );
+
+    expect(JSON.parse(localStorage.getItem('upaa_landing_page') || '{}')).toEqual(updateData);
+  });
+
+  it('should throw and preserve local data when API is unreachable', async () => {
+    const updateData: LandingPageData = {
+      ...INITIAL_LANDING_PAGE_DATA,
+      id: 'existing-id',
+      mainTitle: { pt: 'Título offline' },
+    };
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+
+    await expect(updateLandingPageData(updateData)).rejects.toThrow(
+      'Servidor indisponível. As alterações foram preservadas localmente.'
+    );
+
+    expect(JSON.parse(localStorage.getItem('upaa_landing_page') || '{}')).toEqual(updateData);
+  });
 });
