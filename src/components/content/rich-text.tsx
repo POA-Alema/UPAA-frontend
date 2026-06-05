@@ -11,7 +11,11 @@ export function RichText({
   className = "",
   ...props
 }: RichTextProps) {
-  const paragraphs = content
+  const processedContent = content
+    .replace(/<\/p>\s*<p>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "");
+
+  const paragraphs = processedContent
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
