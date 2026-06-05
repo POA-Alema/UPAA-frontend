@@ -34,8 +34,15 @@ const MapMarkers = dynamic(
   { ssr: false },
 );
 
+const MapRecenterController = dynamic(
+  () =>
+    import("./map-recenter-controller").then((m) => m.MapRecenterController),
+  { ssr: false },
+);
+
 type MapPlaceholderProps = {
   className?: string;
+  enableGeolocation?: boolean;
   showPopups?: boolean;
   showZoomControls?: boolean;
 };
@@ -52,6 +59,7 @@ const DEFAULT_CENTER: [number, number] = [
 
 export function MapPlaceholder({
   className = "h-125",
+  enableGeolocation,
   showPopups = true,
   showZoomControls,
 }: MapPlaceholderProps) {
@@ -67,6 +75,7 @@ export function MapPlaceholder({
   const [alertState, setAlertState] = useState<AlertState | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const recenteredReasons = useRef<Set<RecentralizationReason>>(new Set());
+  const shouldUseGeolocation = enableGeolocation ?? showPopups;
 
   useEffect(() => {
     let isMounted = true;
@@ -131,7 +140,7 @@ export function MapPlaceholder({
       if (reason === "outside_limit") {
         return t(
           "map.alert_recentered_outside_limit",
-          "Voce esta fora da area util do mapa. Recentralizando no Centro Historico.",
+          "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
         );
       }
 
@@ -165,6 +174,10 @@ export function MapPlaceholder({
   );
 
   useEffect(() => {
+    if (!shouldUseGeolocation) {
+      return;
+    }
+
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       maybeRecenter({
         shouldRecenter: true,
@@ -184,10 +197,7 @@ export function MapPlaceholder({
         }
 
         setAlertState(null);
-        setUserPosition([
-          position.coords.latitude,
-          position.coords.longitude,
-        ]);
+        setUserPosition([position.coords.latitude, position.coords.longitude]);
       },
       (error) => {
         setUserPosition(null);
@@ -203,7 +213,21 @@ export function MapPlaceholder({
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
-  }, [maybeRecenter]);
+  }, [maybeRecenter, shouldUseGeolocation]);
+
+  useEffect(() => {
+    if (!alertState) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setAlertState(null);
+    }, 6000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [alertState]);
 
   return (
     <div className={`w-full relative ${className}`}>
@@ -214,9 +238,7 @@ export function MapPlaceholder({
         minZoom={15}
         ref={mapRef}
         zoomControl={
-          typeof showZoomControls === "boolean"
-            ? showZoomControls
-            : showPopups
+          typeof showZoomControls === "boolean" ? showZoomControls : showPopups
         }
         className="w-full h-full"
       >
@@ -230,8 +252,23 @@ export function MapPlaceholder({
         <MapMarkers
           markers={markers}
           showPopups={showPopups}
-          userPosition={userPosition}
+          userPosition={shouldUseGeolocation ? userPosition : null}
         />
+
+        {shouldUseGeolocation ? (
+          <MapRecenterController
+            center={mapCenter}
+            onMapReady={(map) => {
+              mapRef.current = map;
+            }}
+            onOutsideLimit={() => {
+              maybeRecenter({
+                shouldRecenter: true,
+                reason: "outside_limit",
+              });
+            }}
+          />
+        ) : null}
       </MapContainer>
 
       {alertState ? (
@@ -240,7 +277,7 @@ export function MapPlaceholder({
           aria-live="polite"
           aria-atomic="true"
           data-recenter-reason={alertState.reason ?? undefined}
-          className="pointer-events-none fixed left-1/2 top-4 z-50 w-[min(90vw,32rem)] -translate-x-1/2 rounded-2xl border border-black/10 bg-black/85 px-5 py-4 text-sm text-white shadow-2xl backdrop-blur-sm"
+          className="pointer-events-none absolute left-1/2 top-4 z-10000 w-[min(90vw,32rem)] -translate-x-1/2 rounded-2xl border border-black/10 bg-black/85 px-5 py-4 text-sm text-white shadow-2xl backdrop-blur-sm"
         >
           {alertState.message}
         </div>

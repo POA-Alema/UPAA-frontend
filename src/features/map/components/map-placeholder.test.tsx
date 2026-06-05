@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useEffect, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapPlaceholder } from "./map-placeholder";
 import { DEFAULT_MAP_CENTER } from "@/features/map/utils/location";
@@ -47,6 +47,28 @@ vi.mock("next/dynamic", () => ({
       }
 
       return MockTileLayer;
+    }
+
+    if (loaderText.includes("map-recenter-controller")) {
+      function MockMapRecenterController({
+        onMapReady,
+        onOutsideLimit,
+      }: {
+        onMapReady?: (map: { flyTo: typeof flyToMock }) => void;
+        onOutsideLimit?: () => void;
+      }) {
+        useEffect(() => {
+          onMapReady?.({ flyTo: flyToMock });
+        }, [onMapReady]);
+
+        return (
+          <button data-testid="recenter-controller" onClick={onOutsideLimit}>
+            recenter
+          </button>
+        );
+      }
+
+      return MockMapRecenterController;
     }
 
     function MockMapMarkers({
@@ -129,6 +151,7 @@ function mockGeolocation(
 describe("MapPlaceholder geolocation recentering", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -144,6 +167,7 @@ describe("MapPlaceholder geolocation recentering", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it("keeps the user position when it is inside the distance limit", async () => {
@@ -177,9 +201,9 @@ describe("MapPlaceholder geolocation recentering", () => {
     render(<MapPlaceholder />);
 
     expect(
-      await screen.findByText(/Voce esta fora da area util do mapa/i),
+      await screen.findByText(/fora da.*mapa/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Recentralizando no Centro Historico/i)).toHaveAttribute(
+    expect(screen.getByText(/Recentralizando.*Centro/i)).toHaveAttribute(
       "role",
       "status",
     );
@@ -205,6 +229,43 @@ describe("MapPlaceholder geolocation recentering", () => {
     );
     expect(trackMapRecentralization).toHaveBeenCalledWith({
       reason: "permission_denied",
+    });
+  });
+
+  it("does not run geolocation alerts when geolocation is disabled", async () => {
+    mockGeolocation(
+      geolocationPosition(
+        DEFAULT_MAP_CENTER.latitude + 0.05,
+        DEFAULT_MAP_CENTER.longitude + 0.05,
+      ),
+    );
+
+    render(<MapPlaceholder showPopups={false} />);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith("/api/buildings");
+    });
+
+    expect(watchPositionMock).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Recentralizando/i)).not.toBeInTheDocument();
+  });
+
+  it("recenters when the map viewport moves outside the useful area", async () => {
+    mockGeolocation(
+      geolocationPosition(
+        DEFAULT_MAP_CENTER.latitude + 0.001,
+        DEFAULT_MAP_CENTER.longitude + 0.001,
+      ),
+    );
+
+    render(<MapPlaceholder />);
+
+    fireEvent.click(await screen.findByTestId("recenter-controller"));
+
+    expect(await screen.findByText(/fora da.*mapa/i)).toBeInTheDocument();
+    expect(flyToMock).toHaveBeenCalled();
+    expect(trackMapRecentralization).toHaveBeenCalledWith({
+      reason: "outside_limit",
     });
   });
 });

@@ -21,11 +21,11 @@ const resources = {
         fallback: "Dados reais indisponiveis. Exibindo pontos de referencia.",
         you_are_here: "Voce esta aqui",
         alert_recentered_outside_limit:
-          "Voce esta fora da area util do mapa. Recentralizando no Centro Historico.",
+          "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
         alert_recentered_permission_denied:
-          "Permissao de geolocalizacao negada. Exibindo o mapa centralizado no Centro Historico.",
+          "Permissão de geolocalização negada. Exibindo o mapa centralizado no Centro Histórico.",
         alert_geolocation_unavailable:
-          "Geolocalizacao nao disponivel. Exibindo o mapa centralizado no Centro Historico.",
+          "Geolocalização não disponível. Exibindo o mapa centralizado no Centro Histórico.",
       },
     },
   },
@@ -72,7 +72,8 @@ const resources = {
         loading: "Kartendaten werden geladen.",
         empty: "Keine Punkte zum Anzeigen verfuegbar.",
         load_error: "Kartendaten konnten nicht geladen werden.",
-        fallback: "Echtzeitdaten nicht verfuegbar. Referenzpunkte werden angezeigt.",
+        fallback:
+          "Echtzeitdaten nicht verfuegbar. Referenzpunkte werden angezeigt.",
         you_are_here: "Du bist hier",
         alert_recentered_outside_limit:
           "Sie befinden sich ausserhalb des nutzbaren Kartenbereichs. Karte wird auf das historische Zentrum zentriert.",
