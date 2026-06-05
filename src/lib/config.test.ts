@@ -24,7 +24,7 @@ describe('getPublicRuntimeConfig', () => {
     delete process.env.NEXT_PUBLIC_API_URL;
 
     expect(getPublicRuntimeConfig()).toEqual({
-      apiUrl: 'http://localhost:8080'
+      apiUrl: 'http://localhost:3001'
     });
   });
 });
