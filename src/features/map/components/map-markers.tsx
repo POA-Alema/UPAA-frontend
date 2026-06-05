@@ -14,6 +14,7 @@ import type {
   BuildingAttachment,
   MapMarker,
 } from "@/features/map/utils/map-buildings";
+import { buildExternalRouteUrl } from "@/features/map/utils/external-route";
 
 const defaultIcon = new L.Icon({
   iconUrl: "/map-marker.svg",
@@ -52,6 +53,8 @@ function MapPopupCard({
 
   const selectedAttachment: BuildingAttachment | undefined =
     marker.attachments[0];
+  const [latitude, longitude] = marker.position;
+  const externalRouteUrl = buildExternalRouteUrl({ latitude, longitude });
 
   useEffect(() => {
     if (!map) return;
@@ -79,7 +82,7 @@ function MapPopupCard({
 
         {onRequestClose && (
           <button
-            aria-label={t("map.close_details", "Fechar detalhes da edificacao")}
+            aria-label={t("map.close_details", "Fechar detalhes da edificação")}
             onClick={onRequestClose}
             className="group p-2 hover:bg-white/10 transition-all flex items-center justify-center rounded-full border-none bg-transparent shrink-0"
           >
@@ -90,7 +93,8 @@ function MapPopupCard({
         )}
       </div>
 
-      <div className="hover:overflow-y-auto overflow-hidden scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent pt-1.5 pb-4">
+      {/* ALTERAÇÃO AQUI: Mudado para overflow-y-auto por padrão e adicionado flex-1 para o scroll fluir no mobile */}
+      <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#E9C46A]/20 hover:scrollbar-thumb-[#E9C46A]/40 scrollbar-track-transparent pt-1.5 pb-4">
         <div className="relative w-full aspect-16/10 overflow-hidden group">
           {selectedAttachment ? (
             <>
@@ -146,7 +150,7 @@ function MapPopupCard({
             )}
           </div>
 
-          {(marker.routePath || marker.architectPath) && (
+          {(marker.routePath || externalRouteUrl || marker.architectPath) && (
             <div className="flex flex-col gap-3">
               {marker.routePath && (
                 <Link
@@ -164,6 +168,29 @@ function MapPopupCard({
                     arrow_forward
                   </span>
                 </Link>
+              )}
+
+              {externalRouteUrl && (
+                <a
+                  href={externalRouteUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={t(
+                    "map.open_route_aria",
+                    "Abrir rota em aplicativo de navegação",
+                  )}
+                  className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+                >
+                  <div className="flex items-center gap-3 text-[#E9C46A]">
+                    <span className="material-symbols-outlined">route</span>
+                    <span className="uppercase tracking-wider text-sm">
+                      {t("map.open_route", "Abrir rota")}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
+                    arrow_forward
+                  </span>
+                </a>
               )}
 
               {marker.architectPath && (
@@ -252,36 +279,36 @@ export function MapMarkers({
   const sheet =
     showPopups && isMobile && selectedMarker
       ? createPortal(
-        <div
-          role="dialog"
-          aria-modal="true"
-          className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
-            isClosing ? "map-popup-sheet--closing" : ""
-          }`}
-        >
           <div
-            className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
-              isClosing ? "opacity-0" : "opacity-100"
-            }`}
-            onClick={closePanel}
-          />
-
-          <aside
-            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
-              isClosing ? "translate-y-full" : "translate-y-0"
+            role="dialog"
+            aria-modal="true"
+            className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
+              isClosing ? "map-popup-sheet--closing" : ""
             }`}
           >
-            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
-
-            <MapPopupCard
-              marker={selectedMarker}
-              onRequestClose={closePanel}
-              variant="sheet"
+            <div
+              className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
+                isClosing ? "opacity-0" : "opacity-100"
+              }`}
+              onClick={closePanel}
             />
-          </aside>
-        </div>,
-        document.body,
-      )
+
+            <aside
+              className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
+                isClosing ? "translate-y-full" : "translate-y-0"
+              }`}
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
+
+              <MapPopupCard
+                marker={selectedMarker}
+                onRequestClose={closePanel}
+                variant="sheet"
+              />
+            </aside>
+          </div>,
+          document.body,
+        )
       : null;
 
   return (

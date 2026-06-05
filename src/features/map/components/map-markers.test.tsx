@@ -1,14 +1,25 @@
-/* eslint-disable @next/next/no-img-element */
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactNode, ComponentPropsWithoutRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapMarkers } from "./map-markers";
 import type { MapMarker } from "@/features/map/utils/map-buildings";
 
-// 1. MOCK i18n
+const translations: Record<string, string> = {
+  "map.close_details": "Fechar detalhes da edificação",
+  "map.image_unavailable": "Imagem indisponível",
+  "map.mapped_building": "Edificação",
+  "map.year": "Ano",
+  "map.author": "Arquiteto",
+  "map.know_work": "Conhecer a obra",
+  "map.know_author": "Sobre o Autor",
+  "map.open_route": "Abrir rota",
+  "map.open_route_aria": "Abrir rota em aplicativo de navegação",
+};
+
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string, defaultValue: string) => defaultValue,
+    t: (key: string, defaultValue?: string) =>
+      translations[key] ?? defaultValue ?? key,
   }),
   initReactI18next: {
     type: "3rdParty",
@@ -20,7 +31,6 @@ vi.mock("@/features/i18n", () => ({
   default: {},
 }));
 
-// Mocks de infraestrutura
 vi.mock("leaflet", () => ({
   default: {
     Icon: class Icon {
@@ -30,12 +40,18 @@ vi.mock("leaflet", () => ({
   },
 }));
 
-// Resolve o erro de 'any' definindo tipos baseados em elementos HTML reais
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 vi.mock("next/image", () => ({
-  default: ({ alt, src, fill, priority, ...props }: ComponentPropsWithoutRef<"img"> & { fill?: boolean; priority?: boolean }) => {
+  default: ({ alt, fill, priority, ...props }: ComponentPropsWithoutRef<"img"> & { fill?: boolean; priority?: boolean }) => {
     void fill;
     void priority;
-    return <img alt={alt} src={src} {...props} />;
+    void props;
+    return <span role="img" aria-label={alt} />;
   },
 }));
 
@@ -47,7 +63,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// Tipagem para o mock do react-leaflet
 interface MockMarkerProps {
   children?: ReactNode;
   eventHandlers?: { click?: () => void };
@@ -171,7 +186,7 @@ describe("MapMarkers", () => {
 
     fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
 
-    const closeButton = screen.getByLabelText(/Fechar detalhes da edificacao/i);
+    const closeButton = screen.getByLabelText(/Fechar detalhes da edificação/i);
     fireEvent.click(closeButton);
 
     act(() => {

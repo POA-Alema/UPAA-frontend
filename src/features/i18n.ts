@@ -5,15 +5,17 @@ const resources = {
   pt: {
     common: {
       map: {
-        close_details: "Fechar detalhes da edificacao",
-        image_unavailable: "Imagem indisponivel",
-        mapped_building: "Edificacao mapeada",
-        page_unavailable: "Pagina da edificacao ainda nao disponivel",
+        close_details: "Fechar detalhes da edificação",
+        image_unavailable: "Imagem indisponível",
+        mapped_building: "Edificação mapeada",
+        page_unavailable: "Página da edificação ainda não disponível",
         see_more: "Ver mais",
         year: "Ano",
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
+        open_route: "Abrir rota",
+        open_route_aria: "Abrir rota em aplicativo de navegação",
         image_label: "Imagem",
         loading: "Carregando dados do mapa.",
         empty: "Nenhum ponto disponivel para exibir.",
@@ -27,6 +29,11 @@ const resources = {
         alert_geolocation_unavailable:
           "Geolocalização não disponível. Exibindo o mapa centralizado no Centro Histórico.",
       },
+      building: {
+        section_title: "Edificação",
+        map_title: "Mapa",
+        map_placeholder: "Integração com o mapa será conectada assim que a feature correspondente estiver disponível."
+      }
     },
   },
   en: {
@@ -41,6 +48,8 @@ const resources = {
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
+        open_route: "Open route",
+        open_route_aria: "Open route in navigation app",
         image_label: "Image",
         loading: "Loading map data.",
         empty: "No points available to display.",
@@ -54,20 +63,27 @@ const resources = {
         alert_geolocation_unavailable:
           "Geolocation unavailable. Showing the map centered on the Historic Center.",
       },
+      building: {
+        section_title: "Building",
+        map_title: "Map",
+        map_placeholder: "Map integration will be connected as soon as the corresponding feature is available."
+      }
     },
   },
   de: {
     common: {
       map: {
-        close_details: "Gebaeudedetails schliessen",
+        close_details: "Gebäudedetails schließen",
         image_unavailable: "Bild nicht verfuegbar",
-        mapped_building: "Kartiertes Gebaeude",
-        page_unavailable: "Gebaeudeseite noch nicht verfuegbar",
+        mapped_building: "Kartiertes Gebäude",
+        page_unavailable: "Gebäudeseite noch nicht verfügbar",
         see_more: "Mehr sehen",
         year: "Jahr",
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
+        open_route: "Route öffnen",
+        open_route_aria: "Route in Navigations-App öffnen",
         image_label: "Bild",
         loading: "Kartendaten werden geladen.",
         empty: "Keine Punkte zum Anzeigen verfuegbar.",
@@ -82,6 +98,11 @@ const resources = {
         alert_geolocation_unavailable:
           "Geolokalisierung nicht verfuegbar. Karte wird auf das historische Zentrum zentriert.",
       },
+      building: {
+        section_title: "Gebäude",
+        map_title: "Karte",
+        map_placeholder: "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht."
+      }
     },
   },
 };

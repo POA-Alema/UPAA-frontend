@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Manrope, Work_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import { ScrollRestoration } from "@/components/ScrollRestoration";
+import { I18nProvider } from "@/components/I18nProvider";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 
@@ -42,7 +43,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body>
         <ScrollRestoration />
-        {children}
+        <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
   );
