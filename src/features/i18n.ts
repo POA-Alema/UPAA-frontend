@@ -20,6 +20,12 @@ const resources = {
         load_error: "Nao foi possivel carregar os dados do mapa.",
         fallback: "Dados reais indisponiveis. Exibindo pontos de referencia.",
         you_are_here: "Voce esta aqui",
+        alert_recentered_outside_limit:
+          "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
+        alert_recentered_permission_denied:
+          "Permissão de geolocalização negada. Exibindo o mapa centralizado no Centro Histórico.",
+        alert_geolocation_unavailable:
+          "Geolocalização não disponível. Exibindo o mapa centralizado no Centro Histórico.",
       },
     },
   },
@@ -41,6 +47,12 @@ const resources = {
         load_error: "Unable to load map data.",
         fallback: "Live data unavailable. Showing reference points.",
         you_are_here: "You are here",
+        alert_recentered_outside_limit:
+          "You are outside the useful map area. Recentering to the Historic Center.",
+        alert_recentered_permission_denied:
+          "Location permission denied. Showing the map centered on the Historic Center.",
+        alert_geolocation_unavailable:
+          "Geolocation unavailable. Showing the map centered on the Historic Center.",
       },
     },
   },
@@ -60,8 +72,15 @@ const resources = {
         loading: "Kartendaten werden geladen.",
         empty: "Keine Punkte zum Anzeigen verfuegbar.",
         load_error: "Kartendaten konnten nicht geladen werden.",
-        fallback: "Echtzeitdaten nicht verfuegbar. Referenzpunkte werden angezeigt.",
+        fallback:
+          "Echtzeitdaten nicht verfuegbar. Referenzpunkte werden angezeigt.",
         you_are_here: "Du bist hier",
+        alert_recentered_outside_limit:
+          "Sie befinden sich ausserhalb des nutzbaren Kartenbereichs. Karte wird auf das historische Zentrum zentriert.",
+        alert_recentered_permission_denied:
+          "Standortberechtigung verweigert. Karte wird auf das historische Zentrum zentriert.",
+        alert_geolocation_unavailable:
+          "Geolokalisierung nicht verfuegbar. Karte wird auf das historische Zentrum zentriert.",
       },
     },
   },
