@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildBuildingRoute,
+  buildBuildingDetailPath,
   mapBackendBuildingsToMapBuildings,
   mapBuildingsToMarkers,
 } from "./map-buildings";
 
-describe("buildBuildingRoute", () => {
-  it("deve montar a rota de detalhe a partir do slug", () => {
-    expect(buildBuildingRoute("museu-x")).toBe("/buildings/museu-x");
+describe("buildBuildingDetailPath", () => {
+  it("deve montar a rota de detalhe da edificacao a partir do slug", () => {
+    expect(buildBuildingDetailPath("margs")).toBe("/buildings/margs");
   });
 });
 
@@ -82,7 +82,7 @@ describe("mapBuildingsToMarkers", () => {
       summary: "Descricao curta da obra",
       yearLabel: "1912",
       architectName: "Theodor Wiederspahn",
-      routePath: "/buildings/museu-x",
+      routePath: "/buildings/museu-x?returnTo=%2Fmapa",
       architectPath: "/architects/theodor-wiederspahn",
       position: [-30.01, -51.22],
     });

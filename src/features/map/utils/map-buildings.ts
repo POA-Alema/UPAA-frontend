@@ -1,3 +1,5 @@
+import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
+
 export type BuildingAttachment = {
   src: string;
   alt: string;
@@ -48,7 +50,6 @@ export type BackendBuilding = {
 };
 
 export type Building = {
-  // id: number;
   id: number | string;
   name: string;
   slug?: string;
@@ -63,7 +64,6 @@ export type Building = {
 };
 
 export type MapMarker = {
-  // id: number;
   id: number | string;
   name: string;
   slug?: string;
@@ -76,10 +76,6 @@ export type MapMarker = {
   attachments: BuildingAttachment[];
   position: [number, number];
 };
-
-export function buildBuildingRoute(slug: string): string {
-  return `/buildings/${slug}`;
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -227,6 +223,10 @@ export function mapBackendBuildingsToMapBuildings(
   return buildings.map(mapBackendBuildingToMapBuilding);
 }
 
+export function buildBuildingDetailPath(slug: string) {
+  return `/buildings/${slug}`;
+}
+
 export function mapBuildingsToMarkers(buildings: Building[]): MapMarker[] {
   return buildings
     .filter((b) => b.latitude != null && b.longitude != null)
@@ -238,7 +238,7 @@ export function mapBuildingsToMarkers(buildings: Building[]): MapMarker[] {
       summary: b.summary,
       yearLabel: b.yearLabel,
       architectName: b.architectName,
-      routePath: b.slug ? buildBuildingRoute(b.slug) : undefined,
+      routePath: b.slug ? buildBuildingDetailHref(b.slug) : undefined,
       architectPath: b.architectPath,
       attachments: b.attachments ?? [],
       position: [b.latitude!, b.longitude!],

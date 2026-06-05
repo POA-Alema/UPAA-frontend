@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
+import type { LatLngExpression } from "leaflet";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 import {
@@ -42,6 +43,9 @@ export function MapPlaceholder({
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [usedFallback, setUsedFallback] = useState(false);
+  const [userPosition, setUserPosition] = useState<LatLngExpression | null>(
+    null,
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -49,7 +53,6 @@ export function MapPlaceholder({
     async function load() {
       try {
         const response = await fetch("/api/buildings");
-        // const usedFallback = response.headers.get("x-upaa-fallback") != null;
         const didUseFallback = response.headers.get("x-upaa-fallback") != null;
 
         if (!response.ok) {
@@ -62,6 +65,7 @@ export function MapPlaceholder({
         if (!isMounted) {
           return;
         }
+
         setMarkers(mappedMarkers);
         setHasError(false);
         setUsedFallback(didUseFallback);
@@ -69,7 +73,6 @@ export function MapPlaceholder({
           markerCount: mappedMarkers.length,
           fallback: didUseFallback,
         });
-      // } catch {
       } catch (error) {
         if (!isMounted) {
           return;
@@ -95,6 +98,29 @@ export function MapPlaceholder({
     };
   }, []);
 
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserPosition([position.coords.latitude, position.coords.longitude]);
+      },
+      () => {
+        setUserPosition(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      },
+    );
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
   return (
     <div className={`w-full relative ${className}`}>
       <MapContainer
@@ -102,7 +128,9 @@ export function MapPlaceholder({
         zoom={15}
         maxZoom={20}
         minZoom={15}
-        zoomControl={typeof showZoomControls === 'boolean' ? showZoomControls : showPopups}
+        zoomControl={
+          typeof showZoomControls === "boolean" ? showZoomControls : showPopups
+        }
         className="w-full h-full"
       >
         <TileLayer
@@ -112,14 +140,18 @@ export function MapPlaceholder({
           maxZoom={20}
         />
 
-        <MapMarkers markers={markers} showPopups={showPopups} />
+        <MapMarkers
+          markers={markers}
+          showPopups={showPopups}
+          userPosition={userPosition}
+        />
       </MapContainer>
 
       {loading && (
         <div
           role="status"
           aria-live="polite"
-          className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
         >
           {t("map.loading", "Carregando dados do mapa.")}
         </div>
@@ -129,7 +161,7 @@ export function MapPlaceholder({
         <div
           role="status"
           aria-live="polite"
-          className="absolute bottom-2 left-2 bg-white px-3 py-1 rounded shadow"
+          className="absolute bottom-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
         >
           {t(
             "map.fallback",
@@ -142,7 +174,7 @@ export function MapPlaceholder({
         <div
           role="status"
           aria-live="polite"
-          className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
         >
           {/* Nenhum ponto disponivel para exibir. */}
           {t("map.empty", "Nenhum ponto disponivel para exibir.")}

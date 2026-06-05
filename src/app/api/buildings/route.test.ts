@@ -19,7 +19,7 @@ describe("GET /api/buildings", () => {
           location: "Centro Historico",
           coordinates: { lat: -30.01, lng: -51.22 },
           current_occupation: "Museu",
-          media_gallery: [],
+          media_gallery: [{ url: "/images/margs/Margs.jpg" }],
         },
       ]),
     });
@@ -64,6 +64,7 @@ describe("GET /api/buildings", () => {
             title: "Obra legada",
             latitude: -30,
             longitude: -51,
+            images: ["/images/margs/Margs.jpg"],
           },
         ]),
       });
@@ -91,6 +92,31 @@ describe("GET /api/buildings", () => {
 
   it("deve retornar fallback quando a API real falhar", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+
+    const response = await GET();
+    const data = await response.json();
+
+    expect(response.headers.get("x-upaa-fallback")).toBe("map-buildings-mock");
+    expect(data.length).toBeGreaterThan(0);
+  });
+
+  it("deve retornar fallback quando a API real nao trouxer imagem valida", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://backend.test");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue([
+          {
+            id: "1",
+            slug: "margs",
+            name: "MARGS",
+            coordinates: { lat: -30.01, lng: -51.22 },
+            media_gallery: [{ url: "/images/margs/fachada.jpg" }],
+          },
+        ]),
+      }),
+    );
 
     const response = await GET();
     const data = await response.json();

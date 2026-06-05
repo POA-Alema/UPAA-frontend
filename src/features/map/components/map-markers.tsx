@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import L from "leaflet";
+import L, { type LatLngExpression } from "leaflet";
 import { Marker, Tooltip, useMap } from "react-leaflet";
 
 import type {
@@ -15,7 +15,6 @@ import type {
   MapMarker,
 } from "@/features/map/utils/map-buildings";
 
-// Ícones
 const defaultIcon = new L.Icon({
   iconUrl: "/map-marker.svg",
   iconSize: [28, 40],
@@ -30,6 +29,13 @@ const selectedIcon = new L.Icon({
   popupAnchor: [0, -52],
   className:
     "filter drop-shadow-[0_0_12px_rgba(233,196,106,1)] transition-all duration-300",
+});
+
+const userLocationIcon = L.divIcon({
+  className: "",
+  html: `<div class="w-6 h-6 bg-blue-600 border-4 border-white rounded-full shadow-[0_0_0_8px_rgba(37,99,235,0.25)]"></div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 function MapPopupCard({
@@ -73,7 +79,7 @@ function MapPopupCard({
 
         {onRequestClose && (
           <button
-            aria-label="Fechar detalhes da edificação"
+            aria-label={t("map.close_details", "Fechar detalhes da edificacao")}
             onClick={onRequestClose}
             className="group p-2 hover:bg-white/10 transition-all flex items-center justify-center rounded-full border-none bg-transparent shrink-0"
           >
@@ -140,47 +146,43 @@ function MapPopupCard({
             )}
           </div>
 
-          {marker.routePath && (
-            <Link
-              href={marker.routePath}
-              aria-label={`${t("map.know_work", "Conhecer a obra")}: ${marker.name}`}
-              className="group w-full bg-[#E9C46A] font-black py-4 px-6 rounded-xl flex items-center justify-between shadow-lg border-none active:scale-95 transition-all no-underline min-h-12"
-            >
-              <div className="flex items-center gap-3 text-[#1A1A1A]">
-                <span className="material-symbols-outlined font-bold">
-                  menu_book
-                </span>
+          {(marker.routePath || marker.architectPath) && (
+            <div className="flex flex-col gap-3">
+              {marker.routePath && (
+                <Link
+                  href={marker.routePath}
+                  aria-label={`${t("map.know_work", "Conhecer a obra")}: ${marker.name}`}
+                  className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 no-underline text-white transition-all"
+                >
+                  <div className="flex items-center gap-3 text-[#E9C46A]">
+                    <span className="material-symbols-outlined">menu_book</span>
+                    <span className="uppercase tracking-wider text-sm">
+                      {t("map.know_work", "Explorar Obra")}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-white group-hover:translate-x-1 transition-transform">
+                    arrow_forward
+                  </span>
+                </Link>
+              )}
 
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_work", "Explorar Obra")}
-                </span>
-              </div>
-
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
-                arrow_forward
-              </span>
-            </Link>
-          )}
-
-          {marker.architectPath && (
-            <Link
-              href={marker.architectPath}
-              className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
-            >
-              <div className="flex items-center gap-3 text-[#E9C46A]">
-                <span className="material-symbols-outlined">
-                  account_circle
-                </span>
-
-                <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_author", "Sobre o Autor")}
-                </span>
-              </div>
-
-              <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
-                arrow_forward
-              </span>
-            </Link>
+              {marker.architectPath && (
+                <Link
+                  href={marker.architectPath}
+                  className="group w-full border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/10 active:scale-95 no-underline transition-all"
+                >
+                  <div className="flex items-center gap-3 text-[#E9C46A]">
+                    <span className="material-symbols-outlined">account_circle</span>
+                    <span className="uppercase tracking-wider text-sm">
+                      {t("map.know_author", "Sobre o Autor")}
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-[#E9C46A]/40 group-hover:text-[#E9C46A] group-hover:translate-x-1 transition-all">
+                    arrow_forward
+                  </span>
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -191,12 +193,15 @@ function MapPopupCard({
 type MapMarkersProps = {
   markers: MapMarker[];
   showPopups?: boolean;
+  userPosition?: LatLngExpression | null;
 };
 
 export function MapMarkers({
   markers,
   showPopups = true,
+  userPosition = null,
 }: MapMarkersProps) {
+  const { t } = useTranslation("common");
   const [isMobile, setIsMobile] = useState(false);
   // const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
   const [selectedMarkerId, setSelectedMarkerId] = useState<
@@ -247,40 +252,48 @@ export function MapMarkers({
   const sheet =
     showPopups && isMobile && selectedMarker
       ? createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
+            isClosing ? "map-popup-sheet--closing" : ""
+          }`}
+        >
           <div
-            role="dialog"
-            aria-modal="true"
-            className={`absolute inset-0 z-10000 flex items-end justify-center pointer-events-none ${
-              isClosing ? "map-popup-sheet--closing" : ""
+            className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
+              isClosing ? "opacity-0" : "opacity-100"
+            }`}
+            onClick={closePanel}
+          />
+
+          <aside
+            className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
+              isClosing ? "translate-y-full" : "translate-y-0"
             }`}
           >
-            <div
-              className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${
-                isClosing ? "opacity-0" : "opacity-100"
-              }`}
-              onClick={closePanel}
+            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
+
+            <MapPopupCard
+              marker={selectedMarker}
+              onRequestClose={closePanel}
+              variant="sheet"
             />
-
-            <aside
-              className={`pointer-events-auto bg-[#1A1A1A] w-full h-[92vh] rounded-t-4xl transition-all duration-500 flex flex-col shadow-2xl ${
-                isClosing ? "translate-y-full" : "translate-y-0"
-              }`}
-            >
-              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-4 mb-2 shrink-0" />
-
-              <MapPopupCard
-                marker={selectedMarker}
-                onRequestClose={closePanel}
-                variant="sheet"
-              />
-            </aside>
-          </div>,
-          document.body,
-        )
+          </aside>
+        </div>,
+        document.body,
+      )
       : null;
 
   return (
     <>
+      {userPosition && (
+        <Marker position={userPosition} icon={userLocationIcon}>
+          <Tooltip permanent direction="top" offset={[0, -18]}>
+            {t("map.you_are_here")}
+          </Tooltip>
+        </Marker>
+      )}
+
       {markers.map((m) => {
         const isSelected = selectedMarkerId === m.id;
 
