@@ -79,7 +79,7 @@ function MapPopupCard({
 
         {onRequestClose && (
           <button
-            aria-label="Fechar detalhes da edificação"
+            aria-label={t("map.close_details", "Fechar detalhes da edificacao")}
             onClick={onRequestClose}
             className="group p-2 hover:bg-white/10 transition-all flex items-center justify-center rounded-full border-none bg-transparent shrink-0"
           >
@@ -151,6 +151,7 @@ function MapPopupCard({
               {marker.routePath && (
                 <Link
                   href={marker.routePath}
+                  aria-label={`${t("map.know_work", "Conhecer a obra")}: ${marker.name}`}
                   className="group w-full bg-[#E9C46A]/10 border border-[#E9C46A]/50 font-bold py-4 px-6 rounded-xl flex items-center justify-between hover:bg-[#E9C46A]/20 active:scale-95 no-underline text-white transition-all"
                 >
                   <div className="flex items-center gap-3 text-[#E9C46A]">
@@ -202,7 +203,10 @@ export function MapMarkers({
 }: MapMarkersProps) {
   const { t } = useTranslation("common");
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
+  // const [selectedMarkerId, setSelectedMarkerId] = useState<number | null>(null);
+  const [selectedMarkerId, setSelectedMarkerId] = useState<
+    MapMarker["id"] | null
+  >(null);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {

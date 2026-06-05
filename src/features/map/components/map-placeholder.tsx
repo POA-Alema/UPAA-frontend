@@ -2,9 +2,15 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
 import type { LatLngExpression } from "leaflet";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
+import {
+  trackMapBuildingsLoadFailure,
+  trackMapBuildingsLoadSuccess,
+} from "@/features/map/utils/map-analytics";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -32,9 +38,11 @@ export function MapPlaceholder({
   showPopups = true,
   showZoomControls,
 }: MapPlaceholderProps) {
+  const { t } = useTranslation("common");
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [usedFallback, setUsedFallback] = useState(false);
   const [userPosition, setUserPosition] = useState<LatLngExpression | null>(
     null,
   );
@@ -45,6 +53,7 @@ export function MapPlaceholder({
     async function load() {
       try {
         const response = await fetch("/api/buildings");
+        const didUseFallback = response.headers.get("x-upaa-fallback") != null;
 
         if (!response.ok) {
           throw new Error("Failed to load buildings");
@@ -59,13 +68,22 @@ export function MapPlaceholder({
 
         setMarkers(mappedMarkers);
         setHasError(false);
-      } catch {
+        setUsedFallback(didUseFallback);
+        trackMapBuildingsLoadSuccess({
+          markerCount: mappedMarkers.length,
+          fallback: didUseFallback,
+        });
+      } catch (error) {
         if (!isMounted) {
           return;
         }
 
         setMarkers([]);
         setHasError(true);
+        setUsedFallback(false);
+        trackMapBuildingsLoadFailure({
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -87,10 +105,7 @@ export function MapPlaceholder({
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        setUserPosition([
-          position.coords.latitude,
-          position.coords.longitude,
-        ]);
+        setUserPosition([position.coords.latitude, position.coords.longitude]);
       },
       () => {
         setUserPosition(null);
@@ -114,9 +129,7 @@ export function MapPlaceholder({
         maxZoom={20}
         minZoom={15}
         zoomControl={
-          typeof showZoomControls === "boolean"
-            ? showZoomControls
-            : showPopups
+          typeof showZoomControls === "boolean" ? showZoomControls : showPopups
         }
         className="w-full h-full"
       >
@@ -134,15 +147,47 @@ export function MapPlaceholder({
         />
       </MapContainer>
 
+      {loading && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {t("map.loading", "Carregando dados do mapa.")}
+        </div>
+      )}
+
+      {!loading && usedFallback && !hasError && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute bottom-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {t(
+            "map.fallback",
+            "Dados reais indisponiveis. Exibindo pontos de referencia.",
+          )}
+        </div>
+      )}
+
       {!loading && markers.length === 0 && !hasError && (
-        <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          Nenhum ponto disponivel para exibir.
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {/* Nenhum ponto disponivel para exibir. */}
+          {t("map.empty", "Nenhum ponto disponivel para exibir.")}
         </div>
       )}
 
       {!loading && hasError && (
-        <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          Nao foi possivel carregar os dados do mapa.
+        <div
+          role="alert"
+          className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow"
+        >
+          {/* Nao foi possivel carregar os dados do mapa. */}
+          {t("map.load_error", "Nao foi possivel carregar os dados do mapa.")}
         </div>
       )}
     </div>

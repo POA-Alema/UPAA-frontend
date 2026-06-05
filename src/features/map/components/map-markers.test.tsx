@@ -123,11 +123,24 @@ describe("MapMarkers", () => {
     expect(within(sidebar).getByText(/Ano:/i)).toBeInTheDocument();
     expect(within(sidebar).getByText("1912")).toBeInTheDocument();
     expect(
-      within(sidebar).getByRole("link", { name: /explorar obra/i }),
+      within(sidebar).getByRole("link", { name: /Conhecer a obra: MARGS/i }),
     ).toHaveAttribute("href", "/buildings/margs?returnTo=%2Fmapa");
     expect(
       within(sidebar).getByRole("link", { name: /sobre o autor/i }),
     ).toHaveAttribute("href", "/architects/theodor-wiederspahn");
+  });
+
+  it("renderiza CTA acessivel para a rota de detalhe da edificacao", () => {
+    render(<MapMarkers markers={[marker]} />);
+
+    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
+
+    const sidebar = screen.getByRole("complementary");
+    const cta = within(sidebar).getByRole("link", {
+      name: /Conhecer a obra: MARGS/i,
+    });
+
+    expect(cta).toHaveAttribute("href", "/buildings/margs?returnTo=%2Fmapa");
   });
 
   it("abre a bottom sheet no mobile e bloqueia o scroll", () => {
@@ -158,7 +171,7 @@ describe("MapMarkers", () => {
 
     fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
 
-    const closeButton = screen.getByLabelText(/Fechar detalhes da edificação/i);
+    const closeButton = screen.getByLabelText(/Fechar detalhes da edificacao/i);
     fireEvent.click(closeButton);
 
     act(() => {

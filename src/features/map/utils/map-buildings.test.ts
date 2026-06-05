@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { buildBuildingDetailPath, mapBuildingsToMarkers } from "./map-buildings";
-
+import {
+  buildBuildingDetailPath,
+  mapBackendBuildingsToMapBuildings,
+  mapBuildingsToMarkers,
+} from "./map-buildings";
 
 describe("buildBuildingDetailPath", () => {
   it("deve montar a rota de detalhe da edificacao a partir do slug", () => {
     expect(buildBuildingDetailPath("margs")).toBe("/buildings/margs");
   });
 });
-
 
 describe("mapBuildingsToMarkers", () => {
   it("deve retornar apenas edificacoes com coordenadas validas", () => {
@@ -95,5 +97,109 @@ describe("mapBuildingsToMarkers", () => {
     const [result] = mapBuildingsToMarkers(mock);
 
     expect(result.routePath).toBeUndefined();
+  });
+});
+
+describe("mapBackendBuildingsToMapBuildings", () => {
+  it("deve adaptar o payload de buildings/map para o formato do mapa", () => {
+    const [result] = mapBackendBuildingsToMapBuildings([
+      {
+        id: "backend-map-id",
+        slug: "margs",
+        name: "MARGS",
+        location: "Centro Historico",
+        coordinates: { lat: -30.01, lng: -51.22 },
+        current_occupation: "Museu de arte",
+        media_gallery: [
+          {
+            url: "/images/Margs.jpg",
+            caption: "Fachada principal",
+          },
+        ],
+      },
+    ]);
+
+    expect(result).toMatchObject({
+      id: "backend-map-id",
+      name: "MARGS",
+      slug: "margs",
+      district: "Centro Historico",
+      summary: "Museu de arte",
+      latitude: -30.01,
+      longitude: -51.22,
+    });
+    expect(result.attachments).toEqual([
+      {
+        src: "/images/Margs.jpg",
+        alt: "Fachada principal",
+        caption: "Fachada principal",
+      },
+    ]);
+  });
+
+  it("deve adaptar o payload real de constructions para o formato do mapa", () => {
+    const [result] = mapBackendBuildingsToMapBuildings([
+      {
+        id: "backend-id",
+        slug: "margs",
+        name: { pt: "MARGS", en: "Rio Grande do Sul Art Museum" },
+        location: { pt: "Centro Historico" },
+        coordinates: { lat: -30.01, lng: -51.22 },
+        constructionPeriod: "1913",
+        description: { pt: "Descricao da edificacao" },
+        architect: { full: "Theo Wiederspahn" },
+        mediaGallery: [
+          {
+            url: "/images/Margs.jpg",
+            caption: { pt: "Fachada principal" },
+          },
+        ],
+      },
+    ]);
+
+    expect(result).toMatchObject({
+      id: "backend-id",
+      name: "MARGS",
+      slug: "margs",
+      district: "Centro Historico",
+      summary: "Descricao da edificacao",
+      yearLabel: "1913",
+      architectName: "Theo Wiederspahn",
+      latitude: -30.01,
+      longitude: -51.22,
+    });
+    expect(result.attachments).toEqual([
+      {
+        src: "/images/Margs.jpg",
+        alt: "Fachada principal",
+        caption: "Fachada principal",
+      },
+    ]);
+  });
+
+  it("deve aceitar o formato simples de constructions como compatibilidade", () => {
+    const [result] = mapBackendBuildingsToMapBuildings([
+      {
+        id: "simple-id",
+        slug: "obra-simples",
+        title: "Obra simples",
+        latitude: -30,
+        longitude: -51,
+        buildYear: 1980,
+        images: ["/images/obra.jpg"],
+      },
+    ]);
+
+    expect(result).toMatchObject({
+      id: "simple-id",
+      name: "Obra simples",
+      slug: "obra-simples",
+      yearLabel: "1980",
+      latitude: -30,
+      longitude: -51,
+    });
+    expect(result.attachments).toEqual([
+      { src: "/images/obra.jpg", alt: "Obra simples" },
+    ]);
   });
 });
