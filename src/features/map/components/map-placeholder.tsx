@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import type { LatLngExpression, Map as LeafletMap } from "leaflet";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 import {
+  trackMapBuildingsLoadFailure,
+  trackMapBuildingsLoadSuccess,
+  trackMapRecentralization,
+} from "@/features/map/utils/map-analytics";
+import {
   DEFAULT_MAP_CENTER,
-  DISTANCE_LIMIT_METERS,
   getRecentralizationStatus,
-  RecentralizationReason,
+  type RecentralizationReason,
+  type RecentralizationStatus,
 } from "@/features/map/utils/location";
-import type { Map as LeafletMap } from "leaflet";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -40,26 +45,10 @@ type AlertState = {
   reason: RecentralizationReason;
 };
 
-function recordMapEvent(reason: RecentralizationReason) {
-  if (!reason) {
-    return;
-  }
-
-  const payload = {
-    event: "map_action",
-    action: "recenter",
-    reason,
-  };
-
-  if (typeof window !== "undefined" && (window as any).dataLayer) {
-    (window as any).dataLayer.push(payload);
-    return;
-  }
-
-  if (typeof window !== "undefined") {
-    console.log("Map analytics event:", payload);
-  }
-}
+const DEFAULT_CENTER: [number, number] = [
+  DEFAULT_MAP_CENTER.latitude,
+  DEFAULT_MAP_CENTER.longitude,
+];
 
 export function MapPlaceholder({
   className = "h-125",
@@ -70,13 +59,14 @@ export function MapPlaceholder({
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([
-    DEFAULT_MAP_CENTER.latitude,
-    DEFAULT_MAP_CENTER.longitude,
-  ]);
-  const mapRef = useRef<LeafletMap | null>(null);
-  const [leafletMap, setLeafletMap] = useState<LeafletMap | null>(null);
+  const [usedFallback, setUsedFallback] = useState(false);
+  const [userPosition, setUserPosition] = useState<LatLngExpression | null>(
+    null,
+  );
+  const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
   const [alertState, setAlertState] = useState<AlertState | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const recenteredReasons = useRef<Set<RecentralizationReason>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
@@ -84,6 +74,7 @@ export function MapPlaceholder({
     async function load() {
       try {
         const response = await fetch("/api/buildings");
+        const didUseFallback = response.headers.get("x-upaa-fallback") != null;
 
         if (!response.ok) {
           throw new Error("Failed to load buildings");
@@ -98,13 +89,22 @@ export function MapPlaceholder({
 
         setMarkers(mappedMarkers);
         setHasError(false);
-      } catch {
+        setUsedFallback(didUseFallback);
+        trackMapBuildingsLoadSuccess({
+          markerCount: mappedMarkers.length,
+          fallback: didUseFallback,
+        });
+      } catch (error) {
         if (!isMounted) {
           return;
         }
 
         setMarkers([]);
         setHasError(true);
+        setUsedFallback(false);
+        trackMapBuildingsLoadFailure({
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -119,46 +119,52 @@ export function MapPlaceholder({
     };
   }, []);
 
-  useEffect(() => {
-    const maybeRecenter = (
-      status: ReturnType<typeof getRecentralizationStatus>,
-    ) => {
-      if (!status.shouldRecenter) {
+  const getAlertMessage = useCallback(
+    (reason: RecentralizationReason) => {
+      if (reason === "permission_denied") {
+        return t(
+          "map.alert_recentered_permission_denied",
+          "Permissao de geolocalizacao negada. Exibindo o mapa centralizado no Centro Historico.",
+        );
+      }
+
+      if (reason === "outside_limit") {
+        return t(
+          "map.alert_recentered_outside_limit",
+          "Voce esta fora da area util do mapa. Recentralizando no Centro Historico.",
+        );
+      }
+
+      return t(
+        "map.alert_geolocation_unavailable",
+        "Geolocalizacao nao disponivel. Exibindo o mapa centralizado no Centro Historico.",
+      );
+    },
+    [t],
+  );
+
+  const maybeRecenter = useCallback(
+    (status: RecentralizationStatus) => {
+      if (!status.shouldRecenter || !status.reason) {
         return;
       }
 
-      const center: [number, number] = [
-        DEFAULT_MAP_CENTER.latitude,
-        DEFAULT_MAP_CENTER.longitude,
-      ];
-
-      setMapCenter(center);
+      setMapCenter(DEFAULT_CENTER);
+      mapRef.current?.flyTo(DEFAULT_CENTER, 15, { duration: 1.2 });
       setAlertState({
-        message:
-          status.reason === "permission_denied"
-            ? t(
-                "map.alert_recentered_permission_denied",
-                "Permissão de geolocalização negada. Exibindo o mapa centralizado no Centro Histórico.",
-              )
-            : status.reason === "outside_limit"
-            ? t(
-                "map.alert_recentered_outside_limit",
-                "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
-              )
-            : t(
-                "map.alert_geolocation_unavailable",
-                "Geolocalização não disponível. Exibindo o mapa centralizado no Centro Histórico.",
-              ),
+        message: getAlertMessage(status.reason),
         reason: status.reason,
       });
 
-      if (leafletMap) {
-        leafletMap.flyTo(center, 15, { duration: 1.2 });
+      if (!recenteredReasons.current.has(status.reason)) {
+        recenteredReasons.current.add(status.reason);
+        trackMapRecentralization({ reason: status.reason });
       }
+    },
+    [getAlertMessage],
+  );
 
-      recordMapEvent(status.reason);
-    };
-
+  useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       maybeRecenter({
         shouldRecenter: true,
@@ -167,16 +173,37 @@ export function MapPlaceholder({
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        maybeRecenter(getRecentralizationStatus(position, null));
+        const status = getRecentralizationStatus(position, null);
+
+        if (status.shouldRecenter) {
+          setUserPosition(null);
+          maybeRecenter(status);
+          return;
+        }
+
+        setAlertState(null);
+        setUserPosition([
+          position.coords.latitude,
+          position.coords.longitude,
+        ]);
       },
       (error) => {
+        setUserPosition(null);
         maybeRecenter(getRecentralizationStatus(null, error));
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
+      },
     );
-  }, [leafletMap, t]);
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [maybeRecenter]);
 
   return (
     <div className={`w-full relative ${className}`}>
@@ -186,12 +213,11 @@ export function MapPlaceholder({
         maxZoom={20}
         minZoom={15}
         ref={mapRef}
-        whenReady={() => {
-          if (mapRef.current) {
-            setLeafletMap(mapRef.current);
-          }
-        }}
-        zoomControl={typeof showZoomControls === "boolean" ? showZoomControls : showPopups}
+        zoomControl={
+          typeof showZoomControls === "boolean"
+            ? showZoomControls
+            : showPopups
+        }
         className="w-full h-full"
       >
         <TileLayer
@@ -201,7 +227,11 @@ export function MapPlaceholder({
           maxZoom={20}
         />
 
-        <MapMarkers markers={markers} showPopups={showPopups} />
+        <MapMarkers
+          markers={markers}
+          showPopups={showPopups}
+          userPosition={userPosition}
+        />
       </MapContainer>
 
       {alertState ? (
@@ -209,24 +239,52 @@ export function MapPlaceholder({
           role="status"
           aria-live="polite"
           aria-atomic="true"
+          data-recenter-reason={alertState.reason ?? undefined}
           className="pointer-events-none fixed left-1/2 top-4 z-50 w-[min(90vw,32rem)] -translate-x-1/2 rounded-2xl border border-black/10 bg-black/85 px-5 py-4 text-sm text-white shadow-2xl backdrop-blur-sm"
         >
           {alertState.message}
         </div>
       ) : null}
 
+      {loading && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {t("map.loading", "Carregando dados do mapa.")}
+        </div>
+      )}
+
+      {!loading && usedFallback && !hasError && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute bottom-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {t(
+            "map.fallback",
+            "Dados reais indisponiveis. Exibindo pontos de referencia.",
+          )}
+        </div>
+      )}
+
       {!loading && markers.length === 0 && !hasError && (
-        <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          {t("map.no_markers_message", "Nenhum ponto disponivel para exibir.")}
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {t("map.empty", "Nenhum ponto disponivel para exibir.")}
         </div>
       )}
 
       {!loading && hasError && (
-        <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          {t(
-            "map.load_error_message",
-            "Nao foi possivel carregar os dados do mapa.",
-          )}
+        <div
+          role="alert"
+          className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
+        >
+          {t("map.load_error", "Nao foi possivel carregar os dados do mapa.")}
         </div>
       )}
     </div>

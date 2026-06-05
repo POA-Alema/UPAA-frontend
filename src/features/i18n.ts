@@ -1,27 +1,33 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 
 const resources = {
   pt: {
     common: {
       map: {
-        close_details: "Fechar detalhes da edificação",
-        image_unavailable: "Imagem indisponível",
-        mapped_building: "Edificação mapeada",
-        page_unavailable: "Página da edificação ainda não disponível",
-        see_more: "Ver Mais",
+        close_details: "Fechar detalhes da edificacao",
+        image_unavailable: "Imagem indisponivel",
+        mapped_building: "Edificacao mapeada",
+        page_unavailable: "Pagina da edificacao ainda nao disponivel",
+        see_more: "Ver mais",
         year: "Ano",
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
         image_label: "Imagem",
-        alert_recentered_outside_limit: "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
-        alert_recentered_permission_denied: "Permissão de geolocalização negada. Exibindo o mapa centralizado no Centro Histórico.",
-        alert_geolocation_unavailable: "Geolocalização não disponível. Exibindo o mapa centralizado no Centro Histórico.",
-        no_markers_message: "Nenhum ponto disponivel para exibir.",
-        load_error_message: "Nao foi possivel carregar os dados do mapa.",
-      }
-    }
+        loading: "Carregando dados do mapa.",
+        empty: "Nenhum ponto disponivel para exibir.",
+        load_error: "Nao foi possivel carregar os dados do mapa.",
+        fallback: "Dados reais indisponiveis. Exibindo pontos de referencia.",
+        you_are_here: "Voce esta aqui",
+        alert_recentered_outside_limit:
+          "Voce esta fora da area util do mapa. Recentralizando no Centro Historico.",
+        alert_recentered_permission_denied:
+          "Permissao de geolocalizacao negada. Exibindo o mapa centralizado no Centro Historico.",
+        alert_geolocation_unavailable:
+          "Geolocalizacao nao disponivel. Exibindo o mapa centralizado no Centro Historico.",
+      },
+    },
   },
   en: {
     common: {
@@ -30,52 +36,62 @@ const resources = {
         image_unavailable: "Image unavailable",
         mapped_building: "Mapped building",
         page_unavailable: "Building page not yet available",
-        see_more: "See More",
+        see_more: "See more",
         year: "Year",
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
         image_label: "Image",
-        alert_recentered_outside_limit: "You are outside the useful map area. Recentering to the Historic Center.",
-        alert_recentered_permission_denied: "Location permission denied. Showing the map centered on the Historic Center.",
-        alert_geolocation_unavailable: "Geolocation unavailable. Showing the map centered on the Historic Center.",
-        no_markers_message: "No points available to display.",
-        load_error_message: "Unable to load the map data.",
-      }
-    }
+        loading: "Loading map data.",
+        empty: "No points available to display.",
+        load_error: "Unable to load map data.",
+        fallback: "Live data unavailable. Showing reference points.",
+        you_are_here: "You are here",
+        alert_recentered_outside_limit:
+          "You are outside the useful map area. Recentering to the Historic Center.",
+        alert_recentered_permission_denied:
+          "Location permission denied. Showing the map centered on the Historic Center.",
+        alert_geolocation_unavailable:
+          "Geolocation unavailable. Showing the map centered on the Historic Center.",
+      },
+    },
   },
   de: {
     common: {
       map: {
-        close_details: "Gebäudedetails schließen",
-        image_unavailable: "Bild nicht verfügbar",
-        mapped_building: "Kartiertes Gebäude",
-        page_unavailable: "Gebäudeseite noch nicht verfügbar",
+        close_details: "Gebaeudedetails schliessen",
+        image_unavailable: "Bild nicht verfuegbar",
+        mapped_building: "Kartiertes Gebaeude",
+        page_unavailable: "Gebaeudeseite noch nicht verfuegbar",
         see_more: "Mehr sehen",
         year: "Jahr",
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
         image_label: "Bild",
-        alert_recentered_outside_limit: "Sie befinden sich außerhalb des nützlichen Kartenbereichs. Karte wird auf das historische Zentrum zentriert.",
-        alert_recentered_permission_denied: "Standortberechtigung verweigert. Karte wird auf das historische Zentrum zentriert.",
-        alert_geolocation_unavailable: "Geolokalisierung nicht verfügbar. Karte wird auf das historische Zentrum zentriert.",
-        no_markers_message: "Keine Punkte zum Anzeigen verfügbar.",
-        load_error_message: "Karten-Daten konnten nicht geladen werden.",
-      }
-    }
-  }
+        loading: "Kartendaten werden geladen.",
+        empty: "Keine Punkte zum Anzeigen verfuegbar.",
+        load_error: "Kartendaten konnten nicht geladen werden.",
+        fallback: "Echtzeitdaten nicht verfuegbar. Referenzpunkte werden angezeigt.",
+        you_are_here: "Du bist hier",
+        alert_recentered_outside_limit:
+          "Sie befinden sich ausserhalb des nutzbaren Kartenbereichs. Karte wird auf das historische Zentrum zentriert.",
+        alert_recentered_permission_denied:
+          "Standortberechtigung verweigert. Karte wird auf das historische Zentrum zentriert.",
+        alert_geolocation_unavailable:
+          "Geolokalisierung nicht verfuegbar. Karte wird auf das historische Zentrum zentriert.",
+      },
+    },
+  },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'en',// DEFAULT LANGUAGE - TESTS
-    fallbackLng: 'de',
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: "pt",
+  fallbackLng: "pt",
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;
