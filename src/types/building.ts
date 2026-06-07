@@ -27,8 +27,10 @@ export type Building = {
   location: string;
   latitude?: number;
   longitude?: number;
+  coordinates?: { lat?: number; lng?: number };
   constructionPeriod?: string;
   architect?: string;
+  architectId?: string;
   constructor?: string;
   ornamentsAuthor?: string;
   builtArea?: string;
@@ -36,6 +38,7 @@ export type Building = {
   restorationAndHeritage?: string;
   heritage?: string;
   description?: string;
+  history?: string;
   author?: string;
   sources?: BuildingSource[];
   images?: ImageCategory;

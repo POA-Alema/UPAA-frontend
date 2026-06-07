@@ -556,14 +556,20 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
             <label htmlFor="builtArea" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
               Ýrea construída
             </label>
-            <input
-              id="builtArea"
-              name="builtArea"
-              type="text"
-              value={formData.builtArea}
-              onChange={handleInputChange}
-              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <div className="relative">
+              <input
+                id="builtArea"
+                name="builtArea"
+                type="text"
+                placeholder="Ex: 5.000"
+                value={formData.builtArea}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 py-2 pl-4 pr-14 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-on-surface/40">
+                m²
+              </span>
+            </div>
           </div>
 
           <div>
@@ -611,19 +617,27 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
             />
           </div>
 
-          <div>
-            <label htmlFor="author" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
-              Autor
-            </label>
-            <input
-              id="author"
-              name="author"
-              type="text"
-              value={formData.author}
-              onChange={handleInputChange}
-              className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="mb-12 border-b border-outline-variant/20 pb-12">
+        <legend className="mb-8 flex items-center gap-4 font-headline text-2xl font-bold text-primary">
+          <span className="h-[2px] w-12 bg-primary"></span>
+          Histórico
+        </legend>
+
+        <div id="field-history">
+          <label className="mb-4 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
+            Histórico da Edificação *
+          </label>
+          <RichTextEditor
+            value={formData.history ?? ''}
+            onChange={(content) => {
+              setFormData((prev) => ({ ...prev, history: content }));
+              if (errors.history) setErrors((prev) => { const e = { ...prev }; delete e.history; return e; });
+            }}
+          />
+          {errors.history && <p className="mt-2 text-sm text-red-400">{errors.history}</p>}
         </div>
       </fieldset>
 
@@ -740,19 +754,18 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
           Descrição
         </legend>
 
-        <div>
+        <div id="field-description">
           <label className="mb-4 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
-            Descrição da Edificação (RichText)
+            Descrição da Edificação *
           </label>
           <RichTextEditor
             value={formData.description}
-            onChange={(content) =>
-              setFormData((prev) => ({
-                ...prev,
-                description: content,
-              }))
-            }
+            onChange={(content) => {
+              setFormData((prev) => ({ ...prev, description: content }));
+              if (errors.description) setErrors((prev) => { const e = { ...prev }; delete e.description; return e; });
+            }}
           />
+          {errors.description && <p className="mt-2 text-sm text-red-400">{errors.description}</p>}
         </div>
       </fieldset>
 
