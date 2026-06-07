@@ -64,7 +64,7 @@ jobs:
 
       - name: Push para GitLab
         run: |
-          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@tools.ages.pucrs.br/uma-porto-alegre-alem/frontend.git
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@tools.ages.pucrs.br/uma-porto-alegre-alema/frontend.git
           CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
           git push gitlab $CURRENT_BRANCH --force
           git push gitlab --tags --force
