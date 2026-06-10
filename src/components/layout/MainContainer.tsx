@@ -31,9 +31,9 @@ export default function MainContainer({ data }: MainContainerProps) {
       data-testid="landing-content"
     >
       <h2 className="section-title section-title--full">
-        <strong>{data.title}</strong>
+        <strong>{t("landing.title")}</strong>
       </h2>
-      <p className="section-copy section-copy--accent">{data.description}</p>
+      <p className="section-copy section-copy--accent">{t("landing.description")}</p>
     </section>
   );
 }
