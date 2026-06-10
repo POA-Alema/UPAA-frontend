@@ -1,11 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import i18n from '@/features/i18n';
 import {
   DEFAULT_LOCALE,
   detectBrowserLocale,
   persistLocale,
   readPersistedLocale,
+  toI18nLanguage,
   type SupportedLocale,
 } from '@/lib/language';
 
@@ -44,6 +46,11 @@ export function useLanguage(): UseLanguageReturn {
 
   useEffect(() => {
     document.documentElement.lang = locale;
+
+    const nextLanguage = toI18nLanguage(locale);
+    if (i18n.language !== nextLanguage) {
+      i18n.changeLanguage(nextLanguage).catch(() => {});
+    }
   }, [locale]);
 
   const setLocale = useCallback((next: SupportedLocale) => {
