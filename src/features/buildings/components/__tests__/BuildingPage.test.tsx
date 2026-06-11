@@ -92,4 +92,21 @@ describe("BuildingPage", () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("renders fixed detail labels in the selected language", () => {
+    render(<BuildingPage building={building} language="en" />);
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: /history/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: /architectural characteristics/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: /photo gallery/i }),
+    ).toBeInTheDocument();
+  });
 });

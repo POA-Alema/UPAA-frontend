@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { buildingLabels } from "../data/building-labels";
+import type { BuildingLanguage } from "../data/buildings";
 import type { BuildingImage } from "../types/building";
 
 interface BuildingGalleryProps {
   items: BuildingImage[];
+  language?: BuildingLanguage;
 }
 
 function buildPages(count: number): number[] {
@@ -17,7 +20,8 @@ function buildPages(count: number): number[] {
   return result;
 }
 
-export function BuildingGallery({ items }: BuildingGalleryProps) {
+export function BuildingGallery({ items, language = "pt" }: BuildingGalleryProps) {
+  const labels = buildingLabels[language];
   const railRef = useRef<HTMLDivElement>(null);
   const pages = useMemo(() => buildPages(items.length), [items.length]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -101,7 +105,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
 
       <div className="building-gallery__nav">
         <button
-          aria-label="Anterior"
+          aria-label={labels.previous}
           className="building-gallery__nav-btn"
           disabled={isFirst}
           onClick={() => scroll("left")}
@@ -122,7 +126,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
                   : "building-gallery__dot--far";
             return (
               <button
-                aria-label={`Ir para página ${pi + 1}`}
+                aria-label={labels.goToPage(pi + 1)}
                 aria-selected={pi === pageIndex}
                 className={`building-gallery__dot ${sizeClass}`}
                 key={pi}
@@ -135,7 +139,7 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
         </div>
 
         <button
-          aria-label="Próximo"
+          aria-label={labels.next}
           className="building-gallery__nav-btn"
           disabled={isLast}
           onClick={() => scroll("right")}

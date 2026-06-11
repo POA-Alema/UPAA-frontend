@@ -2,9 +2,15 @@ import Image from "next/image";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import { BuildingGallery } from "./BuildingGallery";
+import { buildingLabels } from "../data/building-labels";
 import type { BuildingPageProps } from "../types/building";
 
-export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
+export function BuildingPage({
+  building,
+  backToMapHref,
+  language = "pt",
+}: BuildingPageProps) {
+  const labels = buildingLabels[language];
   const hasHero = Boolean(
     building.title || building.eyebrow || building.hero,
   );
@@ -85,7 +91,7 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
             <div className="section-heading">
               <h2 className="building-section__headline">
                 <span className="building-section__headline-line"></span>{" "}
-                Histórico
+                {labels.history}
               </h2>
             </div>
 
@@ -102,7 +108,7 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         <section className="building-section building-section--features building-flow__section">
           <div className="building-section__inner">
             <h2 className="building-section__title building-section__title--right">
-              Características <br /> Arquitetônicas
+              {labels.characteristics}
             </h2>
 
             <div className="building-feature-stack">
@@ -127,11 +133,11 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         <section className="building-section building-section--gallery building-flow__section">
           <div className="building-section__inner building-section__inner--wide">
             <div className="building-gallery__header">
-              <h2 className="building-gallery__title">Galeria de Fotos</h2>
+              <h2 className="building-gallery__title">{labels.gallery}</h2>
             </div>
           </div>
 
-          <BuildingGallery items={building.gallery} />
+          <BuildingGallery items={building.gallery} language={language} />
         </section>
       ) : null}
 
@@ -141,7 +147,7 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
             <FeatureAction
               href={resolvedBackToMapHref}
               icon="map"
-              label={backToMapAction?.label ?? "Voltar ao Mapa"}
+              label={backToMapAction?.label ?? labels.backToMap}
               variant="primary"
             />
           </div>
@@ -152,7 +158,7 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         <section className="building-section building-section--architect-cta building-flow__section">
           <div className="building-section__inner">
             <div className="building-architect-cta">
-              <h2 className="building-architect-cta__title">O Arquiteto</h2>
+              <h2 className="building-architect-cta__title">{labels.architect}</h2>
               <p className="building-architect-cta__copy">
                 {building.architectCta.description}
               </p>

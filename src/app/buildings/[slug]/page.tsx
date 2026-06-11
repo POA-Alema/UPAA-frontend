@@ -3,19 +3,28 @@ import { BuildingPage } from "@/features/buildings/components/BuildingPage";
 import {
   getBuildingBySlug,
   listBuildings,
+  resolveBuildingLanguage,
 } from "@/features/buildings/data/buildings";
 import { resolveBuildingBackToMapHref } from "@/features/buildings/utils/navigation";
 
 type BuildingDetailPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{
+    slug: string;
+  }>;
   searchParams?: Promise<{
     returnTo?: string | string[];
+    lang?: string | string[];
   }>;
 };
 
-export async function generateMetadata({ params }: BuildingDetailPageProps) {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: BuildingDetailPageProps) {
   const { slug } = await params;
-  const building = await getBuildingBySlug(slug);
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const language = resolveBuildingLanguage(resolvedSearchParams?.lang);
+  const building = await getBuildingBySlug(slug, language);
 
   if (!building) {
     return {
@@ -31,6 +40,7 @@ export async function generateMetadata({ params }: BuildingDetailPageProps) {
 
 export async function generateStaticParams() {
   const buildings = await listBuildings();
+
   return buildings.map((building) => ({
     slug: building.slug,
   }));
@@ -42,7 +52,8 @@ export default async function BuildingDetailPage({
 }: BuildingDetailPageProps) {
   const { slug } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const building = await getBuildingBySlug(slug);
+  const language = resolveBuildingLanguage(resolvedSearchParams?.lang);
+  const building = await getBuildingBySlug(slug, language);
 
   if (!building) {
     notFound();
@@ -50,8 +61,9 @@ export default async function BuildingDetailPage({
 
   return (
     <BuildingPage
-      backToMapHref={resolveBuildingBackToMapHref(resolvedSearchParams)}
       building={building}
+      backToMapHref={resolveBuildingBackToMapHref(resolvedSearchParams)}
+      language={language}
     />
   );
 }

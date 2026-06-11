@@ -47,4 +47,5 @@ export interface Building {
 export interface BuildingPageProps {
   building: Building;
   backToMapHref?: string;
+  language?: "pt" | "en" | "de";
 }
