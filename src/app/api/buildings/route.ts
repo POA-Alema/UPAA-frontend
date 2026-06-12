@@ -45,22 +45,22 @@ async function isValidRemoteImage(src: string): Promise<boolean> {
   }
 }
 
-async function hasValidImage(buildings: Building[]): Promise<boolean> {
-  const imageSources = buildings.flatMap((building) =>
-    (building.attachments ?? []).map((attachment) => attachment.src),
+async function isValidImage(src: string): Promise<boolean> {
+  return src.startsWith("http://") || src.startsWith("https://")
+    ? isValidRemoteImage(src)
+    : isValidLocalImage(src);
+}
+async function sanitizeAttachments(buildings: Building[]): Promise<Building[]> {
+  return Promise.all(
+    buildings.map(async (building) => {
+      const attachments = building.attachments ?? [];
+      const validity = await Promise.all(attachments.map((a) => isValidImage(a.src)));
+      return {
+        ...building,
+        attachments: attachments.filter((_, index) => validity[index]),
+      };
+    }),
   );
-
-  for (const src of imageSources) {
-    const valid = src.startsWith("http://") || src.startsWith("https://")
-      ? await isValidRemoteImage(src)
-      : await isValidLocalImage(src);
-
-    if (valid) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 async function fetchMapBuildings(): Promise<BackendBuilding[]> {
@@ -91,20 +91,19 @@ async function fetchMapBuildings(): Promise<BackendBuilding[]> {
 }
 
 export async function GET() {
-  // return NextResponse.json(mapBuildingsMock);
   try {
-    // const constructions = await fetchConstructions();
     const mapBuildings = await fetchMapBuildings();
     const buildings = mapBackendBuildingsToMapBuildings(mapBuildings);
 
-    if (!(await hasValidImage(buildings))) {
-      throw new Error("Map buildings payload has no valid image");
+    if (buildings.length === 0) {
+      throw new Error("Map buildings payload is empty");
     }
 
-    return NextResponse.json(buildings);
+    return NextResponse.json(await sanitizeAttachments(buildings));
   } catch {
     return NextResponse.json(mapBuildingsMock, {
       headers: {
+
         "x-upaa-fallback": "map-buildings-mock",
       },
     });

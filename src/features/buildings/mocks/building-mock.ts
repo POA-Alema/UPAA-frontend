@@ -1,3 +1,4 @@
+import { s3ImageUrl } from "@/lib/s3";
 import type { Building } from "../types/building";
 
 export const buildingsMock: Building[] = [
@@ -10,7 +11,7 @@ export const buildingsMock: Building[] = [
     summary:
       "Edifício projetado por Theodor Wiederspahn entre 1913 e 1914 para abrigar a antiga Delegacia Fiscal da Fazenda no Rio Grande do Sul, hoje sede do MARGS, na Praça da Alfândega.",
     hero: {
-      src: "/images/margs/Margs.jpg",
+      src: s3ImageUrl("images/margs/Margs.jpg"),
       alt: "Fachada do Museu de Arte do Rio Grande do Sul",
       title: "Fachada principal do MARGS",
       description:
@@ -69,7 +70,7 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
     ],
     gallery: [
       {
-        src: "/images/margs/planta_baixa.jpg",
+        src: s3ImageUrl("images/margs/planta_baixa.jpg"),
         alt: "Planta baixa do segundo pavimento da antiga Delegacia Fiscal",
         caption: "Planta baixa",
         title: "Planta baixa — 2º pavimento",
@@ -80,7 +81,7 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         credits: "Desenho original: Theodor Wiederspahn, 1913.",
       },
       {
-        src: "/images/margs/fachadas.jpg",
+        src: s3ImageUrl("images/margs/fachadas.jpg"),
         alt: "Fachada principal da antiga Delegacia Fiscal",
         caption: "Fachadas",
         title: "Estudo das fachadas",
@@ -90,7 +91,7 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         credits: "Ornamentos: oficinas de João Vicente Friederichs; figuras de Alfred Adloff.",
       },
       {
-        src: "/images/margs/fotos_externas.jpg",
+        src: s3ImageUrl("images/margs/fotos_externas.jpg"),
         alt: "Foto histórica externa do MARGS",
         caption: "Fotos externas",
         title: "Registro externo histórico",
@@ -101,7 +102,7 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         credits: "Autoria não identificada.",
       },
       {
-        src: "/images/margs/fotos_internas.jpg",
+        src: s3ImageUrl("images/margs/fotos_internas.jpg"),
         alt: "Vista interna do hall central do MARGS",
         caption: "Fotos internas",
         title: "Hall central",
@@ -111,27 +112,27 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         credits: "Fotografia institucional do museu.",
       },
       {
-        src: "/images/margs/escadaria_interna.jpeg",
+        src: s3ImageUrl("images/margs/escadaria_interna.jpeg"),
         alt: "Escadaria interna do MARGS",
         caption: "Escadaria interna",
       },
       {
-        src: "/images/margs/teto.jpeg",
+        src: s3ImageUrl("images/margs/teto.jpeg"),
         alt: "Teto do MARGS",
         caption: "Teto",
       },
       {
-        src: "/images/margs/superior.jpeg",
+        src: s3ImageUrl("images/margs/superior.jpeg"),
         alt: "Vista da parte superior superior do MARGS",
         caption: "Vista da parte superior",
       },
       {
-        src: "/images/margs/esculturas.jpeg",
+        src: s3ImageUrl("images/margs/esculturas.jpeg"),
         alt: "Esculturas internas do MARGS",
         caption: "Esculturas internas",
       },
       {
-        src: "/images/margs/esculturas2.jpeg",
+        src: s3ImageUrl("images/margs/esculturas2.jpeg"),
         alt: "Esculturas internas do MARGS",
         caption: "Esculturas internas",
       }
@@ -158,7 +159,7 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
     summary:
       "Antigo Hotel Majestic, hoje um dos principais polos culturais de Porto Alegre, inaugurado como centro cultural em 1990 após restauração do prédio histórico erguido entre 1916 e 1933.",
     hero: {
-      src: "/images/cdcMarioQuintana.jpg",
+      src: s3ImageUrl("images/cdcMarioQuintana.jpg"),
       alt: "Fachada da Casa de Cultura Mario Quintana",
     },
     history: `Erguido entre 1916 e 1933 para abrigar o Hotel Majestic, o edifício foi durante décadas o ponto de encontro da elite intelectual e política de Porto Alegre. Sua imponência classicista e o requinte dos ambientes internos refletiam o prestígio que a cidade conquistava no início do século XX como capital econômica do Rio Grande do Sul.
@@ -195,12 +196,12 @@ Após anos de decadência e ameaça de demolição, o prédio foi tombado e rest
     ],
     gallery: [
       {
-        src: "/images/cdcMarioQuintana.jpg",
+        src: s3ImageUrl("images/cdcMarioQuintana.jpg"),
         alt: "Fachada principal da CCMQ",
         caption: "Fachada principal",
       },
       {
-        src: "/images/cdcMarioQuintana_2.jpg",
+        src: s3ImageUrl("images/cdcMarioQuintana_2.jpg"),
         alt: "Detalhe arquitetônico interno da CCMQ",
         caption: "Detalhe interno",
       },

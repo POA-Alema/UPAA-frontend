@@ -184,7 +184,8 @@ function mapFeaturedArchitect(
 }
 
 export async function listArchitects(): Promise<Architect[]> {
-  return (await fetchArchitectsFromApi()) ?? architectsMock;
+  const fromApi = await fetchArchitectsFromApi();
+  return fromApi && fromApi.length > 0 ? fromApi : architectsMock;
 }
 
 export async function getArchitectBySlug(slug: string): Promise<Architect | null> {

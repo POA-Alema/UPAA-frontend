@@ -1,3 +1,4 @@
+import { s3ImageUrl } from "@/lib/s3";
 import type { Building } from "../utils/map-buildings";
 
 export const mapBuildingsMock: Building[] = [
@@ -13,12 +14,12 @@ export const mapBuildingsMock: Building[] = [
     architectPath: "/architects/theodor-wiederspahn",
     attachments: [
       {
-        src: "/images/margs/Margs.jpg",
+        src: s3ImageUrl("images/margs/Margs.jpg"),
         alt: "Fachada historica com ornamentos classicos",
         caption: "Visão externa do MARGS.",
       },
       {
-        src: "/images/Margs_2.jpg",
+        src: s3ImageUrl("images/Margs_2.jpg"),
         alt: "Detalhe de fachada historica no centro de Porto Alegre",
         caption: "Visão interna da arquitetura do MARGS.",
       },
@@ -38,12 +39,12 @@ export const mapBuildingsMock: Building[] = [
     architectPath: "/architects/theodor-wiederspahn",
     attachments: [
       {
-        src: "/images/cdcMarioQuintana.jpg",
+        src: s3ImageUrl("images/cdcMarioQuintana.jpg"),
         alt: "Volume arquitetonico historico em tons quentes",
         caption: "Visão externa do CCMQ.",
       },
       {
-        src: "/images/cdcMarioQuintana_2.jpg",
+        src: s3ImageUrl("images/cdcMarioQuintana_2.jpg"),
         alt: "Perspectiva urbana de arquitetura monumental",
         caption: "Visão interna da arquitetura do CCMQ.",
       },

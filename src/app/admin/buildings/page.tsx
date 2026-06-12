@@ -75,7 +75,12 @@ export default async function BuildingsAdminPage() {
                   <h3 className="font-headline text-lg font-bold text-on-surface">{building.title}</h3>
                 </div>
 
-                <p className="mb-6 text-sm text-on-surface-variant">{building.location}</p>
+                <p className="mb-2 text-sm text-on-surface-variant">{building.location}</p>
+                {building.coordinates?.lat != null && building.coordinates?.lng != null && (
+                  <p className="mb-6 text-xs text-on-surface-variant/60">
+                    {building.coordinates.lat.toFixed(5)}, {building.coordinates.lng.toFixed(5)}
+                  </p>
+                )}
 
                 <div className="flex items-center justify-between gap-2">
                   <Link

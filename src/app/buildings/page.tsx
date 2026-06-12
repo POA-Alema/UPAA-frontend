@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { PageSection } from '@/components/layout/page-section';
 import { BuildingList } from '@/features/buildings/components/building-list';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Edificações | UPAA Frontend',
   description: 'Estrutura inicial das páginas de edificações.'

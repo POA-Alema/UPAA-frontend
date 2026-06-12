@@ -1,3 +1,4 @@
+import { s3ImageUrl } from "@/lib/s3";
 import type { Architect } from "../types/architect";
 
 export const architectsMock: Architect[] = [
@@ -12,7 +13,7 @@ export const architectsMock: Architect[] = [
 
 Sua obra marcou a paisagem urbana da capital gaúcha, com projetos ligados a prédios públicos, comerciais e institucionais que até hoje são referências históricas da cidade.`,
     image: {
-      src: "/images/theodor.png",
+      src: s3ImageUrl("images/theodor.png"),
       alt: "Theodor Wiederspahn",
       caption: "Theodor Wiederspahn, um dos maiores nomes da arquitetura gaúcha.",
     },
@@ -53,7 +54,7 @@ Sua obra marcou a paisagem urbana da capital gaúcha, com projetos ligados a pr�
         title: "Museu de Arte do RS",
         href: "/buildings/margs",
         image: {
-          src: "/images/margs/Margs.jpg",
+          src: s3ImageUrl("images/margs/Margs.jpg"),
           alt: "Fachada do Museu de Arte do Rio Grande do Sul",
           caption: "Antiga Delegacia Fiscal em Porto Alegre",
         },
@@ -61,7 +62,7 @@ Sua obra marcou a paisagem urbana da capital gaúcha, com projetos ligados a pr�
       {
         title: "Memorial do RS",
         image: {
-          src: "/images/Memorial RS.jpg",
+          src: s3ImageUrl("images/Memorial RS.jpg"),
           alt: "Fachada do Memorial do Rio Grande do Sul",
           caption: "Antigos Correios e Telégrafos",
         },
