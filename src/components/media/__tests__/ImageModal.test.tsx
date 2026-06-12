@@ -114,13 +114,25 @@ describe("ImageModal", () => {
     expect(screen.queryByText("Créditos")).not.toBeInTheDocument();
   });
 
-  it("usa o alt como título quando não há title nem caption", () => {
+  it("não renderiza painel lateral quando há apenas alt (só a imagem)", () => {
     render(
       <ImageModal image={{ src: "/x.jpg", alt: "Somente alt" }} onClose={vi.fn()} />,
     );
 
-    expect(
-      screen.getByRole("heading", { name: /somente alt/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /somente alt/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fonte")).not.toBeInTheDocument();
+  });
+
+  it("renderiza legenda sobreposta quando há apenas caption (sem painel)", () => {
+    render(
+      <ImageModal
+        image={{ src: "/x.jpg", alt: "Imagem", caption: "Minha legenda" }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Minha legenda")).toBeInTheDocument();
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
   });
 });

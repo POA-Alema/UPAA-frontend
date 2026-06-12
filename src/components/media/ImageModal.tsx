@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
@@ -33,6 +33,9 @@ function MetaRow({ label, value }: MetaRowProps) {
 export function ImageModal({ image, onClose }: ImageModalProps) {
   const { t } = useTranslation("common");
   const closeRef = useRef<HTMLButtonElement>(null);
+  // Dimensões reais capturadas no onLoad — fazem a imagem ocupar apenas o
+  // espaço da sua proporção (sem faixas pretas em retratos). Placeholder 3/2.
+  const [dims, setDims] = useState<{ w: number; h: number }>({ w: 1600, h: 1067 });
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
@@ -58,12 +61,16 @@ export function ImageModal({ image, onClose }: ImageModalProps) {
   const heading = image.title || image.caption || image.alt;
   const showCaption = Boolean(image.caption && image.caption !== heading);
   const hasReferences = Boolean(image.source || image.reference || image.credits);
+  // O painel lateral só faz sentido quando há texto rico (descrição/referências).
+  // Quando há apenas legenda/título, ela vira uma faixa discreta na base da imagem.
+  const hasSidebar = Boolean(image.description || hasReferences);
+  const overlayCaption = !hasSidebar ? image.title || image.caption : null;
 
   return createPortal(
     <div
       aria-label={heading}
       aria-modal="true"
-      className="fixed inset-0 z-10000 flex items-stretch justify-center sm:items-center sm:p-4 md:p-8"
+      className="fixed inset-0 z-[20000] flex items-center justify-center p-3 sm:p-5 md:p-8"
       role="dialog"
     >
       <div
@@ -72,10 +79,10 @@ export function ImageModal({ image, onClose }: ImageModalProps) {
         onClick={onClose}
       />
 
-      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden bg-[#1A1A1A] text-white shadow-2xl md:h-auto md:max-h-[90vh] md:w-auto md:max-w-[94vw] md:flex-row md:rounded-2xl">
+      <div className="relative z-10 flex max-h-[94vh] w-full max-w-[96vw] flex-col overflow-hidden rounded-2xl bg-[#1A1A1A] text-white shadow-2xl md:max-h-[88vh] md:w-auto md:flex-row">
         <button
           aria-label={t("image.close", "Fechar imagem ampliada")}
-          className="group absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-black/50 backdrop-blur-sm transition-all hover:bg-white/10"
+          className="group absolute right-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-full border-0 bg-black/50 backdrop-blur-sm transition-all hover:bg-white/10"
           onClick={onClose}
           ref={closeRef}
           type="button"
@@ -85,46 +92,62 @@ export function ImageModal({ image, onClose }: ImageModalProps) {
           </span>
         </button>
 
-        <div className="relative flex min-h-[42vh] shrink-0 items-center justify-center bg-black md:min-h-[60vh] md:w-[62vw] md:max-w-[900px]">
+        <figure className="relative m-0 flex w-full shrink-0 items-center justify-center bg-black/30 md:w-auto">
           <Image
             alt={image.alt}
-            className="object-contain"
-            fill
+            className={`h-auto w-auto max-w-full object-contain md:max-h-[88vh] ${
+              hasSidebar ? "max-h-[52vh]" : "max-h-[82vh]"
+            }`}
+            height={dims.h}
+            onLoad={(event) => {
+              const img = event.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                setDims({ w: img.naturalWidth, h: img.naturalHeight });
+              }
+            }}
             priority
-            sizes="(max-width: 768px) 100vw, 62vw"
+            sizes="(max-width: 768px) 96vw, 70vw"
             src={image.src}
+            width={dims.w}
           />
-        </div>
-
-        <aside className="flex w-full flex-1 flex-col gap-5 overflow-y-auto p-6 md:w-[340px] md:max-w-[340px] md:flex-none">
-          <h2 className="pr-10 text-2xl font-black leading-tight text-white">
-            {heading}
-          </h2>
-
-          {showCaption ? (
-            <p className="text-sm font-medium text-white/60">{image.caption}</p>
+          {overlayCaption ? (
+            <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-4 pt-12 text-center text-sm font-medium text-white/90">
+              {overlayCaption}
+            </figcaption>
           ) : null}
+        </figure>
 
-          {image.description ? (
-            <p className="text-sm leading-relaxed text-white/80">
-              {image.description}
-            </p>
-          ) : null}
+        {hasSidebar ? (
+          <aside className="flex min-h-0 w-full flex-1 flex-col gap-5 overflow-y-auto p-6 md:w-[340px] md:max-w-[340px] md:flex-none">
+            <h2 className="pr-10 text-2xl font-black leading-tight text-white">
+              {heading}
+            </h2>
 
-          {hasReferences ? (
-            <div className="flex flex-col gap-4 border-t border-white/10 pt-5">
-              <MetaRow label={t("image.source", "Fonte")} value={image.source} />
-              <MetaRow
-                label={t("image.reference", "Referência")}
-                value={image.reference}
-              />
-              <MetaRow
-                label={t("image.credits", "Créditos")}
-                value={image.credits}
-              />
-            </div>
-          ) : null}
-        </aside>
+            {showCaption ? (
+              <p className="text-sm font-medium text-white/60">{image.caption}</p>
+            ) : null}
+
+            {image.description ? (
+              <p className="text-sm leading-relaxed text-white/80">
+                {image.description}
+              </p>
+            ) : null}
+
+            {hasReferences ? (
+              <div className="flex flex-col gap-4 border-t border-white/10 pt-5">
+                <MetaRow label={t("image.source", "Fonte")} value={image.source} />
+                <MetaRow
+                  label={t("image.reference", "Referência")}
+                  value={image.reference}
+                />
+                <MetaRow
+                  label={t("image.credits", "Créditos")}
+                  value={image.credits}
+                />
+              </div>
+            ) : null}
+          </aside>
+        ) : null}
       </div>
     </div>,
     document.body,
