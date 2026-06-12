@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRef, useState, useEffect } from 'react';
 
 interface ImageSelectorProps {
@@ -88,11 +89,16 @@ export function ImageSelector({ value = '', onChange, label }: ImageSelectorProp
 
       {previewSrc ? (
         <div className="relative group overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-high/40 max-w-xl shadow-lg">
-          <img
-            src={previewSrc}
-            alt={label}
-            className="w-full h-64 object-cover object-center"
-          />
+          <div className="relative h-64 w-full">
+            <Image
+              src={previewSrc}
+              alt={label}
+              fill
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 36rem"
+              className="object-cover object-center"
+            />
+          </div>
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-4">
             <button
               type="button"

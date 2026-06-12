@@ -4,6 +4,8 @@ import type { Building, BuildingImage, BuildingTechnicalSpec, BuildingCharacteri
 
 const API_TIMEOUT_MS = 2_000;
 
+const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
+
 function extractPt(value: unknown): string {
   if (!value) return '';
   if (typeof value === 'string') return value;
@@ -23,7 +25,7 @@ function pick(api: Record<string, unknown>, ...keys: string[]): unknown {
 }
 
 function mapApiToBuilding(api: Record<string, unknown>): Building {
-  // Backend stores image URLs as relative paths served from the frontend's public/ folder.
+  // Backend stores absolute URLs pointing at the public S3 bucket (see src/lib/s3.ts).
   const mediaGallery = Array.isArray(api['mediaGallery'])
     ? (api['mediaGallery'] as Record<string, unknown>[])
     : Array.isArray(api['media_gallery'])
@@ -43,7 +45,7 @@ function mapApiToBuilding(api: Record<string, unknown>): Building {
     : [];
 
   const characteristics: BuildingCharacteristic[] = features.map((f) => ({
-    icon: String(f['icon_url'] ?? ''),
+    icon: String(f['icon_url'] ?? f['icon'] ?? ''),
     title: extractPt(f['title']),
     description: extractPt(f['description']),
   }));
@@ -77,6 +79,13 @@ function mapApiToBuilding(api: Record<string, unknown>): Building {
     technicalSpecs: technicalSpecs.length > 0 ? technicalSpecs : undefined,
     characteristics: characteristics.length > 0 ? characteristics : undefined,
     gallery: gallery.length > 0 ? gallery : undefined,
+    architectCta: {
+      description: architectName
+        ? `Explore a vida e o legado de ${architectName}, o arquiteto que moldou a paisagem urbana de Porto Alegre com suas obras monumentais.`
+        : 'Explore a vida e o legado de Theodor Wiederspahn, o arquiteto que moldou a paisagem urbana de Porto Alegre com suas obras monumentais.',
+      label: 'Conheça mais sobre o Arquiteto',
+      href: ARCHITECT_DETAIL_PATH,
+    },
   };
 }
 

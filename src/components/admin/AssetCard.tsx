@@ -1,7 +1,5 @@
 'use client';
-
-import { useEffect, useState } from 'react';
-import Image from 'next/image'; // 1. Importado o componente do Next.js
+import Image from 'next/image';
 import type { BuildingImage } from '@/types/building';
 
 interface AssetCardProps {
@@ -10,20 +8,20 @@ interface AssetCardProps {
 }
 
 export default function AssetCard({ image, onRemove }: AssetCardProps) {
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    setFailed(false);
-  }, [image.url]);
-
   return (
     <article className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-high/40">
-      <img
-        src={src}
-        alt={image.alt}
-        className="h-56 w-full object-cover"
-        onError={handleError}
-      />
+      {/* `fill` lets the image size from the container (admin URLs can be local, remote S3
+          or data URLs); `unoptimized` skips the optimizer so arbitrary hosts don't 403. */}
+      <div className="relative h-56 w-full">
+        <Image
+          src={image.url}
+          alt={image.alt}
+          fill
+          unoptimized
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+        />
+      </div>
 
       <div className="space-y-3 p-4">
         <div>

@@ -1,4 +1,5 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
+import { s3ImageUrl } from '@/lib/s3';
 import { getArchitects } from './architects';
 import type { ImageCategory, Building, BuildingFormData, BuildingImage } from '@/types/building';
 
@@ -17,7 +18,7 @@ function _buildBackendImageUrl(path: string): string {
   return `${apiUrl.replace(/\/$/, '')}${path}`;
 }
 
-const DEFAULT_FALLBACK_IMAGE = '/images/Margs.jpg';
+const DEFAULT_FALLBACK_IMAGE = s3ImageUrl('images/margs/Margs.jpg');
 
 function normalizeImage(image: Partial<BuildingImage>, index: number): BuildingImage {
   return {
@@ -127,8 +128,7 @@ function mapMediaGalleryToImages(mediaGallery: Record<string, unknown>[] | undef
   if (!Array.isArray(mediaGallery)) return result;
 
   for (const item of mediaGallery) {
-    // Backend does not serve image files; URLs are relative paths served from the
-    // frontend's own public/ folder, so keep them as-is.
+    // Backend stores absolute URLs pointing at the public S3 bucket, so keep them as-is.
     const raw = String(item['url'] ?? item['path'] ?? item['src'] ?? '');
     const img = normalizeImage({
       id: String(item['id'] ?? raw ?? ''),
@@ -146,23 +146,23 @@ function mapMediaGalleryToImages(mediaGallery: Record<string, unknown>[] | undef
   return result;
 }
 
-function mapImagesToMediaGallery(images?: ImageCategory | null) {
-  const out: any[] = [];
-  if (!images) return out;
+// function mapImagesToMediaGallery(images?: ImageCategory | null) {
+//   const out: any[] = [];
+//   if (!images) return out;
 
-  const push = (list: BuildingImage[], type: string) => {
-    for (const img of list) {
-      out.push({ id: img.id, url: img.url, alt: img.alt, caption: img.caption, type });
-    }
-  };
+//   const push = (list: BuildingImage[], type: string) => {
+//     for (const img of list) {
+//       out.push({ id: img.id, url: img.url, alt: img.alt, caption: img.caption, type });
+//     }
+//   };
 
-  push(images.floorPlan ?? [], 'planta_baixa');
-  push(images.facades ?? [], 'fachada');
-  push(images.interiorPhotos ?? [], 'interna');
-  push(images.exteriorPhotos ?? [], 'externa');
+//   push(images.floorPlan ?? [], 'planta_baixa');
+//   push(images.facades ?? [], 'fachada');
+//   push(images.interiorPhotos ?? [], 'interna');
+//   push(images.exteriorPhotos ?? [], 'externa');
 
-  return out;
-}
+//   return out;
+// }
 
 function extractLocalizedString(value: unknown): string | undefined {
   if (value == null) return undefined;
@@ -247,16 +247,31 @@ function generateQrCodeKey(slug: string): string {
   return `POA-${slug.substring(0, 12).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
 }
 
+// Maps the frontend image categories to the backend ImageType enum so the gallery
+// keeps its categorization end-to-end (and round-trips back via mapMediaGalleryToImages).
+const CATEGORY_IMAGE_TYPE: Record<keyof ImageCategory, string> = {
+  floorPlan: 'planta_baixa',
+  facades: 'fachada',
+  exteriorPhotos: 'externa',
+  interiorPhotos: 'interna',
+};
+
 function fromFormDataToApiDto(data: BuildingFormData) {
-  // Backend only accepts a flat `images: string[]` (all stored as type "externa").
-  // URLs are relative paths served from the frontend's public/ folder.
-  const imagesUrls = [] as string[];
+  // Send the gallery as categorized objects { url, type, caption }. The backend stores
+  // `type` as the ImageType enum and wraps `caption` as I18nText.
+  const images: { url: string; type: string; caption?: string }[] = [];
   if (data.images) {
-    for (const category of [data.images.floorPlan, data.images.facades, data.images.exteriorPhotos, data.images.interiorPhotos]) {
-      (category ?? []).forEach((image) => {
-        if (image.url) imagesUrls.push(image.url);
+    (Object.keys(CATEGORY_IMAGE_TYPE) as (keyof ImageCategory)[]).forEach((category) => {
+      (data.images?.[category] ?? []).forEach((image) => {
+        if (image.url) {
+          images.push({
+            url: image.url,
+            type: CATEGORY_IMAGE_TYPE[category],
+            caption: image.caption,
+          });
+        }
       });
-    }
+    });
   }
 
   const possibleAdvanced = data as unknown as Record<string, unknown>;
@@ -273,7 +288,9 @@ function fromFormDataToApiDto(data: BuildingFormData) {
   if (data.description !== undefined) dto.description = data.description;
   // backend stores the construction company in the "constructor" db field via dto.author
   if (data.constructor !== undefined) dto.author = data.constructor;
-  if (imagesUrls.length > 0) dto.images = imagesUrls;
+  // Send the array even when empty so removing the last photo clears the
+  // gallery on the backend (which also deletes the uploaded objects from S3).
+  if (data.images !== undefined) dto.images = images;
   if (data.location !== undefined) dto.location = data.location;
   if (data.constructionPeriod !== undefined) dto.constructionPeriod = data.constructionPeriod;
   if (data.ornamentsAuthor !== undefined) dto.ornamentsAuthor = data.ornamentsAuthor;
@@ -375,4 +392,31 @@ export async function deleteBuilding(id: string): Promise<void> {
     method: 'DELETE',
     expectJson: false,
   });
+}
+
+export async function uploadBuildingImage(file: File, type = 'externa'): Promise<string> {
+  const { apiUrl } = getPublicRuntimeConfig();
+  const baseUrl = apiUrl.replace(/\/$/, '');
+
+  const formData = new FormData();
+  formData.append('files', file);
+  formData.append('metadata', JSON.stringify([{ type, indexes: [0] }]));
+
+  const response = await fetch(`${baseUrl}/buildings/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Falha ao enviar a imagem (HTTP ${response.status}).`);
+  }
+
+  const groups = (await response.json()) as Array<{ type: string; urls: string[] }>;
+  const url = groups?.[0]?.urls?.[0];
+
+  if (!url) {
+    throw new Error('O servidor não retornou a URL da imagem enviada.');
+  }
+
+  return url;
 }

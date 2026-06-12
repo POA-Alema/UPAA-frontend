@@ -4,6 +4,8 @@ import { useState, useTransition, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import type { BuildingFormData, BuildingSource } from '@/types/building';
 import type { ArchitectOption } from '@/services/architects';
+import { s3ImageUrl } from '@/lib/s3';
+import { uploadBuildingImage } from '@/services/buildings';
 import AssetCard from './AssetCard';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -16,11 +18,20 @@ interface BuildingFormProps {
   architects?: ArchitectOption[];
 }
 
+interface MetaData {
+  qrCodeKey?: string;
+  history?: string;
+  createdById?: string;
+  updatedById?: string;
+}
+
+
+
 const IMAGE_CATEGORIES = [
-  { key: 'floorPlan', label: 'Planta baixa' },
-  { key: 'facades', label: 'Fachadas' },
-  { key: 'exteriorPhotos', label: 'Fotos externas' },
-  { key: 'interiorPhotos', label: 'Fotos internas' },
+  { key: 'floorPlan', label: 'Planta baixa', type: 'planta_baixa' },
+  { key: 'facades', label: 'Fachadas', type: 'fachada' },
+  { key: 'exteriorPhotos', label: 'Fotos externas', type: 'externa' },
+  { key: 'interiorPhotos', label: 'Fotos internas', type: 'interna' },
 ] as const;
 
 function createInitialData(initialData?: BuildingFormData): BuildingFormData {
@@ -139,11 +150,8 @@ function ArchitectSelect({
 export function BuildingForm({ onSubmit, initialData, isLoading = false, architects = [] }: BuildingFormProps) {
   const [formData, setFormData] = useState<BuildingFormData>(createInitialData(initialData));
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [meta, setMeta] = useState<Record<string, any>>({
-    slug: undefined,
+  const [meta, setMeta] = useState<MetaData>({
     qrCodeKey: undefined,
-    architectId: undefined,
-    coordinates: { lat: undefined, lng: undefined },
     history: undefined,
     createdById: undefined,
     updatedById: undefined,
@@ -158,6 +166,7 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
     interiorPhotos: { url: '', alt: '', caption: '' },
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploadingCategory, setUploadingCategory] = useState<string | null>(null);
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -305,6 +314,35 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
     }
   };
 
+  const handleUploadFile = async (
+    category: (typeof IMAGE_CATEGORIES)[number]['key'],
+    type: string,
+    file: File
+  ) => {
+    const errorKey = `imagem-${category}`;
+    setUploadingCategory(category);
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[errorKey];
+      return newErrors;
+    });
+
+    try {
+      const url = await uploadBuildingImage(file, type);
+      setImagemTemp((prev) => ({
+        ...prev,
+        [category]: { ...prev[category], url },
+      }));
+    } catch (error) {
+      setErrors((prev) => ({
+        ...prev,
+        [errorKey]: error instanceof Error ? error.message : 'Falha ao enviar a imagem.',
+      }));
+    } finally {
+      setUploadingCategory(null);
+    }
+  };
+
   const handleAddImage = (category: (typeof IMAGE_CATEGORIES)[number]['key']) => {
     const draft = imagemTemp[category];
     const errorKey = `imagem-${category}`;
@@ -352,9 +390,16 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
 
     startTransition(async () => {
       try {
-        // merge meta (advanced) fields into payload; cast to any because form shape is extended
-        const payload = { ...(formData as any), ...meta } as unknown as BuildingFormData;
-        await onSubmit(payload as any);
+        const cleanMeta: Record<string, unknown> = {};
+        (Object.keys(meta) as (keyof MetaData)[]).forEach((key) => {
+          const value = meta[key];
+          if (value === undefined) return;
+          if (typeof value === 'string' && value.trim() === '') return;
+          cleanMeta[key] = value;
+        });
+
+        const payload = { ...(formData as object), ...cleanMeta } as unknown as BuildingFormData;
+        await onSubmit(payload as BuildingFormData);
         setSubmitMessage({
           type: 'success',
           text: initialData ? 'Edificação atualizada com sucesso!' : 'Edificação criada com sucesso!',
@@ -659,16 +704,6 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
           {showAdvanced && (
             <div className="space-y-4">
               <div>
-                <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Slug</label>
-                <input
-                  type="text"
-                  value={meta.slug ?? ''}
-                  onChange={(e) => setMeta((m) => ({ ...m, slug: e.target.value }))}
-                  className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
-                />
-              </div>
-
-              <div>
                 <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">QR Code Key</label>
                 <input
                   type="text"
@@ -676,42 +711,6 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
                   onChange={(e) => setMeta((m) => ({ ...m, qrCodeKey: e.target.value }))}
                   className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
                 />
-              </div>
-
-              <div>
-                <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Architect ID</label>
-                <input
-                  type="text"
-                  value={meta.architectId ?? ''}
-                  onChange={(e) => setMeta((m) => ({ ...m, architectId: e.target.value }))}
-                  className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Coordinates lat</label>
-                  <input
-                    type="number"
-                    value={meta.coordinates?.lat ?? ''}
-                    onChange={(e) =>
-                      setMeta((m) => ({ ...m, coordinates: { ...(m.coordinates ?? {}), lat: Number(e.target.value) } }))
-                    }
-                    className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">Coordinates lng</label>
-                  <input
-                    type="number"
-                    value={meta.coordinates?.lng ?? ''}
-                    onChange={(e) =>
-                      setMeta((m) => ({ ...m, coordinates: { ...(m.coordinates ?? {}), lng: Number(e.target.value) } }))
-                    }
-                    className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2"
-                  />
-                </div>
               </div>
 
               <div>
@@ -887,7 +886,7 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
         </legend>
 
         <div className="space-y-8">
-          {IMAGE_CATEGORIES.map(({ key, label }) => {
+          {IMAGE_CATEGORIES.map(({ key, label, type }) => {
             const images = formData.images?.[key] || [];
             const draftImage = imagemTemp[key];
             const previewImage =
@@ -898,11 +897,9 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
                     alt: draftImage.alt.trim(),
                     caption: draftImage.caption.trim() || undefined,
                     fallbackUrl:
-                      key === 'facades' || key === 'exteriorPhotos'
-                        ? '/images/Margs.jpg'
-                        : key === 'interiorPhotos'
-                          ? '/images/Memorial RS.jpg'
-                          : '/images/Margs.jpg',
+                      key === 'interiorPhotos'
+                        ? s3ImageUrl('images/Memorial RS.jpg')
+                        : s3ImageUrl('images/margs/Margs.jpg'),
                   }
                 : null;
 
@@ -926,9 +923,35 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
                       type="text"
                       value={imagemTemp[key].url}
                       onChange={(e) => handleImageInputChange(key, 'url', e.target.value)}
-                      placeholder="/images/Margs.jpg ou URL externa"
+                      placeholder="URL externa"
                       className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
                     />
+                    <div className="mt-2 flex items-center gap-3">
+                      <label
+                        className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border border-outline-variant/30 bg-surface-container-high/40 px-3 py-2 font-headline text-[10px] font-bold uppercase tracking-widest text-on-surface/70 transition-all hover:bg-surface-container-high/60 ${
+                          uploadingCategory === key ? 'pointer-events-none opacity-60' : ''
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-sm">
+                          {uploadingCategory === key ? 'hourglass_empty' : 'cloud_upload'}
+                        </span>
+                        {uploadingCategory === key ? 'Enviando...' : 'Enviar arquivo (S3)'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingCategory === key}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadFile(key, type, file);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
+                      <span className="text-xs text-on-surface/40">
+                        Envia (preenche a URL automaticamente)
+                      </span>
+                    </div>
                   </div>
 
                   <div>

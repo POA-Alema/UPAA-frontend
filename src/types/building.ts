@@ -25,9 +25,9 @@ export type Building = {
   slug?: string;
   title: string;
   location: string;
+  coordinates?: { lat?: number; lng?: number };
   latitude?: number;
   longitude?: number;
-  coordinates?: { lat?: number; lng?: number };
   constructionPeriod?: string;
   architect?: string;
   architectId?: string;
