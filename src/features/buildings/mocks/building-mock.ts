@@ -12,6 +12,13 @@ export const buildingsMock: Building[] = [
     hero: {
       src: "/images/margs/Margs.jpg",
       alt: "Fachada do Museu de Arte do Rio Grande do Sul",
+      title: "Fachada principal do MARGS",
+      description:
+        "Vista da fachada principal da antiga Delegacia Fiscal da Fazenda, voltada para a Praça da Alfândega, no Centro Histórico de Porto Alegre. O conjunto, concluído em 1916, abriga o MARGS desde 1978.",
+      source: "Acervo do Museu de Arte do Rio Grande do Sul Ado Malagoli (MARGS)",
+      reference:
+        "WEIMER, Günter. Arquitetura erudita da imigração alemã no Rio Grande do Sul. Porto Alegre: UFRGS, 2005.",
+      credits: "Projeto: Theodor Wiederspahn (1913–1916). Tombamento IPHAN, 2000.",
     },
     history: `Localizado na Praça da Alfândega, o Museu de Arte do Rio Grande do Sul, pertencente ao estado, situa-se na área do antigo cais de 1856, aterrada quando da construção do novo porto, de onde se ingressa no centro histórico da cidade pelo Pórtico do Cais Mauá. Projetado e construído de 1913 a 1916, pelo arquiteto Theodor Wiederspahn, com a execução do Engenheiro Rudolph Arhons para abrigar a Delegacia Fiscal.
 
@@ -65,21 +72,43 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         src: "/images/margs/planta_baixa.jpg",
         alt: "Planta baixa do segundo pavimento da antiga Delegacia Fiscal",
         caption: "Planta baixa",
+        title: "Planta baixa — 2º pavimento",
+        description:
+          "Desenho técnico do segundo pavimento da antiga Delegacia Fiscal, evidenciando a organização simétrica dos ambientes em torno do hall central.",
+        source: "Acervo técnico do projeto de restauração (1996–1998)",
+        reference: "Projeto de Restauração de Ediolanda Liedke, 1996–1998.",
+        credits: "Desenho original: Theodor Wiederspahn, 1913.",
       },
       {
         src: "/images/margs/fachadas.jpg",
         alt: "Fachada principal da antiga Delegacia Fiscal",
         caption: "Fachadas",
+        title: "Estudo das fachadas",
+        description:
+          "Composição das fachadas voltada ao classicismo, concebida em diálogo com o prédio dos Correios e Telégrafos, de linguagem mais abarrocada.",
+        source: "Acervo do MARGS",
+        credits: "Ornamentos: oficinas de João Vicente Friederichs; figuras de Alfred Adloff.",
       },
       {
         src: "/images/margs/fotos_externas.jpg",
         alt: "Foto histórica externa do MARGS",
         caption: "Fotos externas",
+        title: "Registro externo histórico",
+        description:
+          "Fotografia histórica do edifício na área do antigo cais de 1856, aterrada por ocasião da construção do novo porto de Porto Alegre.",
+        source: "Acervo fotográfico histórico — Praça da Alfândega",
+        reference: "FRANCO, Sérgio da Costa. Porto Alegre: guia histórico. Porto Alegre: UFRGS, 2006.",
+        credits: "Autoria não identificada.",
       },
       {
         src: "/images/margs/fotos_internas.jpg",
         alt: "Vista interna do hall central do MARGS",
         caption: "Fotos internas",
+        title: "Hall central",
+        description:
+          "Vista interna do hall central, iluminado por claraboia zenital, recurso recorrente nos projetos de Wiederspahn para garantir ambientes amplos e iluminados.",
+        source: "Acervo do MARGS",
+        credits: "Fotografia institucional do museu.",
       },
       {
         src: "/images/margs/escadaria_interna.jpeg",

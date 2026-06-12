@@ -49,51 +49,38 @@ Componente `"use client"` que implementa:
 
 **Type-check passou** (`npx tsc --noEmit` sem erros).
 
+### 5. `src/components/media/ExpandableImage.tsx` — Wrapper expansível (novo componente)
+
+Wrapper `"use client"` que renderiza o `next/image` (`fill`) e sobrepõe um botão `absolute inset-0 z-20` com `cursor-zoom-in`. Badge com ícone Material Symbols `open_in_full` no canto superior direito, `opacity-0` por padrão e visível em `group-hover` / `group-focus-visible`. Controla o estado `isOpen` e renderiza `<ImageModal>` quando aberto. Props: `image`, `imageClassName`, `sizes`, `priority`.
+
+### 6. Chaves i18n (`src/features/i18n.ts`)
+
+Bloco `image` adicionado nos 3 idiomas (pt / en / de): `expand`, `close`, `source`, `reference`, `credits`.
+
+### 7. Wiring do `ExpandableImage` nas 4 superfícies
+
+1. **`BuildingGallery.tsx`** — `<Image>` da galeria substituído por `<ExpandableImage>`
+2. **Hero de `BuildingPage.tsx`** — hero usa `<ExpandableImage>` preservando o fallback de `alt` (`hero.alt || title`)
+3. **`ArchitectGallery.tsx`** — `<ExpandableImage>` apenas nos cards `<figure>` **sem** `href`; cards com `href` mantêm `<Image>` simples dentro do `<Link>` (não abrem modal sobre o link)
+4. **Hero de `ArchitectPage.tsx`** — hero usa `<ExpandableImage>` preservando o fallback de `alt` (`image.alt || title`)
+
+### 8. Seed do mock MARGS (`src/features/buildings/mocks/building-mock.ts`)
+
+Hero + 4 itens da galeria do MARGS populados com `ImageMetadata` realista (título, descrição, fonte, referência, créditos) para demonstrar o painel lateral completo.
+
+### 9. Testes (Vitest + Testing Library)
+
+- **`ExpandableImage.test.tsx`** (4): ícone `open_in_full` presente; modal ausente antes do clique; abre `ImageModal` ao clicar; fecha pelo botão
+- **`ImageModal.test.tsx`** (7): fecha por botão / Esc / backdrop; scroll-lock; renderiza todos os metadados; omite labels de campos ausentes; usa `alt` como título de fallback
+- **`ArchitectGallery.test.tsx`** (2): cards com `href` não recebem botão de ampliar (não abre modal sobre link); cards sem `href` recebem o botão
+
+**Suíte completa: 138/138 passando. Type-check e lint limpos.**
+
 ---
 
 ## 🚧 O que falta fazer
 
-### Responsabilidade: Front-end
-
-#### `src/components/media/ExpandableImage.tsx` (componente ainda não existe)
-
-Wrapper `"use client"` que:
-
-- Renderiza o `next/image` normalmente
-- Sobrepõe um botão `absolute inset-0` com `cursor-zoom-in` e ícone Material Symbols `open_in_full` no canto superior direito, visível no hover/focus
-- Controla o estado `isOpen` e renderiza `<ImageModal>` quando aberto
-
-#### Chaves i18n (`src/features/i18n.ts`)
-
-Adicionar bloco `image` nos 3 idiomas (pt / en / de):
-
-```json
-"image": {
-  "expand": "Ampliar imagem",
-  "close": "Fechar imagem ampliada",
-  "source": "Fonte",
-  "reference": "Referência",
-  "credits": "Créditos"
-}
-```
-
-#### Wiring do `ExpandableImage` nas 4 superfícies
-
-1. **`BuildingGallery.tsx`** — substituir `<figure>/<img>` por `<ExpandableImage>` em todos os itens
-2. **Hero de `BuildingPage.tsx`** — mesma substituição na imagem principal
-3. **`ArchitectGallery.tsx`** — somente nos cards `<figure>` **sem** `href`; cards com link continuam navegando normalmente (não abrir modal sobre link)
-4. **Hero de `ArchitectPage.tsx`** — idem ao hero de edificação
-
-#### Seed do mock MARGS (`src/features/buildings/mocks/building-mock.ts`)
-
-Popular `ImageMetadata` no hero e em pelo menos 3 itens da galeria do MARGS com dados de exemplo reais (título, descrição, fonte, referência, créditos) para demonstrar e testar o painel lateral completo.
-
-#### Testes (por último, a pedido do usuário)
-
-Padrão: Vitest + Testing Library, mockando `next/image`, `react-i18next` e `next/link`.
-
-- **`ExpandableImage`**: mostra ícone `open_in_full` no hover; abre `ImageModal` ao clicar; não abre quando envolto em link
-- **`ImageModal`**: fecha por botão; fecha por Esc; fecha por clique no backdrop; renderização condicional de cada campo de metadados (campo ausente → não renderiza o label)
+Front-end concluído. Resta apenas a parte de backend (abaixo).
 
 ---
 
