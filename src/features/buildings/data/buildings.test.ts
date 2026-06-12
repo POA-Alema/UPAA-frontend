@@ -1,7 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getBuildingBySlug, getFeaturedBuilding, listBuildings } from "./buildings";
 
 describe("building data layer", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("returns the mock collection while the CMS layer is unavailable", async () => {
     const buildings = await listBuildings();
 

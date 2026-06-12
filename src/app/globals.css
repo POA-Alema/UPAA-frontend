@@ -1482,6 +1482,12 @@ button:focus-visible {
   font-size: 1.8rem;
 }
 
+.building-feature-icon--img {
+  width: 1.8rem;
+  height: 1.8rem;
+  object-fit: contain;
+}
+
 .building-gallery__header {
   margin-bottom: 24px;
   display: flex;

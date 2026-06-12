@@ -1,5 +1,9 @@
 import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
 
+// O acervo é dedicado a Theodor Wiederspahn; o payload do mapa só traz
+// architect_id, então o link "Sobre o Autor" usa a rota dele por padrão.
+const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
+
 export type BuildingAttachment = {
   src: string;
   alt: string;
@@ -207,6 +211,7 @@ export function mapBackendBuildingToMapBuilding(
       toOptionalString(building.constructionPeriod) ??
       toOptionalNumber(building.buildYear)?.toString(),
     architectName: selectLocalizedText(building.architect),
+    architectPath: ARCHITECT_DETAIL_PATH,
     attachments: extractAttachments(
       building.mediaGallery ?? building.media_gallery,
       building.images,

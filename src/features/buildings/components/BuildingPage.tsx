@@ -4,6 +4,14 @@ import { FeatureAction } from "@/components/ui/feature-action";
 import { BuildingGallery } from "./BuildingGallery";
 import type { BuildingPageProps } from "../types/building";
 
+function isIconPath(icon: string): boolean {
+  return (
+    icon.startsWith("/") ||
+    icon.startsWith("http://") ||
+    icon.startsWith("https://")
+  );
+}
+
 export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
   const hasHero = Boolean(
     building.title || building.eyebrow || building.hero,
@@ -111,9 +119,21 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
                   className={`info-card building-feature-card building-feature-card--${index % 2 === 0 ? "left" : "right"}`}
                   key={characteristic.title}
                 >
-                  <span className="material-symbols-outlined building-feature-icon">
-                    {characteristic.icon}
-                  </span>
+                  {isIconPath(characteristic.icon) ? (
+                    <Image
+                      alt=""
+                      aria-hidden
+                      className="building-feature-icon building-feature-icon--img"
+                      height={29}
+                      src={characteristic.icon}
+                      unoptimized
+                      width={29}
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined building-feature-icon">
+                      {characteristic.icon}
+                    </span>
+                  )}
                   <h3>{characteristic.title}</h3>
                   <p>{characteristic.description}</p>
                 </article>

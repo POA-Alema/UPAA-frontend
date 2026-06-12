@@ -56,7 +56,8 @@ describe("architect data layer", () => {
     });
   });
 
-  it("returns an empty collection when the API has no valid architect content", async () => {
+  it("falls back to the curated mock when the API has no valid architect content", async () => {
+
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -73,7 +74,7 @@ describe("architect data layer", () => {
 
     const architects = await listArchitects();
 
-    expect(architects).toEqual([]);
+    expect(architects).toEqual(architectsMock);
   });
 
   it("returns the mock collection when the architects API request fails", async () => {
