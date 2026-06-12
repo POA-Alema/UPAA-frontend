@@ -1,4 +1,6 @@
-export interface ArchitectImage {
+import type { ImageMetadata } from "@/types/image";
+
+export interface ArchitectImage extends ImageMetadata {
   src: string;
   alt: string;
   caption?: string;
