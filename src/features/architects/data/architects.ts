@@ -3,6 +3,10 @@ import type { Architect } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
 
+// Placeholder de texto livre até o CMS enviar a descrição das imagens.
+const IMAGE_DESCRIPTION_PLACEHOLDER =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
 type LocalizedField = {
   pt?: string;
 };
@@ -95,6 +99,9 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
           src: imageSrc,
           alt: record.image?.alt || title || "",
           caption: record.image?.caption,
+          // Placeholder até o CMS enviar título/texto livre das imagens.
+          title: record.image?.title || record.image?.caption || title,
+          description: record.image?.description ?? IMAGE_DESCRIPTION_PLACEHOLDER,
         }
       : record.image,
     actions: record.actions,
@@ -168,6 +175,9 @@ function mapFeaturedArchitect(
           src: imageSrc,
           alt: imageCaption || title,
           caption: imageCaption || fallback.image?.caption,
+          // Placeholder até o CMS enviar título + texto livre da imagem.
+          title: fallback.image?.title,
+          description: fallback.image?.description,
         }
       : fallback.image,
     actions: {

@@ -1,6 +1,10 @@
 import { s3ImageUrl } from "@/lib/s3";
 import type { Building } from "../types/building";
 
+// Texto livre placeholder (será substituído por rich text vindo do CMS).
+const LOREM =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
 export const buildingsMock: Building[] = [
   {
     id: "margs",
@@ -14,12 +18,7 @@ export const buildingsMock: Building[] = [
       src: s3ImageUrl("images/margs/Margs.jpg"),
       alt: "Fachada do Museu de Arte do Rio Grande do Sul",
       title: "Fachada principal do MARGS",
-      description:
-        "Vista da fachada principal da antiga Delegacia Fiscal da Fazenda, voltada para a Praça da Alfândega, no Centro Histórico de Porto Alegre. O conjunto, concluído em 1916, abriga o MARGS desde 1978.",
-      source: "Acervo do Museu de Arte do Rio Grande do Sul Ado Malagoli (MARGS)",
-      reference:
-        "WEIMER, Günter. Arquitetura erudita da imigração alemã no Rio Grande do Sul. Porto Alegre: UFRGS, 2005.",
-      credits: "Projeto: Theodor Wiederspahn (1913–1916). Tombamento IPHAN, 2000.",
+      description: LOREM,
     },
     history: `Localizado na Praça da Alfândega, o Museu de Arte do Rio Grande do Sul, pertencente ao estado, situa-se na área do antigo cais de 1856, aterrada quando da construção do novo porto, de onde se ingressa no centro histórico da cidade pelo Pórtico do Cais Mauá. Projetado e construído de 1913 a 1916, pelo arquiteto Theodor Wiederspahn, com a execução do Engenheiro Rudolph Arhons para abrigar a Delegacia Fiscal.
 
@@ -74,68 +73,64 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
         alt: "Planta baixa do segundo pavimento da antiga Delegacia Fiscal",
         caption: "Planta baixa",
         title: "Planta baixa — 2º pavimento",
-        description:
-          "Desenho técnico do segundo pavimento da antiga Delegacia Fiscal, evidenciando a organização simétrica dos ambientes em torno do hall central.",
-        source: "Acervo técnico do projeto de restauração (1996–1998)",
-        reference: "Projeto de Restauração de Ediolanda Liedke, 1996–1998.",
-        credits: "Desenho original: Theodor Wiederspahn, 1913.",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/fachadas.jpg"),
         alt: "Fachada principal da antiga Delegacia Fiscal",
         caption: "Fachadas",
-        title: "Estudo das fachadas",
-        description:
-          "Composição das fachadas voltada ao classicismo, concebida em diálogo com o prédio dos Correios e Telégrafos, de linguagem mais abarrocada.",
-        source: "Acervo do MARGS",
-        credits: "Ornamentos: oficinas de João Vicente Friederichs; figuras de Alfred Adloff.",
+        title: "Fachadas",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/fotos_externas.jpg"),
         alt: "Foto histórica externa do MARGS",
         caption: "Fotos externas",
-        title: "Registro externo histórico",
-        description:
-          "Fotografia histórica do edifício na área do antigo cais de 1856, aterrada por ocasião da construção do novo porto de Porto Alegre.",
-        source: "Acervo fotográfico histórico — Praça da Alfândega",
-        reference: "FRANCO, Sérgio da Costa. Porto Alegre: guia histórico. Porto Alegre: UFRGS, 2006.",
-        credits: "Autoria não identificada.",
+        title: "Fotos externas",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/fotos_internas.jpg"),
         alt: "Vista interna do hall central do MARGS",
         caption: "Fotos internas",
         title: "Hall central",
-        description:
-          "Vista interna do hall central, iluminado por claraboia zenital, recurso recorrente nos projetos de Wiederspahn para garantir ambientes amplos e iluminados.",
-        source: "Acervo do MARGS",
-        credits: "Fotografia institucional do museu.",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/escadaria_interna.jpeg"),
         alt: "Escadaria interna do MARGS",
         caption: "Escadaria interna",
+        title: "Escadaria interna",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/teto.jpeg"),
         alt: "Teto do MARGS",
         caption: "Teto",
+        title: "Teto",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/superior.jpeg"),
         alt: "Vista da parte superior superior do MARGS",
         caption: "Vista da parte superior",
+        title: "Vista da parte superior",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/esculturas.jpeg"),
         alt: "Esculturas internas do MARGS",
         caption: "Esculturas internas",
+        title: "Esculturas internas",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/margs/esculturas2.jpeg"),
         alt: "Esculturas internas do MARGS",
         caption: "Esculturas internas",
-      }
+        title: "Esculturas internas (detalhe)",
+        description: LOREM,
+      },
     ],
     architectCta: {
       description:
@@ -161,6 +156,8 @@ Seu projeto foi desenvolvido concomitantemente ao dos Correios e Telégrafos. Wi
     hero: {
       src: s3ImageUrl("images/cdcMarioQuintana.jpg"),
       alt: "Fachada da Casa de Cultura Mario Quintana",
+      title: "Fachada da Casa de Cultura Mario Quintana",
+      description: LOREM,
     },
     history: `Erguido entre 1916 e 1933 para abrigar o Hotel Majestic, o edifício foi durante décadas o ponto de encontro da elite intelectual e política de Porto Alegre. Sua imponência classicista e o requinte dos ambientes internos refletiam o prestígio que a cidade conquistava no início do século XX como capital econômica do Rio Grande do Sul.
 
@@ -199,11 +196,15 @@ Após anos de decadência e ameaça de demolição, o prédio foi tombado e rest
         src: s3ImageUrl("images/cdcMarioQuintana.jpg"),
         alt: "Fachada principal da CCMQ",
         caption: "Fachada principal",
+        title: "Fachada principal",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/cdcMarioQuintana_2.jpg"),
         alt: "Detalhe arquitetônico interno da CCMQ",
         caption: "Detalhe interno",
+        title: "Detalhe interno",
+        description: LOREM,
       },
     ],
     architectCta: {

@@ -1,25 +1,19 @@
 /**
- * Metadados de referência de uma imagem.
+ * Metadados de uma imagem exibidos no modal de visualização ampliada.
  *
- * CONTRATO com o backend (ainda não implementado no servidor):
- * todos os campos são OPCIONAIS — o front renderiza condicionalmente e
- * nunca quebra o layout quando algum deles estiver ausente.
+ * CONTRATO com o backend: ambos os campos são OPCIONAIS no tipo, mas a
+ * intenção do produto é que TODA imagem traga `title` e `description`.
+ * O `description` é um texto livre que será editado como rich text no CMS
+ * (aceita HTML simples; o componente `RichText` higieniza e quebra em parágrafos).
  *
- * Enquanto o backend não envia estes campos, eles vêm do mock
- * (ver src/features/buildings/mocks/building-mock.ts). Quando o backend
- * passar a enviá-los, as funções de normalização devem mapeá-los para cá.
+ * Enquanto o backend não envia estes campos, eles vêm dos mocks. Quando o
+ * backend passar a enviá-los, as funções de normalização devem mapeá-los para cá.
  */
 export interface ImageMetadata {
-  /** Título curto da imagem (ex.: "Fachada principal"). */
+  /** Título da imagem (nome exibido como cabeçalho do painel). */
   title?: string;
-  /** Legenda ou descrição longa do que a imagem mostra. */
+  /** Texto livre (rich text do CMS) descrevendo a imagem. */
   description?: string;
-  /** Fonte formal: instituição, acervo ou autor da imagem. */
-  source?: string;
-  /** Referência literária ou bibliográfica associada. */
-  reference?: string;
-  /** Créditos da imagem (fotógrafo, ilustrador, licença). */
-  credits?: string;
 }
 
 /**

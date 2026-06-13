@@ -1,6 +1,10 @@
 import { s3ImageUrl } from "@/lib/s3";
 import type { ImmigrationSection } from "../types/immigration";
 
+// Texto livre placeholder (será substituído por rich text vindo do CMS).
+const LOREM =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
 export const immigrationMock: ImmigrationSection = {
   subtitle: "Herança cultural, memória e formação do estado",
   title: "A Imigração Alemã no Rio Grande do Sul",
@@ -8,6 +12,8 @@ export const immigrationMock: ImmigrationSection = {
   image: {
     src: s3ImageUrl("images/oktoberfest.jpg"),
     alt: "Fachada do Museu de Arte do Rio Grande do Sul, edificação histórica no centro de Porto Alegre",
+    title: "A Imigração Alemã no Rio Grande do Sul",
+    description: LOREM,
   },
 };
 

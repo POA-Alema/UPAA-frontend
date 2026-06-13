@@ -6,9 +6,6 @@ import type { ExpandableImageData } from "@/types/image";
 
 const translations: Record<string, string> = {
   "image.close": "Fechar imagem ampliada",
-  "image.source": "Fonte",
-  "image.reference": "Referência",
-  "image.credits": "Créditos",
 };
 
 vi.mock("react-i18next", () => ({
@@ -41,9 +38,6 @@ const fullImage: ExpandableImageData = {
   caption: "Fachada principal",
   title: "Museu de Arte",
   description: "Vista da fachada principal do museu.",
-  source: "Acervo MARGS",
-  reference: "WEIMER, Günter. Arquitetura erudita.",
-  credits: "Theodor Wiederspahn, 1913.",
 };
 
 describe("ImageModal", () => {
@@ -88,30 +82,13 @@ describe("ImageModal", () => {
     expect(document.body.style.overflow).toBe("hidden");
   });
 
-  it("renderiza todos os metadados quando presentes", () => {
+  it("renderiza título e texto livre no painel lateral", () => {
     render(<ImageModal image={fullImage} onClose={vi.fn()} />);
 
     expect(
       screen.getByRole("heading", { name: /museu de arte/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/vista da fachada principal/i)).toBeInTheDocument();
-    expect(screen.getByText("Fonte")).toBeInTheDocument();
-    expect(screen.getByText("Acervo MARGS")).toBeInTheDocument();
-    expect(screen.getByText("Referência")).toBeInTheDocument();
-    expect(screen.getByText("Créditos")).toBeInTheDocument();
-  });
-
-  it("omite labels de campos ausentes sem quebrar o layout", () => {
-    render(
-      <ImageModal
-        image={{ src: "/x.jpg", alt: "Imagem", source: "Acervo X" }}
-        onClose={vi.fn()}
-      />,
-    );
-
-    expect(screen.getByText("Fonte")).toBeInTheDocument();
-    expect(screen.queryByText("Referência")).not.toBeInTheDocument();
-    expect(screen.queryByText("Créditos")).not.toBeInTheDocument();
   });
 
   it("não renderiza painel lateral quando há apenas alt (só a imagem)", () => {
@@ -121,10 +98,9 @@ describe("ImageModal", () => {
 
     expect(screen.getByRole("img", { name: /somente alt/i })).toBeInTheDocument();
     expect(screen.queryByRole("heading")).not.toBeInTheDocument();
-    expect(screen.queryByText("Fonte")).not.toBeInTheDocument();
   });
 
-  it("renderiza legenda sobreposta quando há apenas caption (sem painel)", () => {
+  it("renderiza legenda sobreposta quando há apenas caption (sem texto livre)", () => {
     render(
       <ImageModal
         image={{ src: "/x.jpg", alt: "Imagem", caption: "Minha legenda" }}

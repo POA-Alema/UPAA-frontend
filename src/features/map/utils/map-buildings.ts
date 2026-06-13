@@ -1,10 +1,15 @@
 import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
+import type { ImageMetadata } from "@/types/image";
 
 // O acervo é dedicado a Theodor Wiederspahn; o payload do mapa só traz
 // architect_id, então o link "Sobre o Autor" usa a rota dele por padrão.
 const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
 
-export type BuildingAttachment = {
+// Placeholder de texto livre até o CMS enviar a descrição das imagens.
+const IMAGE_DESCRIPTION_PLACEHOLDER =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+export type BuildingAttachment = ImageMetadata & {
   src: string;
   alt: string;
   caption?: string;
@@ -30,6 +35,8 @@ type BackendMedia = {
   caption?: unknown;
   alt?: unknown;
   altText?: unknown;
+  title?: unknown;
+  description?: unknown;
 };
 
 export type BackendBuilding = {
@@ -159,6 +166,12 @@ function mapBackendMediaToAttachment(
     src,
     alt,
     caption: caption || undefined,
+    // Placeholder até o CMS enviar título/texto livre das imagens.
+    title:
+      selectLocalizedText(media.title as LocalizedText) || caption || buildingName,
+    description:
+      selectLocalizedText(media.description as LocalizedText) ||
+      IMAGE_DESCRIPTION_PLACEHOLDER,
   };
 }
 
@@ -178,7 +191,12 @@ function extractAttachments(
     return images
       .map((image) =>
         typeof image === "string"
-          ? { src: image, alt: buildingName }
+          ? {
+              src: image,
+              alt: buildingName,
+              title: buildingName,
+              description: IMAGE_DESCRIPTION_PLACEHOLDER,
+            }
           : isRecord(image)
             ? mapBackendMediaToAttachment(image, buildingName)
             : null,

@@ -40,8 +40,8 @@ const image: ExpandableImageData = {
   src: "/margs.jpg",
   alt: "Fachada do MARGS",
   caption: "Fachada principal",
+  title: "Fachada principal do MARGS",
   description: "Vista da fachada principal.",
-  source: "Acervo MARGS",
 };
 
 describe("ExpandableImage", () => {

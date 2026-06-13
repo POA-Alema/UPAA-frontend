@@ -1,6 +1,10 @@
 import { s3ImageUrl } from "@/lib/s3";
 import type { Building } from "../utils/map-buildings";
 
+// Texto livre placeholder (será substituído por rich text vindo do CMS).
+const LOREM =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
 export const mapBuildingsMock: Building[] = [
   {
     id: 1,
@@ -17,11 +21,15 @@ export const mapBuildingsMock: Building[] = [
         src: s3ImageUrl("images/margs/Margs.jpg"),
         alt: "Fachada historica com ornamentos classicos",
         caption: "Visão externa do MARGS.",
+        title: "Visão externa do MARGS",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/Margs_2.jpg"),
         alt: "Detalhe de fachada historica no centro de Porto Alegre",
         caption: "Visão interna da arquitetura do MARGS.",
+        title: "Visão interna do MARGS",
+        description: LOREM,
       },
     ],
     latitude: -30.029111,
@@ -42,11 +50,15 @@ export const mapBuildingsMock: Building[] = [
         src: s3ImageUrl("images/cdcMarioQuintana.jpg"),
         alt: "Volume arquitetonico historico em tons quentes",
         caption: "Visão externa do CCMQ.",
+        title: "Visão externa do CCMQ",
+        description: LOREM,
       },
       {
         src: s3ImageUrl("images/cdcMarioQuintana_2.jpg"),
         alt: "Perspectiva urbana de arquitetura monumental",
         caption: "Visão interna da arquitetura do CCMQ.",
+        title: "Visão interna do CCMQ",
+        description: LOREM,
       },
     ],
     latitude: -30.0316,

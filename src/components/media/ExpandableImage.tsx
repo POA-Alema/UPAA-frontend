@@ -12,6 +12,8 @@ interface ExpandableImageProps {
   imageClassName?: string;
   sizes?: string;
   priority?: boolean;
+  /** Repassado ao next/image — útil para fallback de imagem quebrada. */
+  onError?: () => void;
 }
 
 export function ExpandableImage({
@@ -19,6 +21,7 @@ export function ExpandableImage({
   imageClassName,
   sizes,
   priority,
+  onError,
 }: ExpandableImageProps) {
   const { t } = useTranslation("common");
   const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +32,7 @@ export function ExpandableImage({
         alt={image.alt}
         className={imageClassName}
         fill
+        onError={onError}
         priority={priority}
         sizes={sizes}
         src={image.src}

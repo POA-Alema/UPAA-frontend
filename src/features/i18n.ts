@@ -37,9 +37,6 @@ const resources = {
       image: {
         expand: "Ampliar imagem",
         close: "Fechar imagem ampliada",
-        source: "Fonte",
-        reference: "Referência",
-        credits: "Créditos",
       },
     },
   },
@@ -78,9 +75,6 @@ const resources = {
       image: {
         expand: "Expand image",
         close: "Close expanded image",
-        source: "Source",
-        reference: "Reference",
-        credits: "Credits",
       },
     },
   },
@@ -120,9 +114,6 @@ const resources = {
       image: {
         expand: "Bild vergrößern",
         close: "Vergrößertes Bild schließen",
-        source: "Quelle",
-        reference: "Referenz",
-        credits: "Bildnachweis",
       },
     },
   },
