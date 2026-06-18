@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const analyticsMocks = vi.hoisted(() => ({
   trackBuildingDetailLoadFailure: vi.fn(),
@@ -15,9 +15,21 @@ import {
 } from "./buildings";
 
 describe("building data layer", () => {
+  const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_API_URL = "http://localhost:3001";
+  });
+
+  afterEach(() => {
+    if (originalApiUrl === undefined) {
+      delete process.env.NEXT_PUBLIC_API_URL;
+      return;
+    }
+
+    process.env.NEXT_PUBLIC_API_URL = originalApiUrl;
   });
 
   it("returns the mock collection while the CMS layer is unavailable", async () => {
