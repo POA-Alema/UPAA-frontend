@@ -63,11 +63,12 @@ describe("ArchitectGallery", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("adiciona o botão de ampliar em cards sem href", () => {
+  it("renderiza imagem estática em cards sem href (sem botão de ampliar)", () => {
     render(<ArchitectGallery items={works} />);
 
+    expect(screen.getByRole("img", { name: /fachada do memorial/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /ampliar imagem/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /ampliar imagem/i }),
+    ).not.toBeInTheDocument();
   });
 });
