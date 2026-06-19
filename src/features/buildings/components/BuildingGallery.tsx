@@ -92,6 +92,7 @@ export function BuildingGallery({ items, language = "pt" }: BuildingGalleryProps
                 priority={index === 0}
                 sizes="(max-width: 820px) 75vw, 25vw"
                 src={item.src}
+                unoptimized
               />
             </div>
             {item.caption ? (

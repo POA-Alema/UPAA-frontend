@@ -48,6 +48,7 @@ export function BuildingPage({
                 priority
                 sizes="100vw"
                 src={building.hero.src}
+                unoptimized
               />
               <div className="building-hero__overlay"></div>
             </div>
