@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { ArchitectPreview } from "@/features/architects/components/ArchitectPreview";
 import { getFeaturedArchitect } from "@/features/architects/data/architects";
 import { LandingContent } from "@/features/home/components/landing-content";
+import { LinksSection } from "@/features/home/components/links-section-container";
 import { ImmigrationSection } from "@/features/home/components/immigration-section-container";
 import { MapPreviewSection } from "@/features/home/components/map-preview-section";
 import MainContainerSkeleton from "@/components/layout/MainContainerSkeleton";
@@ -19,6 +20,7 @@ export default async function HomePage() {
           <Suspense fallback={<MainContainerSkeleton />}>
             <LandingContent />
           </Suspense>
+          <LinksSection />
           <MapPreviewSection />
           <ImmigrationSection />
           {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}

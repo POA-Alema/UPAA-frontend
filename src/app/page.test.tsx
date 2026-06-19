@@ -18,6 +18,10 @@ vi.mock("@/features/home/components/landing-content", () => ({
   LandingContent: () => <div data-testid="landing-content">Landing</div>,
 }));
 
+vi.mock("@/features/home/components/links-section-container", () => ({
+  LinksSection: () => <div data-testid="links-section-container">Links</div>,
+}));
+
 vi.mock("@/features/home/components/map-preview-section", () => ({
   MapPreviewSection: () => <div data-testid="map-preview-section">Map</div>,
 }));
@@ -42,6 +46,7 @@ describe("HomePage", () => {
 
     render(result);
 
+    expect(screen.getByTestId("links-section-container")).toBeInTheDocument();
     expect(
       screen.getByTestId("immigration-section-container")
     ).toBeInTheDocument();

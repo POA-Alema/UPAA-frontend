@@ -238,6 +238,54 @@ button:focus-visible {
   padding-bottom: 40px;
 }
 
+.home-links-section {
+  display: grid;
+  gap: 20px;
+  padding-top: 24px;
+  padding-bottom: 16px;
+}
+
+.home-links-section__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.home-links-section__item {
+  list-style: none;
+}
+
+.home-links-section__link {
+  display: grid;
+  gap: 8px;
+  min-height: 100%;
+  padding: 20px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  color: inherit;
+  text-decoration: none;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.home-links-section__link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+}
+
+.home-links-section__label {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  letter-spacing: 0.02em;
+}
+
+.home-links-section__description {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
 .home-intro {
   display: grid;
   gap: 40px;
