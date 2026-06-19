@@ -129,11 +129,13 @@ describe("mapBackendBuildingsToMapBuildings", () => {
       longitude: -51.22,
     });
     expect(result.attachments).toEqual([
-      {
+      expect.objectContaining({
         src: "/images/Margs.jpg",
         alt: "Fachada principal",
         caption: "Fachada principal",
-      },
+        title: "Fachada principal",
+        description: expect.any(String),
+      }),
     ]);
   });
 
@@ -169,11 +171,13 @@ describe("mapBackendBuildingsToMapBuildings", () => {
       longitude: -51.22,
     });
     expect(result.attachments).toEqual([
-      {
+      expect.objectContaining({
         src: "/images/Margs.jpg",
         alt: "Fachada principal",
         caption: "Fachada principal",
-      },
+        title: "Fachada principal",
+        description: expect.any(String),
+      }),
     ]);
   });
 
@@ -199,7 +203,12 @@ describe("mapBackendBuildingsToMapBuildings", () => {
       longitude: -51,
     });
     expect(result.attachments).toEqual([
-      { src: "/images/obra.jpg", alt: "Obra simples" },
+      expect.objectContaining({
+        src: "/images/obra.jpg",
+        alt: "Obra simples",
+        title: "Obra simples",
+        description: expect.any(String),
+      }),
     ]);
   });
 });

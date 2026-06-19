@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import { BuildingGallery } from "./BuildingGallery";
@@ -43,13 +44,11 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
         <section className="building-hero">
           {building.hero ? (
             <div className="building-hero__media">
-              <Image
-                alt={building.hero.alt || building.title}
-                className="building-hero__image"
-                fill
+              <ExpandableImage
+                image={{ ...building.hero, alt: building.hero.alt || building.title }}
+                imageClassName="building-hero__image"
                 priority
                 sizes="100vw"
-                src={building.hero.src}
               />
               <div className="building-hero__overlay"></div>
             </div>

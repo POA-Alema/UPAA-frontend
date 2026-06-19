@@ -42,6 +42,8 @@ describe("getImmigrationData", () => {
       image: {
         src: "/images/backend.jpg",
         alt: "Imagem vinda do backend",
+        title: immigrationMock.image?.title,
+        description: immigrationMock.image?.description,
       },
     });
   });
@@ -76,6 +78,8 @@ describe("getImmigrationData", () => {
       image: {
         src: "/images/lista.jpg",
         alt: "Legenda da lista",
+        title: immigrationMock.image?.title,
+        description: immigrationMock.image?.description,
       },
     });
   });

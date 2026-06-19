@@ -1,6 +1,10 @@
 import { s3ImageUrl } from "@/lib/s3";
 import type { Architect } from "../types/architect";
 
+// Texto livre placeholder (será substituído por rich text vindo do CMS).
+const LOREM =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
 export const architectsMock: Architect[] = [
   {
     id: "theodor-wiederspahn",
@@ -16,6 +20,8 @@ Sua obra marcou a paisagem urbana da capital gaúcha, com projetos ligados a pr�
       src: s3ImageUrl("images/theodor.png"),
       alt: "Theodor Wiederspahn",
       caption: "Theodor Wiederspahn, um dos maiores nomes da arquitetura gaúcha.",
+      title: "Theodor Wiederspahn",
+      description: LOREM,
     },
     details: [
       {
@@ -57,6 +63,8 @@ Sua obra marcou a paisagem urbana da capital gaúcha, com projetos ligados a pr�
           src: s3ImageUrl("images/margs/Margs.jpg"),
           alt: "Fachada do Museu de Arte do Rio Grande do Sul",
           caption: "Antiga Delegacia Fiscal em Porto Alegre",
+          title: "Museu de Arte do RS",
+          description: LOREM,
         },
       },
       {
@@ -65,6 +73,8 @@ Sua obra marcou a paisagem urbana da capital gaúcha, com projetos ligados a pr�
           src: s3ImageUrl("images/Memorial RS.jpg"),
           alt: "Fachada do Memorial do Rio Grande do Sul",
           caption: "Antigos Correios e Telégrafos",
+          title: "Memorial do RS",
+          description: LOREM,
         },
       },
     ],

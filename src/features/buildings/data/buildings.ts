@@ -6,6 +6,10 @@ const API_TIMEOUT_MS = 2_000;
 
 const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
 
+// Placeholder de texto livre até o CMS enviar a descrição das imagens.
+const IMAGE_DESCRIPTION_PLACEHOLDER =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
 function extractPt(value: unknown): string {
   if (!value) return '';
   if (typeof value === 'string') return value;
@@ -32,11 +36,19 @@ function mapApiToBuilding(api: Record<string, unknown>): Building {
       ? (api['media_gallery'] as Record<string, unknown>[])
       : [];
 
-  const gallery: BuildingImage[] = mediaGallery.map((item) => ({
-    src: String(item['url'] ?? ''),
-    alt: extractPt(item['caption']) || extractPt(api['name']) || 'Imagem da edificação',
-    caption: extractPt(item['caption']) || undefined,
-  }));
+  const gallery: BuildingImage[] = mediaGallery.map((item) => {
+    const itemCaption = extractPt(item['caption']);
+    const buildingName = extractPt(api['name']);
+    return {
+      src: String(item['url'] ?? ''),
+      alt: itemCaption || buildingName || 'Imagem da edificação',
+      caption: itemCaption || undefined,
+      // Placeholder até o CMS enviar título/texto livre das imagens.
+      title:
+        extractPt(item['title']) || itemCaption || buildingName || 'Imagem da edificação',
+      description: extractPt(item['description']) || IMAGE_DESCRIPTION_PLACEHOLDER,
+    };
+  });
 
   const hero: BuildingImage | undefined = gallery[0];
 

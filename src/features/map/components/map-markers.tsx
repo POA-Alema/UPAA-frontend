@@ -3,10 +3,10 @@
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import L, { type LatLngExpression } from "leaflet";
 import { Marker, Tooltip, useMap } from "react-leaflet";
 
@@ -98,15 +98,13 @@ function MapPopupCard({
         <div className="relative w-full aspect-16/10 overflow-hidden group">
           {selectedAttachment ? (
             <>
-              <Image
-                alt={selectedAttachment.alt}
-                src={selectedAttachment.src}
-                fill
-                className="object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
+              <ExpandableImage
+                image={selectedAttachment}
+                imageClassName="object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
                 priority
               />
 
-              <div className="absolute inset-0 bg-linear-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60" />
             </>
           ) : (
             <div className="w-full h-full bg-[#222] animate-pulse flex items-center justify-center">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { RichText } from "@/components/content/rich-text";
 import { PageSection } from "@/components/layout/page-section";
 import { immigrationMock } from "../mocks/immigration-mock";
@@ -40,13 +41,11 @@ export function ImmigrationSectionComponent({
       {image ? (
         <figure className="immigration-section__media">
           <div className="architect-image-frame immigration-section__image-frame">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={image.src}
-              alt={image.alt}
-              className="architect-image immigration-section__image"
-              data-testid="immigration-image"
+            <ExpandableImage
+              image={image}
+              imageClassName="architect-image immigration-section__image"
               onError={() => setHasImageError(true)}
+              sizes="(max-width: 820px) 92vw, 1100px"
             />
           </div>
         </figure>

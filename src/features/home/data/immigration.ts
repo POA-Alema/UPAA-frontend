@@ -53,6 +53,9 @@ function mapImmigrationSection(
       ? {
           src: imageSrc,
           alt: imageAlt || title,
+          // Placeholder até o CMS enviar título + texto livre da imagem.
+          title: immigrationMock.image?.title,
+          description: immigrationMock.image?.description,
         }
       : undefined,
   };

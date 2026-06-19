@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPreviewProps } from "../types/architect";
@@ -67,13 +67,11 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
         {architect.image ? (
           <figure className="architect-preview__media">
             <div className="architect-image-frame architect-image-frame--preview">
-              <Image
-                alt={architect.image.alt || architect.title}
-                className="architect-image"
-                fill
+              <ExpandableImage
+                image={{ ...architect.image, alt: architect.image.alt || architect.title }}
+                imageClassName="architect-image"
                 priority
                 sizes="(max-width: 1024px) 280px, 340px"
-                src={architect.image.src}
               />
               <div className="architect-image-overlay"></div>
             </div>

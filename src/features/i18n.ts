@@ -33,7 +33,11 @@ const resources = {
         section_title: "Edificação",
         map_title: "Mapa",
         map_placeholder: "Integração com o mapa será conectada assim que a feature correspondente estiver disponível."
-      }
+      },
+      image: {
+        expand: "Ampliar imagem",
+        close: "Fechar imagem ampliada",
+      },
     },
   },
   en: {
@@ -67,7 +71,11 @@ const resources = {
         section_title: "Building",
         map_title: "Map",
         map_placeholder: "Map integration will be connected as soon as the corresponding feature is available."
-      }
+      },
+      image: {
+        expand: "Expand image",
+        close: "Close expanded image",
+      },
     },
   },
   de: {
@@ -102,7 +110,11 @@ const resources = {
         section_title: "Gebäude",
         map_title: "Karte",
         map_placeholder: "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht."
-      }
+      },
+      image: {
+        expand: "Bild vergrößern",
+        close: "Vergrößertes Bild schließen",
+      },
     },
   },
 };

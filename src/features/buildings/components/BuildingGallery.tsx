@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import type { BuildingImage } from "../types/building";
 
 interface BuildingGalleryProps {
@@ -81,13 +81,11 @@ export function BuildingGallery({ items }: BuildingGalleryProps) {
         {items.map((item, index) => (
           <figure className="building-gallery-card" key={`${item.src}-${index}`}>
             <div className="building-gallery-card__media">
-              <Image
-                alt={item.alt}
-                className="building-gallery-card__image"
-                fill
+              <ExpandableImage
+                image={item}
+                imageClassName="building-gallery-card__image"
                 priority={index === 0}
                 sizes="(max-width: 820px) 75vw, 25vw"
-                src={item.src}
               />
             </div>
             {item.caption ? (
