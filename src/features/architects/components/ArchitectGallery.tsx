@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ExpandableImage } from "@/components/media/ExpandableImage";
 import type { ArchitectWork } from "../types/architect";
 
 interface ArchitectGalleryProps {
@@ -73,23 +72,14 @@ export function ArchitectGallery({ items }: ArchitectGalleryProps) {
             <>
               <div className="architect-work-card__media">
                 {work.image ? (
-                  work.href ? (
-                    <Image
-                      alt={work.image.alt}
-                      className="architect-image"
-                      fill
-                      priority={index === 0}
-                      sizes="(max-width: 768px) 82vw, 288px"
-                      src={work.image.src}
-                    />
-                  ) : (
-                    <ExpandableImage
-                      image={work.image}
-                      imageClassName="architect-image"
-                      priority={index === 0}
-                      sizes="(max-width: 768px) 82vw, 288px"
-                    />
-                  )
+                  <Image
+                    alt={work.image.alt}
+                    className="architect-image"
+                    fill
+                    priority={index === 0}
+                    sizes="(max-width: 768px) 82vw, 288px"
+                    src={work.image.src}
+                  />
                 ) : (
                   <span className="material-symbols-outlined architect-work-card__fallback">
                     image

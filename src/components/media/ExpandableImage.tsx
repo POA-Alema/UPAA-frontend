@@ -43,7 +43,7 @@ export function ExpandableImage({
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-[#E9C46A] opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-[#E9C46A] opacity-100 backdrop-blur-sm transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100">
           <span className="material-symbols-outlined text-xl">open_in_full</span>
         </span>
       </button>

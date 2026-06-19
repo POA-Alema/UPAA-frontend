@@ -54,13 +54,13 @@ export function ImageModal({ image, onClose }: ImageModalProps) {
     >
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/15 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Container de tamanho fixo: o modal tem sempre o mesmo tamanho,
           independentemente da proporção da imagem (object-contain centraliza). */}
-      <div className="relative z-10 flex h-[90vh] w-[94vw] max-w-[1200px] flex-col overflow-hidden rounded-2xl bg-[#1A1A1A] text-white shadow-2xl md:h-[85vh] md:flex-row">
+      <div className="relative z-10 flex h-[90vh] w-[94vw] max-w-[1200px] flex-col overflow-hidden rounded-2xl border-2 border-[#E9C46A] bg-[#1A1A1A]/80 text-white shadow-2xl md:h-[85vh] md:flex-row">
         <button
           aria-label={t("image.close", "Fechar imagem ampliada")}
           className="group absolute right-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-full border-0 bg-black/50 backdrop-blur-sm transition-all hover:bg-white/10"
