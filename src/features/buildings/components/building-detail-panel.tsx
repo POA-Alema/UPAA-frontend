@@ -1,4 +1,5 @@
 import type { Building } from "@/data/buildings";
+import { BuildingMaterialsSection } from "./building-materials-section";
 
 type BuildingDetailPanelProps = {
   building: Building;
@@ -12,13 +13,19 @@ export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
         <p className="meta-line">
           {building.location} - {building.constructionPeriod}
         </p>
-        <h3>Edificação</h3>
+        <h3>Edificacao</h3>
         <p>{building.description}</p>
       </article>
       <article className="info-card">
         <h3>Mapa</h3>
-        <p>Integração com o mapa será conectada assim que a feature correspondente estiver disponível.</p>
+        <p>
+          Integracao com o mapa sera conectada assim que a feature
+          correspondente estiver disponivel.
+        </p>
       </article>
+      <div className="content-grid__full">
+        <BuildingMaterialsSection materials={building.materials} />
+      </div>
     </div>
   );
 }

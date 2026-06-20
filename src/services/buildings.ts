@@ -1,5 +1,11 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
-import type { ImageCategory, Building, BuildingFormData, BuildingImage } from '@/types/building';
+import type {
+  ImageCategory,
+  Building,
+  BuildingFormData,
+  BuildingImage,
+  BuildingMaterial,
+} from '@/types/building';
 
 const ENDPOINT_CANDIDATES = [
   '/admin/edificacoes',
@@ -66,6 +72,26 @@ function createMockBuildings(): Building[] {
           author: 'Equipe UPAA',
         },
       ],
+      materials: [
+        {
+          id: 'margs-material-planta-1',
+          type: 'plant',
+          title: 'Planta baixa',
+          description: 'Levantamento grafico da organizacao interna.',
+        },
+        {
+          id: 'margs-material-documento-1',
+          type: 'document',
+          title: 'Documento historico',
+          description: 'Registro documental associado ao edificio.',
+        },
+        {
+          id: 'margs-material-analise-1',
+          type: 'analysis',
+          title: 'Analise arquitetonica',
+          description: 'Sintese visual de elementos formais e patrimoniais.',
+        },
+      ],
       images: {
         floorPlan: [
           createMockImage(
@@ -126,6 +152,7 @@ function createMockBuildings(): Building[] {
           author: 'Equipe UPAA',
         },
       ],
+      materials: [],
       images: {
         floorPlan: [],
         facades: [
@@ -175,6 +202,27 @@ function normalizeImage(image: Partial<BuildingImage>, index: number): BuildingI
   };
 }
 
+function normalizeMaterial(
+  material: Partial<BuildingMaterial>,
+  index: number
+): BuildingMaterial {
+  const allowedTypes = ['plant', 'document', 'analysis'] as const;
+  const materialType = material.type as BuildingMaterial['type'] | undefined;
+  const type = materialType && allowedTypes.includes(materialType)
+    ? materialType
+    : 'document';
+
+  return {
+    id: material.id ?? `material-${index + 1}`,
+    type,
+    title: material.title ?? 'Material adicional',
+    description: material.description,
+    url: material.url,
+    previewUrl: material.previewUrl,
+    previewAlt: material.previewAlt,
+  };
+}
+
 function normalizeImages(categories?: Partial<ImageCategory> | null): ImageCategory {
   return {
     floorPlan: (categories?.floorPlan ?? []).map(normalizeImage),
@@ -200,6 +248,7 @@ function normalizeBuilding(building: Partial<Building>): Building {
     description: building.description,
     author: building.author,
     sources: building.sources ?? [],
+    materials: (building.materials ?? []).map(normalizeMaterial),
     images: normalizeImages(building.images),
     createdAt: building.createdAt ? new Date(building.createdAt) : undefined,
     updatedAt: building.updatedAt ? new Date(building.updatedAt) : undefined,

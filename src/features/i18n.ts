@@ -15,7 +15,18 @@ const resources = {
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
         image_label: "Imagem"
-        
+      },
+      building_materials: {
+        title: "Galeria de materiais",
+        slide_hint: "Deslize",
+        list_label: "Materiais adicionais da edificacao",
+        open_label: "Abrir {{type}}: {{title}}",
+        empty: "Nenhum material adicional cadastrado.",
+        types: {
+          plant: "Planta",
+          document: "Documento",
+          analysis: "Analise"
+        }
       }
     }
   },
@@ -32,6 +43,18 @@ const resources = {
         know_work: "Discover the work",
         know_author: "Discover the author",
         image_label: "Image"
+      },
+      building_materials: {
+        title: "Materials gallery",
+        slide_hint: "Slide",
+        list_label: "Additional building materials",
+        open_label: "Open {{type}}: {{title}}",
+        empty: "No additional materials registered.",
+        types: {
+          plant: "Floor plan",
+          document: "Document",
+          analysis: "Analysis"
+        }
       }
     }
   },
@@ -48,6 +71,18 @@ const resources = {
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
         image_label: "Bild"
+      },
+      building_materials: {
+        title: "Materialgalerie",
+        slide_hint: "Wischen",
+        list_label: "Zusaetzliche Gebaeudematerialien",
+        open_label: "{{type}} oeffnen: {{title}}",
+        empty: "Keine zusaetzlichen Materialien registriert.",
+        types: {
+          plant: "Plan",
+          document: "Dokument",
+          analysis: "Analyse"
+        }
       }
     }
   }
