@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import MainContainer from "@/components/layout/MainContainer";
 import MainContainerSkeleton from "@/components/layout/MainContainerSkeleton";
 import { getLandingData } from "@/features/home/data/landing";
-import { landingMock, landingMockEmpty } from "@/features/home/mocks/landing-mock";
+import { landingMock } from "@/features/home/mocks/landing-mock";
 
 describe("MainContainer (Landing Page)", () => {
   const originalFetch = globalThis.fetch;
@@ -40,15 +40,10 @@ describe("MainContainer (Landing Page)", () => {
     expect(screen.getByTestId("landing-loading")).toBeInTheDocument();
   });
 
-  it("deve exibir fallback com mock vazio", () => {
-    render(<MainContainer data={landingMockEmpty} />);
+  it("deve exibir fallback quando data é null", () => {
+    render(<MainContainer data={null} />);
 
     expect(screen.getByTestId("landing-fallback")).toBeInTheDocument();
-
-    expect(
-      screen.getByText(/nenhum conteúdo disponível/i)
-    ).toBeInTheDocument();
-
     expect(screen.queryByTestId("landing-content")).not.toBeInTheDocument();
   });
 

@@ -3,15 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
-
-const SECTION_IDS = ["intro", "immigration", "map-preview", "architects"] as const;
-
-const SECTION_KEYS: Record<string, string> = {
-  intro: "nav.section_intro",
-  immigration: "nav.section_immigration",
-  "map-preview": "nav.section_map",
-  architects: "nav.section_architects",
-};
+import { SECTION_IDS, SECTION_KEYS } from "@/lib/nav-sections";
 
 type Props = { minimized?: boolean };
 

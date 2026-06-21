@@ -31,7 +31,7 @@ export function MapPreviewSection() {
           aria-label={cta}
           className={`absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-150 bg-ui-overlay group-hover:opacity-100 group-hover:pointer-events-auto ${touchActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         >
-          <span className="px-6 py-3 bg-ui-accent text-ui-secondary font-bold rounded-lg hover:brightness-95 transition" aria-hidden="false">{cta}</span>
+          <span className="px-6 py-3 bg-ui-accent text-ui-secondary font-bold rounded-lg hover:brightness-95 transition" aria-hidden="true">{cta}</span>
         </a>
       </div>
     </section>

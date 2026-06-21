@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-import { ExpandableImage } from "@/components/media/ExpandableImage";
-=======
 "use client";
 
-import Image from "next/image";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
->>>>>>> 5437c96 (fix(i18n): replace hardcoded landing page content with dynamic translations)
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPreviewProps } from "../types/architect";
@@ -18,24 +14,28 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
     return null;
   }
 
-  const details = [
-    {
-      label: t("architect.detail_origin_label"),
-      value: t("architect.detail_origin_value"),
-      subValue: t("architect.detail_origin_sub"),
-    },
-    {
-      label: t("architect.detail_death_label"),
-      value: t("architect.detail_death_value"),
-      subValue: t("architect.detail_death_sub"),
-    },
-  ];
+  const details = architect.details?.length
+    ? architect.details
+    : [
+        {
+          label: t("architect.detail_origin_label"),
+          value: t("architect.detail_origin_value"),
+          subValue: t("architect.detail_origin_sub"),
+        },
+        {
+          label: t("architect.detail_death_label"),
+          value: t("architect.detail_death_value"),
+          subValue: t("architect.detail_death_sub"),
+        },
+      ];
 
   return (
     <article id="architects" className="section-card section-card--dark architect-preview home-flow__section">
       <section className="architect-preview__grid">
         <div className="architect-preview__copy">
-          <p className="eyebrow eyebrow--light">{t("architect.eyebrow")}</p>
+          {architect.eyebrow ? (
+            <p className="eyebrow eyebrow--light">{architect.eyebrow}</p>
+          ) : null}
 
           <h2 className="architect-title architect-title--light">
             <strong>{architect.title}</strong>
@@ -96,7 +96,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
             </div>
 
             <figcaption className="architect-caption architect-caption--light">
-              {t("architect.image_caption")}
+              {architect.image.caption ?? t("architect.image_caption")}
             </figcaption>
           </figure>
         ) : null}

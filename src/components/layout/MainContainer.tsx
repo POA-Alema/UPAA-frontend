@@ -11,7 +11,7 @@ type MainContainerProps = {
 export default function MainContainer({ data }: MainContainerProps) {
   const { t } = useTranslation("common");
 
-  if (!data || (!data.title && !data.description)) {
+  if (!data) {
     return (
       <section
         className="section-card home-flow__section"

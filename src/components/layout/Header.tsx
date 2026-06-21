@@ -6,17 +6,15 @@ import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 import MenuToggle from "@/components/ui/MenuToggle";
-import { resolveLocale } from "@/lib/language";
+import { resolveLocale, toI18nLanguage } from "@/lib/language";
 import { useLanguage } from "@/lib/use-language";
+import { SECTION_IDS, SECTION_KEYS } from "@/lib/nav-sections";
 
-const SECTION_IDS = ["intro", "immigration", "map-preview", "architects"] as const;
-
-const SECTION_KEYS: Record<string, string> = {
-  intro: "nav.section_intro",
-  immigration: "nav.section_immigration",
-  "map-preview": "nav.section_map",
-  architects: "nav.section_architects",
-};
+const LANGUAGES = [
+  { code: "pt", labelKey: "header.lang_pt" },
+  { code: "de", labelKey: "header.lang_de" },
+  { code: "en", labelKey: "header.lang_en" },
+] as const;
 
 const Header = function Header() {
   const pathname = usePathname() || "/";
@@ -26,7 +24,7 @@ const Header = function Header() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
 
-  const lang = locale === "pt-BR" ? "pt" : locale;
+  const lang = toI18nLanguage(locale);
 
   const isLanding = pathname === "/";
   const actionHref = isLanding ? "/mapa" : "/";
@@ -142,30 +140,17 @@ const Header = function Header() {
               <div className="h-px bg-white/60 my-2" />
 
               <div className="flex items-center justify-between gap-1">
-                <button
-                  onClick={() => { changeLang("pt"); }}
-                  className={`flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105 ${lang === "pt" ? "ring-2 ring-ui-accent" : ""}`}
-                  aria-describedby="language-source"
-                  aria-pressed={lang === "pt"}
-                >
-                  {t("header.lang_pt")}
-                </button>
-                <button
-                  onClick={() => { changeLang("de"); }}
-                  className={`flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105 ${lang === "de" ? "ring-2 ring-ui-accent" : ""}`}
-                  aria-describedby="language-source"
-                  aria-pressed={lang === "de"}
-                >
-                  {t("header.lang_de")}
-                </button>
-                <button
-                  onClick={() => { changeLang("en"); }}
-                  className={`flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105 ${lang === "en" ? "ring-2 ring-ui-accent" : ""}`}
-                  aria-describedby="language-source"
-                  aria-pressed={lang === "en"}
-                >
-                  {t("header.lang_en")}
-                </button>
+                {LANGUAGES.map(({ code, labelKey }) => (
+                  <button
+                    key={code}
+                    onClick={() => { changeLang(code); }}
+                    className={`flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105 ${lang === code ? "ring-2 ring-ui-accent" : ""}`}
+                    aria-describedby="language-source"
+                    aria-pressed={lang === code}
+                  >
+                    {t(labelKey)}
+                  </button>
+                ))}
               </div>
               <span className="sr-only" id="language-source">
                 {source === "persisted"

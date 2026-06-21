@@ -45,11 +45,13 @@ export function useLanguage(): UseLanguageReturn {
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang = locale;
-
     const nextLanguage = toI18nLanguage(locale);
     if (i18n.language !== nextLanguage) {
-      i18n.changeLanguage(nextLanguage).catch(() => {});
+      i18n.changeLanguage(nextLanguage)
+        .then(() => { document.documentElement.lang = locale; })
+        .catch(() => {});
+    } else {
+      document.documentElement.lang = locale;
     }
   }, [locale]);
 
