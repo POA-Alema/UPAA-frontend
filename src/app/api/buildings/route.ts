@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import path from "node:path";
 import { stat } from "node:fs/promises";
 import { getPublicRuntimeConfig } from "@/lib/config";
-import { mapBuildingsMock } from "@/features/map/mocks/map-buildings-mock";
+import { getMapBuildingsMock } from "@/features/map/mocks/map-buildings-mock";
 import {
   mapBackendBuildingsToMapBuildings,
   type Building,
@@ -10,10 +10,16 @@ import {
 } from "@/features/map/utils/map-buildings";
 
 const API_TIMEOUT_MS = 2_000;
-const BUILDINGS_ENDPOINT_CANDIDATES = [
-  "/buildings/map?lang=pt",
-  "/constructions",
-] as const;
+const BACKEND_LANG: Record<string, string> = {
+  pt: "pt",
+  en: "en",
+  de: "de",
+};
+
+function resolveBuildingsEndpoints(lang: string): string[] {
+  const backendLang = BACKEND_LANG[lang] ?? "pt";
+  return [`/buildings/map?lang=${backendLang}`, "/constructions"];
+}
 
 async function isValidLocalImage(src: string): Promise<boolean> {
   try {
@@ -63,12 +69,11 @@ async function sanitizeAttachments(buildings: Building[]): Promise<Building[]> {
   );
 }
 
-async function fetchMapBuildings(): Promise<BackendBuilding[]> {
+async function fetchMapBuildings(lang: string): Promise<BackendBuilding[]> {
   const { apiUrl } = getPublicRuntimeConfig();
   const baseUrl = apiUrl.replace(/\/$/, "");
 
-  for (const endpoint of BUILDINGS_ENDPOINT_CANDIDATES) {
-    // const response = await fetch(`${baseUrl}/constructions`, {
+  for (const endpoint of resolveBuildingsEndpoints(lang)) {
     const response = await fetch(`${baseUrl}${endpoint}`, {
       cache: "no-store",
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
@@ -90,10 +95,11 @@ async function fetchMapBuildings(): Promise<BackendBuilding[]> {
   throw new Error("Failed to load map buildings");
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const lang = new URL(request.url).searchParams.get("lang") ?? "pt";
   try {
-    const mapBuildings = await fetchMapBuildings();
-    const buildings = mapBackendBuildingsToMapBuildings(mapBuildings);
+    const mapBuildings = await fetchMapBuildings(lang);
+    const buildings = mapBackendBuildingsToMapBuildings(mapBuildings, lang);
 
     if (buildings.length === 0) {
       throw new Error("Map buildings payload is empty");
@@ -101,9 +107,8 @@ export async function GET() {
 
     return NextResponse.json(await sanitizeAttachments(buildings));
   } catch {
-    return NextResponse.json(mapBuildingsMock, {
+    return NextResponse.json(getMapBuildingsMock(lang), {
       headers: {
-
         "x-upaa-fallback": "map-buildings-mock",
       },
     });

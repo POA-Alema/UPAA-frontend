@@ -4,6 +4,10 @@ import HomePage from "./page";
 import { architectsMock } from "@/features/architects/mocks/architect-mock";
 import { getFeaturedArchitect } from "@/features/architects/data/architects";
 
+vi.mock("next/headers", () => ({
+  cookies: vi.fn().mockResolvedValue({ get: () => undefined }),
+}));
+
 vi.mock("@/features/architects/data/architects", () => ({
   getFeaturedArchitect: vi.fn().mockResolvedValue(null),
 }));

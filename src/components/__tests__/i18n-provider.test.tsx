@@ -7,7 +7,6 @@ function TranslatedText() {
   const { t } = useTranslation("common");
   return (
     <div>
-      <span data-testid="header-logo">{t("header.logo_line1")}</span>
       <span data-testid="nav-intro">{t("nav.section_intro")}</span>
       <span data-testid="footer-title">{t("footer.title")}</span>
       <span data-testid="home-cta">{t("home.intro_cta")}</span>
@@ -35,7 +34,6 @@ describe("i18n provider — language switching and re-render", () => {
   it("renders Portuguese translations by default", () => {
     renderWithI18n();
 
-    expect(screen.getByTestId("header-logo")).toHaveTextContent("Uma");
     expect(screen.getByTestId("nav-intro")).toHaveTextContent("Introdução");
     expect(screen.getByTestId("footer-title")).toHaveTextContent(
       "Uma Porto Alegre Alemã",
@@ -56,7 +54,6 @@ describe("i18n provider — language switching and re-render", () => {
       await i18n.changeLanguage("en");
     });
 
-    expect(screen.getByTestId("header-logo")).toHaveTextContent("A");
     expect(screen.getByTestId("nav-intro")).toHaveTextContent("Intro");
     expect(screen.getByTestId("footer-title")).toHaveTextContent(
       "A Germanic Porto Alegre",
@@ -75,7 +72,6 @@ describe("i18n provider — language switching and re-render", () => {
       await i18n.changeLanguage("de");
     });
 
-    expect(screen.getByTestId("header-logo")).toHaveTextContent("Ein");
     expect(screen.getByTestId("nav-intro")).toHaveTextContent("Einführung");
     expect(screen.getByTestId("footer-title")).toHaveTextContent(
       "Ein deutsches Porto Alegre",
@@ -108,8 +104,6 @@ describe("i18n provider — language switching and re-render", () => {
 
   it("produces non-empty strings for all critical keys in every language", async () => {
     const criticalKeys = [
-      "header.logo_line1",
-      "header.logo_line3",
       "header.action_map",
       "header.action_home",
       "header.lang_pt",

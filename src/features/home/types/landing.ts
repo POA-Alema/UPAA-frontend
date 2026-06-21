@@ -5,6 +5,8 @@ export type LandingData = {
 
 type LocalizedField = {
   pt?: string;
+  en?: string;
+  de?: string;
 };
 
 export type LandingPageRecord = {

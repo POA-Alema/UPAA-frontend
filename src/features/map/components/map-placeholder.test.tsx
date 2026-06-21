@@ -13,6 +13,7 @@ let watchPositionMock: ReturnType<typeof vi.fn>;
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: translateMock,
+    i18n: { language: "pt" },
   }),
   initReactI18next: {
     type: "3rdParty",
@@ -243,7 +244,7 @@ describe("MapPlaceholder geolocation recentering", () => {
     render(<MapPlaceholder showPopups={false} />);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/buildings");
+      expect(fetch).toHaveBeenCalledWith("/api/buildings?lang=pt");
     });
 
     expect(watchPositionMock).not.toHaveBeenCalled();

@@ -12,9 +12,6 @@ export const resources = {
       },
 
       header: {
-        logo_line1: "Uma",
-        logo_line2: "Porto Alegre",
-        logo_line3: "Alemã",
         action_map: "Mapa",
         action_home: "Home",
         lang_pt: "Português",
@@ -81,6 +78,11 @@ export const resources = {
         char_innovation_title: "Inovação Estrutural",
         char_innovation_desc:
           "Pioneiro no uso de novas tecnologias construtivas para a época, como grandes vãos, claraboias zenitais e estruturas que permitiam ambientes amplos e iluminados.",
+        page_legacy_prefix: "O Legado de",
+        page_bio_heading: "História",
+        page_characteristics_heading: "Características Arquitetônicas",
+        page_works_heading: "Obras Marcantes",
+        page_back_to_map: "Voltar ao Mapa",
       },
 
       map: {
@@ -115,6 +117,12 @@ export const resources = {
         map_title: "Mapa",
         map_placeholder:
           "Integração com o mapa será conectada assim que a feature correspondente estiver disponível.",
+        history_heading: "Histórico",
+        characteristics_heading: "Características Arquitetônicas",
+        gallery_heading: "Galeria de Fotos",
+        architect_cta_title: "O Arquiteto",
+        back_to_map: "Voltar ao Mapa",
+        architect_cta_label: "Conheça mais sobre o Arquiteto",
       },
       image: {
         expand: "Ampliar imagem",
@@ -133,9 +141,6 @@ export const resources = {
       },
 
       header: {
-        logo_line1: "A",
-        logo_line2: "Porto Alegre",
-        logo_line3: "German",
         action_map: "Map",
         action_home: "Home",
         lang_pt: "Português",
@@ -202,6 +207,11 @@ export const resources = {
         char_innovation_title: "Structural Innovation",
         char_innovation_desc:
           "Pioneer in the use of new construction technologies for the time, such as large spans, zenith skylights and structures that allowed spacious and well-lit environments.",
+        page_legacy_prefix: "The Legacy of",
+        page_bio_heading: "History",
+        page_characteristics_heading: "Architectural Characteristics",
+        page_works_heading: "Notable Works",
+        page_back_to_map: "Back to Map",
       },
 
       map: {
@@ -235,6 +245,12 @@ export const resources = {
         map_title: "Map",
         map_placeholder:
           "Map integration will be connected as soon as the corresponding feature is available.",
+        history_heading: "History",
+        characteristics_heading: "Architectural Characteristics",
+        gallery_heading: "Photo Gallery",
+        architect_cta_title: "The Architect",
+        back_to_map: "Back to Map",
+        architect_cta_label: "Learn more about the Architect",
       },
       image: {
         expand: "Expand image",
@@ -253,9 +269,6 @@ export const resources = {
       },
 
       header: {
-        logo_line1: "Ein",
-        logo_line2: "Porto Alegre",
-        logo_line3: "Deutsch",
         action_map: "Karte",
         action_home: "Start",
         lang_pt: "Português",
@@ -322,6 +335,11 @@ export const resources = {
         char_innovation_title: "Strukturelle Innovation",
         char_innovation_desc:
           "Pionier im Einsatz neuer Bautechnologien für die damalige Zeit, wie große Spannweiten, Oberlichtfenster und Strukturen, die geräumige und gut beleuchtete Umgebungen ermöglichten.",
+        page_legacy_prefix: "Das Erbe von",
+        page_bio_heading: "Geschichte",
+        page_characteristics_heading: "Architektonische Merkmale",
+        page_works_heading: "Bedeutende Werke",
+        page_back_to_map: "Zurück zur Karte",
       },
 
       map: {
@@ -356,6 +374,12 @@ export const resources = {
         map_title: "Karte",
         map_placeholder:
           "Die Kartenintegration wird verfügbar sein, sobald die entsprechende Funktion bereitsteht.",
+        history_heading: "Geschichte",
+        characteristics_heading: "Architektonische Merkmale",
+        gallery_heading: "Fotogalerie",
+        architect_cta_title: "Der Architekt",
+        back_to_map: "Zurück zur Karte",
+        architect_cta_label: "Mehr über den Architekten erfahren",
       },
       image: {
         expand: "Bild vergrößern",

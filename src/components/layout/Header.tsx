@@ -85,23 +85,14 @@ const Header = function Header() {
     };
   }, [open]);
 
-  const logoLines = [
-    { key: "header.logo_line1" as const, accent: false },
-    { key: "header.logo_line2" as const, accent: false },
-    { key: "header.logo_line3" as const, accent: true },
-  ];
-
   return (
     <header className="w-full sticky top-0 z-50 bg-ui-surface text-white border-b border-zinc-800 shadow-md backdrop-blur-sm">
       <div className="relative max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="flex flex-col leading-tight">
-            {logoLines.map(function (line, idx) {
-              const cls = line.accent ? "text-ui-accent" : "text-ui-primary";
-              return (
-                <span key={idx} className={`${cls} font-light text-sm md:text-base`}>{t(line.key)}</span>
-              );
-            })}
+            <span className="text-ui-primary font-light text-sm md:text-base">Uma</span>
+            <span className="text-ui-primary font-light text-sm md:text-base">Porto Alegre</span>
+            <span className="text-ui-accent font-light text-sm md:text-base">Alemã</span>
           </div>
         </div>
 
