@@ -59,6 +59,7 @@ export function persistLocale(locale: SupportedLocale): void {
   try {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, locale);
     localStorage.setItem(I18NEXT_LANGUAGE_STORAGE_KEY, toI18nLanguage(locale));
+    document.cookie = `${LANGUAGE_STORAGE_KEY}=${locale}; path=/; max-age=31536000; SameSite=Lax`;
   } catch {
     // ignore storage errors
   }

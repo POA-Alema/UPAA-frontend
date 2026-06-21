@@ -179,7 +179,6 @@ export async function getLandingPageData(): Promise<LandingPageData> {
       return getLocalData();
     }
 
-    // Normalizing DB data in case some optional fields are missing or not set
     return {
       id: data.id || data._id,
       mainTitle: data.mainTitle || INITIAL_LANDING_PAGE_DATA.mainTitle,
