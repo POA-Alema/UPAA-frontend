@@ -6,10 +6,14 @@ import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import { ArchitectGallery } from "./ArchitectGallery";
+import { useArchitectDetailTracking } from "../hooks";
 import type { ArchitectPageProps } from "../types/architect";
 
 export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) {
   const { t } = useTranslation("common");
+  
+  // Track the page view for analytics
+  useArchitectDetailTracking(architect.slug, architect.title);
 
   const details = architect.details?.length
     ? architect.details
