@@ -3,6 +3,7 @@ import type { Architect, ArchitectWork } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
 
+
 type LocalizedField = {
   pt?: string;
   en?: string;
@@ -110,9 +111,8 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
     record.imageUrl?.trim() ||
     record.imageURL?.trim();
 
-  // Map related buildings or works to ArchitectWork format
   const works: Array<ArchitectWork> = [];
-  
+
   if (Array.isArray(record.works) && record.works.length > 0) {
     works.push(
       ...record.works
@@ -286,7 +286,6 @@ export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Arc
     return fromApi;
   }
 
-  // Fall back to searching in the list (for backward compatibility)
   const architects = await listArchitects(lang);
   return architects.find((architect) => architect.slug === slug) ?? null;
 }
