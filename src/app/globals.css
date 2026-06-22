@@ -460,18 +460,14 @@ button:focus-visible {
   gap: 18px;
 }
 
-<<<<<<< HEAD
 .feature-grid {
-=======
-.content-grid__full {
-  grid-column: 1 / -1;
-}
-
-.architect-feature-grid {
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+}
+
+.content-grid__full {
+  grid-column: 1 / -1;
 }
 
 .architect-detail-grid--compact {
@@ -1981,7 +1977,6 @@ button:focus-visible {
     flex-basis: 82vw;
   }
 
-<<<<<<< HEAD
   .building-section {
     padding: 40px 20px;
   }
@@ -1992,14 +1987,15 @@ button:focus-visible {
   }
 
   .building-gallery__header {
-=======
-  .building-materials__header {
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
     align-items: start;
     flex-direction: column;
   }
 
-<<<<<<< HEAD
+  .building-materials__header {
+    align-items: start;
+    flex-direction: column;
+  }
+
   .building-gallery__rail {
     padding: 8px 4vw 20px;
     scroll-padding-left: 4vw;
@@ -2008,10 +2004,10 @@ button:focus-visible {
   .building-gallery-card {
     flex-basis: 75vw;
     scroll-snap-align: center;
-=======
+  }
+
   .building-materials__card {
     flex-basis: 82vw;
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
   }
 }
 

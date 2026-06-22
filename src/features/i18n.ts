@@ -95,7 +95,6 @@ export const resources = {
         author: "Autoria",
         know_work: "Conhecer a obra",
         know_author: "Conhecer o autor",
-<<<<<<< HEAD
         open_route: "Abrir rota",
         open_route_aria: "Abrir rota em aplicativo de navegação",
         image_label: "Imagem",
@@ -129,10 +128,6 @@ export const resources = {
         expand: "Ampliar imagem",
         close: "Fechar imagem ampliada",
       },
-    },
-=======
-        image_label: "Imagem"
-      },
       building_materials: {
         title: "Galeria de materiais",
         slide_hint: "Deslize",
@@ -142,11 +137,10 @@ export const resources = {
         types: {
           plant: "Planta",
           document: "Documento",
-          analysis: "Analise"
-        }
-      }
-    }
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
+          analysis: "Analise",
+        },
+      },
+    },
   },
 
   en: {
@@ -242,7 +236,6 @@ export const resources = {
         author: "Author",
         know_work: "Discover the work",
         know_author: "Discover the author",
-<<<<<<< HEAD
         open_route: "Open route",
         open_route_aria: "Open route in navigation app",
         image_label: "Image",
@@ -275,10 +268,6 @@ export const resources = {
         expand: "Expand image",
         close: "Close expanded image",
       },
-    },
-=======
-        image_label: "Image"
-      },
       building_materials: {
         title: "Materials gallery",
         slide_hint: "Slide",
@@ -288,11 +277,10 @@ export const resources = {
         types: {
           plant: "Floor plan",
           document: "Document",
-          analysis: "Analysis"
-        }
-      }
-    }
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
+          analysis: "Analysis",
+        },
+      },
+    },
   },
 
   de: {
@@ -388,7 +376,6 @@ export const resources = {
         author: "Autor",
         know_work: "Das Werk entdecken",
         know_author: "Den Autor kennenlernen",
-<<<<<<< HEAD
         open_route: "Route öffnen",
         open_route_aria: "Route in Navigations-App öffnen",
         image_label: "Bild",
@@ -405,25 +392,6 @@ export const resources = {
         alert_geolocation_unavailable:
           "Geolokalisierung nicht verfuegbar. Karte wird auf das historische Zentrum zentriert.",
       },
-=======
-        image_label: "Bild"
-      },
-      building_materials: {
-        title: "Materialgalerie",
-        slide_hint: "Wischen",
-        list_label: "Zusaetzliche Gebaeudematerialien",
-        open_label: "{{type}} oeffnen: {{title}}",
-        empty: "Keine zusaetzlichen Materialien registriert.",
-        types: {
-          plant: "Plan",
-          document: "Dokument",
-          analysis: "Analyse"
-        }
-      }
-    }
-  }
-};
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
 
       building: {
         section_title: "Gebäude",
@@ -441,11 +409,22 @@ export const resources = {
         expand: "Bild vergrößern",
         close: "Vergrößertes Bild schließen",
       },
+      building_materials: {
+        title: "Materialgalerie",
+        slide_hint: "Wischen",
+        list_label: "Zusaetzliche Gebaeudematerialien",
+        open_label: "{{type}} oeffnen: {{title}}",
+        empty: "Keine zusaetzlichen Materialien registriert.",
+        types: {
+          plant: "Plan",
+          document: "Dokument",
+          analysis: "Analyse",
+        },
+      },
     },
   },
 } as const;
 
-<<<<<<< HEAD
 i18n.use(initReactI18next).init({
   resources,
   lng: "pt",
@@ -455,6 +434,4 @@ i18n.use(initReactI18next).init({
   },
 });
 
-=======
->>>>>>> aef6f16 (US19-FE76 adiciona secao de materiais das edificacoes)
 export default i18n;
