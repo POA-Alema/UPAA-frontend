@@ -1,5 +1,5 @@
 import { getPublicRuntimeConfig } from "@/lib/config";
-import type { Architect } from "../types/architect";
+import type { Architect, ArchitectWork } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
 
@@ -26,6 +26,22 @@ type ArchitectApiRecord = Partial<Architect> & {
   resumo?: string;
   imageUrl?: string;
   imageURL?: string;
+  works?: Array<{
+    id?: string;
+    title?: string;
+    slug?: string;
+    description?: string;
+    imageUrl?: string;
+    imageURL?: string;
+  }>;
+  buildingIds?: string[];
+  relatedBuildings?: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    summary?: string;
+    imageUrl?: string;
+  }>;
 };
 
 type LandingPageRecord = {
@@ -94,6 +110,49 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
     record.imageUrl?.trim() ||
     record.imageURL?.trim();
 
+  // Map related buildings or works to ArchitectWork format
+  const works: Array<ArchitectWork> = [];
+  
+  if (Array.isArray(record.works) && record.works.length > 0) {
+    works.push(
+      ...record.works
+        .filter((w): w is typeof record.works[0] & { title: string } => Boolean(w?.title))
+        .map((work) => ({
+          title: work.title,
+          href: work.slug ? `/buildings/${work.slug}` : undefined,
+          image: work.imageURL || work.imageUrl
+            ? {
+                src: (work.imageURL || work.imageUrl) as string,
+                alt: work.title,
+                caption: work.description,
+                title: work.title,
+                description: work.description,
+              }
+            : undefined,
+        }))
+    );
+  }
+
+  if (Array.isArray(record.relatedBuildings) && record.relatedBuildings.length > 0) {
+    works.push(
+      ...record.relatedBuildings
+        .filter((b): b is typeof record.relatedBuildings[0] & { title: string; slug: string } => Boolean(b?.title && b?.slug))
+        .map((building) => ({
+          title: building.title,
+          href: `/buildings/${building.slug}`,
+          image: building.imageUrl
+            ? {
+                src: building.imageUrl,
+                alt: building.title,
+                caption: building.summary,
+                title: building.title,
+                description: building.summary,
+              }
+            : undefined,
+        }))
+    );
+  }
+
   const architect: Partial<Architect> = {
     id: record.id ? String(record.id) : slug,
     slug,
@@ -111,7 +170,7 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
         }
       : record.image,
     actions: record.actions,
-    works: record.works,
+    works: works.length > 0 ? works : (record.works as ArchitectWork[] | undefined),
   };
 
   return hasRequiredArchitectFields(architect) ? architect : null;
@@ -141,6 +200,32 @@ async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[] | null> 
   return records
     .map((record) => mapArchitectFromApi(record))
     .filter((architect): architect is Architect => Boolean(architect));
+}
+
+async function fetchArchitectBySlugFromApi(slug: string, lang = "pt"): Promise<Architect | null> {
+  const baseUrl = getApiBaseUrl();
+
+  if (!baseUrl || !slug) {
+    return null;
+  }
+
+  try {
+    const url = new URL(`${ARCHITECTS_ENDPOINT}/${slug}`, baseUrl);
+    url.searchParams.set("lang", lang);
+    const response = await fetch(url.toString(), {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as ArchitectApiRecord;
+    return mapArchitectFromApi(payload);
+  } catch (error) {
+    console.error("[architects] fetchArchitectBySlugFromApi failed:", error);
+    return null;
+  }
 }
 
 function mapFeaturedArchitect(
@@ -195,6 +280,13 @@ export async function listArchitects(lang = "pt"): Promise<Architect[]> {
 }
 
 export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Architect | null> {
+  // First try to fetch the detailed architect data from the dedicated endpoint
+  const fromApi = await fetchArchitectBySlugFromApi(slug, lang);
+  if (fromApi) {
+    return fromApi;
+  }
+
+  // Fall back to searching in the list (for backward compatibility)
   const architects = await listArchitects(lang);
   return architects.find((architect) => architect.slug === slug) ?? null;
 }

@@ -81,10 +81,47 @@ describe("architect data layer", () => {
     await expect(listArchitects()).rejects.toThrow("Network error");
   });
 
-  it("returns the requested architect from the API by slug", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
+  it("returns the requested architect from the API by slug endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: "1",
+        slug: "theodor-wiederspahn",
+        name: "Theodor Wiederspahn",
+        summary: "Resumo",
+        biography: "Biografia completa vinda do banco.",
+        relatedBuildings: [
+          {
+            id: "building-1",
+            slug: "margs",
+            title: "Museu de Arte do RS",
+            imageUrl: "/images/margs/Margs.jpg",
+          },
+        ],
+      }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const architect = await getArchitectBySlug("theodor-wiederspahn");
+
+    expect(architect?.bio).toBe("Biografia completa vinda do banco.");
+    expect(architect?.works).toHaveLength(1);
+    expect(architect?.works?.[0]?.title).toBe("Museu de Arte do RS");
+    expect(architect?.works?.[0]?.href).toBe("/buildings/margs");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/architects/theodor-wiederspahn?lang=pt",
+      { next: { revalidate: 3600 } }
+    );
+  });
+
+  it("falls back to list endpoint when slug endpoint returns not found", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      })
+      .mockResolvedValueOnce({
         ok: true,
         json: async () => [
           {
@@ -95,12 +132,14 @@ describe("architect data layer", () => {
             biography: "Biografia completa vinda do banco.",
           },
         ],
-      })
-    );
+      });
+
+    vi.stubGlobal("fetch", fetchMock);
 
     const architect = await getArchitectBySlug("theodor-wiederspahn");
 
     expect(architect?.bio).toBe("Biografia completa vinda do banco.");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("returns the featured architect mapped from the landing-page payload", async () => {
@@ -235,9 +274,9 @@ describe("architect data layer", () => {
   });
 
   it("returns null when the requested architect does not exist", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 404 }) // First call to slug endpoint fails
+      .mockResolvedValueOnce({
         ok: true,
         json: async () => [
           {
@@ -248,8 +287,9 @@ describe("architect data layer", () => {
             biography: "Biografia completa vinda do banco.",
           },
         ],
-      })
-    );
+      }); // Second call to list endpoint succeeds
+
+    vi.stubGlobal("fetch", fetchMock);
 
     const architect = await getArchitectBySlug("inexistente");
 
