@@ -3,7 +3,6 @@ import type { Architect, ArchitectWork } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
 
-// Placeholder de texto livre até o CMS enviar a descrição das imagens.
 const IMAGE_DESCRIPTION_PLACEHOLDER =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
@@ -87,7 +86,7 @@ function hasRequiredArchitectFields(
     architect.id &&
       architect.slug &&
       architect.title &&
-      architect.bioSummary !== undefined && 
+      architect.bioSummary !== undefined &&
       architect.bio
   );
 }
@@ -109,9 +108,8 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
     record.imageUrl?.trim() ||
     record.imageURL?.trim();
 
-  // Map related buildings or works to ArchitectWork format
   const works: Array<ArchitectWork> = [];
-  
+
   if (Array.isArray(record.works) && record.works.length > 0) {
     works.push(
       ...record.works
@@ -297,7 +295,6 @@ export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Arc
     return fromApi;
   }
 
-  // Fall back to searching in the list (for backward compatibility)
   const architects = await listArchitects(lang);
   return architects.find((architect) => architect.slug === slug) ?? null;
 }
