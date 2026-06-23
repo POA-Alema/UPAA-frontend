@@ -1,0 +1,197 @@
+"use client";
+
+import Image from "next/image";
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
+import { RichText } from "@/components/content/rich-text";
+import { FeatureAction } from "@/components/ui/feature-action";
+import { BuildingGallery } from "./BuildingGallery";
+import type { BuildingPageProps } from "../types/building";
+
+function isIconPath(icon: string): boolean {
+  return (
+    icon.startsWith("/") ||
+    icon.startsWith("http://") ||
+    icon.startsWith("https://")
+  );
+}
+
+export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
+  const { t } = useTranslation("common");
+  const hasHero = Boolean(
+    building.title || building.eyebrow || building.hero,
+  );
+  const hasTechnicalSpecs = Boolean(building.technicalSpecs?.length);
+  const hasHistory = Boolean(building.history);
+  const hasCharacteristics = Boolean(building.characteristics?.length);
+  const hasGallery = Boolean(building.gallery?.length);
+  const backToMapAction = building.actions?.backToMap;
+  const resolvedBackToMapHref = backToMapHref ?? backToMapAction?.href;
+  const hasBackToMap = Boolean(resolvedBackToMapHref);
+  const hasArchitectCta = Boolean(building.architectCta?.description);
+
+  if (
+    !hasHero &&
+    !hasTechnicalSpecs &&
+    !hasHistory &&
+    !hasCharacteristics &&
+    !hasGallery &&
+    !hasBackToMap &&
+    !hasArchitectCta
+  ) {
+    return null;
+  }
+
+  return (
+    <article className="building-page building-flow">
+      {hasHero ? (
+        <section className="building-hero">
+          {building.hero ? (
+            <div className="building-hero__media">
+              <ExpandableImage
+                image={{ ...building.hero, alt: building.hero.alt || building.title }}
+                imageClassName="building-hero__image"
+                priority
+                sizes="100vw"
+              />
+              <div className="building-hero__overlay"></div>
+            </div>
+          ) : null}
+
+          <div className="building-hero__copy">
+            {building.eyebrow ? (
+              <p className="eyebrow eyebrow--light">{building.eyebrow}</p>
+            ) : null}
+            {building.title ? (
+              <h1 className="building-hero__title">{building.title}</h1>
+            ) : null}
+            {building.subtitle ? (
+              <p className="building-hero__subtitle">{building.subtitle}</p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {hasTechnicalSpecs ? (
+        <section className="building-section building-section--specs building-flow__section">
+          <div className="building-section__inner">
+            <div className="building-specs-grid">
+              {building.technicalSpecs?.map((spec) => (
+                <div
+                  className="building-spec"
+                  key={`${spec.label}-${spec.value}`}
+                >
+                  <p className="meta-line meta-line--light">{spec.label}</p>
+                  <p className="building-spec__value">{spec.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {hasHistory ? (
+        <section className="building-section building-section--history building-flow__section">
+          <div className="building-section__inner">
+            <div className="section-heading">
+              <h2 className="building-section__headline">
+                <span className="building-section__headline-line"></span>{" "}
+                {t("building.history_heading")}
+              </h2>
+            </div>
+
+            <RichText
+              className="rich-text rich-text--muted building-history__text"
+              content={building.history}
+              emphasizeFirstParagraph
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {hasCharacteristics ? (
+        <section className="building-section building-section--features building-flow__section">
+          <div className="building-section__inner">
+            <h2 className="building-section__title building-section__title--right">
+              {t("building.characteristics_heading")}
+            </h2>
+
+            <div className="building-feature-stack">
+              {building.characteristics?.map((characteristic, index) => (
+                <article
+                  className={`info-card building-feature-card building-feature-card--${index % 2 === 0 ? "left" : "right"}`}
+                  key={characteristic.title}
+                >
+                  {isIconPath(characteristic.icon) ? (
+                    <Image
+                      alt=""
+                      aria-hidden
+                      className="building-feature-icon building-feature-icon--img"
+                      height={29}
+                      src={characteristic.icon}
+                      unoptimized
+                      width={29}
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined building-feature-icon">
+                      {characteristic.icon}
+                    </span>
+                  )}
+                  <h3>{characteristic.title}</h3>
+                  <p>{characteristic.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {hasGallery && building.gallery ? (
+        <section className="building-section building-section--gallery building-flow__section">
+          <div className="building-section__inner building-section__inner--wide">
+            <div className="building-gallery__header">
+              <h2 className="building-gallery__title">{t("building.gallery_heading")}</h2>
+            </div>
+          </div>
+
+          <BuildingGallery items={building.gallery} />
+        </section>
+      ) : null}
+
+      {hasBackToMap ? (
+        <section className="building-cta building-flow__section">
+          <div className="building-cta__content">
+            <FeatureAction
+              href={resolvedBackToMapHref}
+              icon="map"
+              label={backToMapAction?.label ?? t("building.back_to_map")}
+              variant="primary"
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {hasArchitectCta && building.architectCta ? (
+        <section className="building-section building-section--architect-cta building-flow__section">
+          <div className="building-section__inner">
+            <div className="building-architect-cta">
+              <h2 className="building-architect-cta__title">{t("building.architect_cta_title")}</h2>
+              <p className="building-architect-cta__copy">
+                {building.architectCta.description}
+              </p>
+              <div className="section-actions section-actions--center">
+                <FeatureAction
+                  href={building.architectCta.href}
+                  icon="person"
+                  label={building.architectCta.label}
+                  variant="primary"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </article>
+  );
+}

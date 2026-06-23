@@ -1,7 +1,11 @@
 import { getLandingData } from "@/features/home/data/landing";
 import MainContainer from "@/components/layout/MainContainer";
 
-export async function LandingContent() {
-  const data = await getLandingData();
+type LandingContentProps = {
+  lang?: string;
+};
+
+export async function LandingContent({ lang }: LandingContentProps) {
+  const data = await getLandingData(lang);
   return <MainContainer data={data} />;
 }

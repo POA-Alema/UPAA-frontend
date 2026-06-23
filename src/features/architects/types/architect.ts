@@ -1,4 +1,6 @@
-export interface ArchitectImage {
+import type { ImageMetadata } from "@/types/image";
+
+export interface ArchitectImage extends ImageMetadata {
   src: string;
   alt: string;
   caption?: string;
@@ -24,6 +26,7 @@ export interface ArchitectCharacteristic {
 export interface ArchitectWork {
   title: string;
   image?: ArchitectImage;
+  href?: string;
 }
 
 export interface Architect {
@@ -50,4 +53,5 @@ export interface ArchitectPreviewProps {
 
 export interface ArchitectPageProps {
   architect: Architect;
+  backToMapHref?: string;
 }
