@@ -6,11 +6,7 @@ import type { LatLngExpression, Map as LeafletMap } from "leaflet";
 import type { Feature, Polygon } from "geojson";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
-import {
-  CENTRO_HISTORICO_GEOJSON,
-  CENTRO_HISTORICO_VIEW_BOUNDS,
-  isPointInsideCentroHistorico,
-} from "@/features/map/constants/centro-historico-boundary";
+import { CENTRO_HISTORICO_GEOJSON } from "@/features/map/constants/centro-historico-boundary";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 import {
@@ -45,12 +41,6 @@ const MapMarkers = dynamic(
   { ssr: false },
 );
 
-const MapRecenterController = dynamic(
-  () =>
-    import("./map-recenter-controller").then((m) => m.MapRecenterController),
-  { ssr: false },
-);
-
 type MapPlaceholderProps = {
   className?: string;
   enableGeolocation?: boolean;
@@ -67,28 +57,6 @@ const DEFAULT_CENTER: [number, number] = [
   DEFAULT_MAP_CENTER.latitude,
   DEFAULT_MAP_CENTER.longitude,
 ];
-
-function getCentroHistoricoRecentralizationStatus(
-  position: GeolocationPosition | null,
-  error: GeolocationPositionError | null,
-) {
-  const status = getRecentralizationStatus(position, error);
-
-  if (!position?.coords) {
-    return status;
-  }
-
-  const isInsideCentroHistorico = isPointInsideCentroHistorico(
-    position.coords.longitude,
-    position.coords.latitude,
-  );
-
-  return {
-    ...status,
-    shouldRecenter: !isInsideCentroHistorico,
-    reason: isInsideCentroHistorico ? null : "outside_limit",
-  } satisfies RecentralizationStatus;
-}
 
 export function MapPlaceholder({
   className = "h-125",
@@ -170,13 +138,6 @@ export function MapPlaceholder({
         );
       }
 
-      if (reason === "outside_limit") {
-        return t(
-          "map.alert_recentered_outside_limit",
-          "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
-        );
-      }
-
       return t(
         "map.alert_geolocation_unavailable",
         "Geolocalizacao nao disponivel. Exibindo o mapa centralizado no Centro Historico.",
@@ -221,23 +182,12 @@ export function MapPlaceholder({
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        const status = getCentroHistoricoRecentralizationStatus(
-          position,
-          null,
-        );
-
-        if (status.shouldRecenter) {
-          setUserPosition(null);
-          maybeRecenter(status);
-          return;
-        }
-
         setAlertState(null);
         setUserPosition([position.coords.latitude, position.coords.longitude]);
       },
       (error) => {
         setUserPosition(null);
-        maybeRecenter(getCentroHistoricoRecentralizationStatus(null, error));
+        maybeRecenter(getRecentralizationStatus(null, error));
       },
       {
         enableHighAccuracy: false,
@@ -272,8 +222,6 @@ export function MapPlaceholder({
         zoom={15}
         maxZoom={20}
         minZoom={15}
-        maxBounds={CENTRO_HISTORICO_VIEW_BOUNDS}
-        maxBoundsViscosity={0.8}
         ref={mapRef}
         zoomControl={
           typeof showZoomControls === "boolean" ? showZoomControls : showPopups
@@ -314,21 +262,6 @@ export function MapPlaceholder({
           showPopups={showPopups}
           userPosition={shouldUseGeolocation ? userPosition : null}
         />
-
-        {shouldUseGeolocation ? (
-          <MapRecenterController
-            center={mapCenter}
-            onMapReady={(map) => {
-              mapRef.current = map;
-            }}
-            onOutsideLimit={() => {
-              maybeRecenter({
-                shouldRecenter: true,
-                reason: "outside_limit",
-              });
-            }}
-          />
-        ) : null}
       </MapContainer>
 
       {alertState ? (
