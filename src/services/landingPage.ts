@@ -221,6 +221,7 @@ export async function updateLandingPageData(data: LandingPageData): Promise<Land
       method,
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeader(),
       },
       body: JSON.stringify(data),
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
