@@ -1,6 +1,17 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getAuthSession } from '@/lib/auth-storage';
+import type { AdminRole } from '@/types/auth';
 
 export default function AdminPage() {
+  const [role, setRole] = useState<AdminRole | null>(null);
+
+  useEffect(() => {
+    setRole(getAuthSession()?.user.role ?? null);
+  }, []);
+
   return (
     <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
       <div className="max-w-6xl mx-auto">
@@ -52,6 +63,25 @@ export default function AdminPage() {
               Edite as seções, imagens, textos e instituições em destaque da página inicial.
             </p>
           </Link>
+
+          {role === 'ADMIN' && (
+            <Link
+              href="/admin/users"
+              className="bg-surface-container-high/40 p-8 rounded-xl border border-outline-variant/10 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <span className="material-symbols-outlined text-primary text-2xl">
+                  manage_accounts
+                </span>
+                <h2 className="font-headline font-bold text-xl text-on-surface">
+                  Usuários
+                </h2>
+              </div>
+              <p className="text-on-surface-variant text-sm">
+                Gerencie administradores, gerenciadores de conteúdo e permissões de acesso.
+              </p>
+            </Link>
+          )}
         </div>
       </div>
     </section>

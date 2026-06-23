@@ -1,4 +1,5 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
+import { getAuthHeader } from '@/lib/auth-storage';
 import { s3ImageUrl } from '@/lib/s3';
 import type { LandingPageData } from '@/types/landingPage';
 
@@ -165,6 +166,7 @@ export async function getLandingPageData(): Promise<LandingPageData> {
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeader(),
       },
       cache: 'no-store',
     });

@@ -2,9 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { getAuthSession } from '@/lib/auth-storage';
+import type { AdminRole } from '@/types/auth';
 
 export function AdminSidebarNav() {
   const pathname = usePathname();
+  const [role, setRole] = useState<AdminRole | null>(null);
+
+  useEffect(() => {
+    setRole(getAuthSession()?.user.role ?? null);
+  }, []);
 
   const links = [
     {
@@ -25,6 +33,16 @@ export function AdminSidebarNav() {
       icon: 'title',
       exact: false,
     },
+    ...(role === 'ADMIN'
+      ? [
+          {
+            href: '/admin/users',
+            label: 'Usuários',
+            icon: 'manage_accounts',
+            exact: false,
+          },
+        ]
+      : []),
   ];
 
   return (
