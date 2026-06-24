@@ -7,10 +7,9 @@ import { deleteBuilding } from "@/services/buildings";
 
 interface DeleteButtonProps {
   id: string;
-  onDelete?: (id: string) => Promise<void> | void;
 }
 
-export default function DeleteButton({ id, onDelete }: DeleteButtonProps) {
+export default function DeleteButton({ id }: DeleteButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -21,11 +20,7 @@ export default function DeleteButton({ id, onDelete }: DeleteButtonProps) {
       setIsLoading(true);
       setErrorMessage(null);
 
-      if (onDelete) {
-        await onDelete(id);
-      } else {
-        await deleteBuilding(id);
-      }
+      await deleteBuilding(id);
 
       router.push("/admin/buildings?status=deleted");
       router.refresh();

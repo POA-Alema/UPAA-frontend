@@ -2,11 +2,9 @@
 
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { AdminAuthGuard } from '@/components/admin/AdminAuthGuard';
+import { AdminAuthGuard, AUTH_ROUTES } from '@/components/admin/AdminAuthGuard';
 import { AdminSidebarNav } from '@/components/admin/AdminSidebarNav';
 import { LogoutButton } from '@/components/admin/LogoutButton';
-
-const AUTH_ROUTES = new Set(['/admin/login']);
 
 type AdminShellProps = {
   children: ReactNode;

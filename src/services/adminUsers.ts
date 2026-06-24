@@ -73,8 +73,9 @@ export function updateAdminUser(id: string, data: AdminUserFormData): Promise<Ad
   });
 }
 
-export function deleteAdminUser(id: string): Promise<AdminUser | null> {
-  return requestAdminUsersApi<AdminUser>(`/${id}`, {
+export function deleteAdminUser(id: string): Promise<null> {
+  return requestAdminUsersApi<never>(`/${id}`, {
     method: 'DELETE',
-  });
+    expectJson: false,
+  }) as Promise<null>;
 }

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getAuthSession } from '@/lib/auth-storage';
 
-const AUTH_ROUTES = new Set(['/admin/login']);
+export const AUTH_ROUTES = new Set(['/admin/login']);
 const ADMIN_ONLY_PREFIXES = ['/admin/users', '/admin/register'];
 
 type AdminAuthGuardProps = {
