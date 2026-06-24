@@ -43,7 +43,7 @@ function normalizeMaterial(
   return {
     id: material.id ?? `material-${index + 1}`,
     type,
-    title: material.title ?? 'Material adicional',
+    title: material.title ?? '',
     description: material.description,
     url: material.url,
     previewUrl: material.previewUrl,

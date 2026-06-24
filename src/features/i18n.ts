@@ -131,13 +131,14 @@ export const resources = {
       building_materials: {
         title: "Galeria de materiais",
         slide_hint: "Deslize",
-        list_label: "Materiais adicionais da edificacao",
+        list_label: "Materiais adicionais da edificação",
         open_label: "Abrir {{type}}: {{title}}",
         empty: "Nenhum material adicional cadastrado.",
+        unnamed: "Material",
         types: {
           plant: "Planta",
           document: "Documento",
-          analysis: "Analise",
+          analysis: "Análise",
         },
       },
     },
@@ -274,6 +275,7 @@ export const resources = {
         list_label: "Additional building materials",
         open_label: "Open {{type}}: {{title}}",
         empty: "No additional materials registered.",
+        unnamed: "Material",
         types: {
           plant: "Floor plan",
           document: "Document",
@@ -412,9 +414,10 @@ export const resources = {
       building_materials: {
         title: "Materialgalerie",
         slide_hint: "Wischen",
-        list_label: "Zusaetzliche Gebaeudematerialien",
-        open_label: "{{type}} oeffnen: {{title}}",
-        empty: "Keine zusaetzlichen Materialien registriert.",
+        list_label: "Zusätzliche Gebäudematerialien",
+        open_label: "{{type}} öffnen: {{title}}",
+        empty: "Keine zusätzlichen Materialien registriert.",
+        unnamed: "Material",
         types: {
           plant: "Plan",
           document: "Dokument",

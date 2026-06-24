@@ -19,6 +19,10 @@
   --ui-secondary: #100E0D;
   --ui-surface: var(--page-background);
   --ui-overlay: #161413bf;
+
+  --material-card-bg: #f2eee7;
+  --material-card-text: #312b25;
+  --material-badge-bg: rgba(21, 19, 18, 0.82);
 }
 
 .text-accent {
@@ -1288,7 +1292,7 @@ button:focus-visible {
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid rgba(209, 166, 91, 0.24);
-  background: #f2eee7;
+  background: var(--material-card-bg);
 }
 
 .building-materials__card-image {
@@ -1305,8 +1309,8 @@ button:focus-visible {
   place-items: center;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(214, 204, 188, 0.9)),
-    #f2eee7;
-  color: #312b25;
+    var(--material-card-bg);
+  color: var(--material-card-text);
 }
 
 .building-materials__card-fallback .material-symbols-outlined {
@@ -1324,7 +1328,7 @@ button:focus-visible {
   max-width: calc(100% - 24px);
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(21, 19, 18, 0.82);
+  background: var(--material-badge-bg);
   color: var(--accent-strong);
   font-size: 0.72rem;
   font-weight: 800;

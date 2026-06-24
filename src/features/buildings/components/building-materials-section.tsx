@@ -35,7 +35,7 @@ const MATERIAL_META: Record<
   analysis: {
     icon: "analytics",
     labelKey: "building_materials.types.analysis",
-    fallbackLabel: "Analise",
+    fallbackLabel: "Análise",
   },
 };
 
@@ -68,20 +68,33 @@ export function BuildingMaterialsSection({
         <div
           aria-label={t(
             "building_materials.list_label",
-            "Materiais adicionais da edificacao",
+            "Materiais adicionais da edificação",
           )}
           className="building-materials__rail"
+          role="list"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+              e.preventDefault();
+              e.currentTarget.scrollBy({
+                left: e.key === "ArrowRight" ? 384 : -384,
+                behavior: "smooth",
+              });
+            }
+          }}
           tabIndex={0}
         >
-          {materials!.map((material) => {
+          {(materials ?? []).map((material) => {
             const meta = MATERIAL_META[material.type];
             const typeLabel = t(meta.labelKey, meta.fallbackLabel);
+            const displayTitle =
+              material.title ||
+              t("building_materials.unnamed", "Material");
             const content = (
               <>
                 <div className="building-materials__card-media">
                   {material.previewUrl ? (
                     <Image
-                      alt={material.previewAlt ?? material.title}
+                      alt={material.previewAlt ?? displayTitle}
                       className="building-materials__card-image"
                       fill
                       loading="lazy"
@@ -109,7 +122,7 @@ export function BuildingMaterialsSection({
                   </span>
                 </div>
                 <div className="building-materials__caption">
-                  <strong>{material.title}</strong>
+                  <strong>{displayTitle}</strong>
                   {material.description && <span>{material.description}</span>}
                 </div>
               </>
@@ -121,11 +134,14 @@ export function BuildingMaterialsSection({
                   aria-label={t(
                     "building_materials.open_label",
                     "Abrir {{type}}: {{title}}",
-                    { title: material.title, type: typeLabel },
+                    { title: displayTitle, type: typeLabel },
                   )}
                   className="building-materials__card"
                   href={material.url}
                   key={material.id}
+                  rel="noopener noreferrer"
+                  role="listitem"
+                  target="_blank"
                 >
                   {content}
                 </a>
@@ -133,7 +149,7 @@ export function BuildingMaterialsSection({
             }
 
             return (
-              <article className="building-materials__card" key={material.id}>
+              <article className="building-materials__card" key={material.id} role="listitem">
                 {content}
               </article>
             );
