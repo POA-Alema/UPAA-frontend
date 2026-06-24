@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import type { LandingPageData, InstitutionItem } from '@/types/landingPage';
+import { ConfirmationModal } from './ConfirmationModal';
 import { ImageSelector } from './ImageSelector';
 import { RichTextEditor } from './RichTextEditor';
 
@@ -28,6 +29,7 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
   // States for Institution Modal/Form
   const [isInstModalOpen, setIsInstModalOpen] = useState(false);
   const [editingInst, setEditingInst] = useState<Partial<InstitutionItem> | null>(null);
+  const [institutionToRemove, setInstitutionToRemove] = useState<InstitutionItem | null>(null);
   const [instErrors, setInstErrors] = useState<Record<string, string>>({});
 
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -219,7 +221,6 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
   };
 
   const handleRemoveInstitution = (id: string) => {
-    if (!confirm('Deseja realmente remover esta instituição?')) return;
     setFormData((prev) => ({
       ...prev,
       institutionsSection: {
@@ -227,6 +228,7 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
         institutions: prev.institutionsSection.institutions.filter((item) => item.id !== id),
       },
     }));
+    setInstitutionToRemove(null);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -723,7 +725,7 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleRemoveInstitution(inst.id)}
+                              onClick={() => setInstitutionToRemove(inst)}
                               className="p-1 text-red-400 hover:text-red-300 transition-colors"
                               title="Remover"
                             >
@@ -754,6 +756,25 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
           {isPending ? 'Salvando Alterações...' : 'Salvar Alterações'}
         </button>
       </div>
+
+      <ConfirmationModal
+        isOpen={institutionToRemove !== null}
+        title="Remover instituição?"
+        description={
+          <>
+            A instituição{' '}
+            <strong className="text-on-surface">
+              {institutionToRemove?.title[activeLang] || institutionToRemove?.title.pt || 'selecionada'}
+            </strong>{' '}
+            será removida desta seção.
+          </>
+        }
+        confirmLabel="Remover"
+        onCancel={() => setInstitutionToRemove(null)}
+        onConfirm={() => {
+          if (institutionToRemove) handleRemoveInstitution(institutionToRemove.id);
+        }}
+      />
 
       {/* INSTITUTION MODAL / DRAWER */}
       {isInstModalOpen && editingInst && (

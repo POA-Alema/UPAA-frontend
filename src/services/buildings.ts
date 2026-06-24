@@ -1,4 +1,5 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
+import { getAuthHeader } from '@/lib/auth-storage';
 import { s3ImageUrl } from '@/lib/s3';
 import { getArchitects } from './architects';
 import type { ImageCategory, Building, BuildingFormData, BuildingImage, BuildingMaterial } from '@/types/building';
@@ -103,6 +104,7 @@ async function requestBuildingsApi<T>(
         signal: AbortSignal.timeout(API_TIMEOUT_MS),
         headers: {
           'Content-Type': 'application/json',
+          ...getAuthHeader(),
           ...(init?.headers ?? {}),
         },
         cache: 'no-store',
@@ -426,6 +428,9 @@ export async function uploadBuildingImage(file: File, type = 'externa'): Promise
 
   const response = await fetch(`${baseUrl}/buildings/upload`, {
     method: 'POST',
+    headers: {
+      ...getAuthHeader(),
+    },
     body: formData,
   });
 
