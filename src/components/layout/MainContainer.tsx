@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
 import type { LandingData } from "@/features/home/types/landing";
 
 type MainContainerProps = {
@@ -5,6 +9,8 @@ type MainContainerProps = {
 };
 
 export default function MainContainer({ data }: MainContainerProps) {
+  const { t } = useTranslation("common");
+
   if (!data || (!data.title && !data.description)) {
     return (
       <section
@@ -12,7 +18,7 @@ export default function MainContainer({ data }: MainContainerProps) {
         data-testid="landing-fallback"
       >
         <span className="text-zinc-500 italic uppercase text-xs tracking-widest select-none">
-          Nenhum conteúdo disponível no momento
+          {t("landing.empty", "Nenhum conteudo disponivel no momento")}
         </span>
       </section>
     );
@@ -25,9 +31,14 @@ export default function MainContainer({ data }: MainContainerProps) {
       data-testid="landing-content"
     >
       <h2 className="section-title" style={{ maxWidth: "none" }}>
-        <strong>{data.title}</strong>
+        <strong>{t("landing.title", data.title)}</strong>
       </h2>
-      <p className="section-copy" style={{ color: "var(--accent)", maxWidth: "none" }}>{data.description}</p>
+      <p
+        className="section-copy"
+        style={{ color: "var(--accent)", maxWidth: "none" }}
+      >
+        {t("landing.description", data.description)}
+      </p>
     </section>
   );
 }

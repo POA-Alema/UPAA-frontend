@@ -2,9 +2,11 @@ declare module "i18next" {
   type InitOptions = Record<string, unknown>;
 
   const i18n: {
+    isInitialized: boolean;
     use(plugin: unknown): typeof i18n;
     init(options: InitOptions): typeof i18n;
-    t(key: string, options?: unknown): string;
+    changeLanguage(language: string): Promise<unknown>;
+    t(key: string, fallbackOrOptions?: string | Record<string, unknown>): string;
   };
 
   export default i18n;

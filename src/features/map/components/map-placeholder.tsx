@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 
@@ -31,6 +33,7 @@ export function MapPlaceholder({
   showPopups = true,
   showZoomControls,
 }: MapPlaceholderProps) {
+  const { t } = useTranslation("common");
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -97,13 +100,13 @@ export function MapPlaceholder({
 
       {!loading && markers.length === 0 && !hasError && (
         <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          Nenhum ponto disponivel para exibir.
+          {t("map.empty_points", "Nenhum ponto disponivel para exibir.")}
         </div>
       )}
 
       {!loading && hasError && (
         <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded shadow">
-          Nao foi possivel carregar os dados do mapa.
+          {t("map.load_error", "Nao foi possivel carregar os dados do mapa.")}
         </div>
       )}
     </div>

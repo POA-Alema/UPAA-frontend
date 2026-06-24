@@ -74,12 +74,15 @@ function MapPopupCard({
         <h2 className="text-[1rem] font-bold text-[#E9C46A] tracking-tight leading-tight line-clamp-2">
           {variant === "sidebar"
             ? marker.name
-            : t("map.mapped_building", "Edificação")}
+            : t("map.mapped_building", "Edificacao mapeada")}
         </h2>
 
         {onRequestClose && (
           <button
-            aria-label="Fechar detalhes da edificação"
+            aria-label={t(
+              "map.close_details",
+              "Fechar detalhes da edificacao",
+            )}
             onClick={onRequestClose}
             className="group p-2 hover:bg-white/10 transition-all flex items-center justify-center rounded-full border-none bg-transparent shrink-0"
           >
@@ -107,7 +110,7 @@ function MapPopupCard({
           ) : (
             <div className="w-full h-full bg-[#222] animate-pulse flex items-center justify-center">
               <span className="text-white/20 italic text-sm">
-                {t("map.image_unavailable", "Imagem indisponível")}
+                {t("map.image_unavailable", "Imagem indisponivel")}
               </span>
             </div>
           )}
@@ -138,7 +141,7 @@ function MapPopupCard({
             {marker.architectName && (
               <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs text-white/80">
                 <span className="text-[#E9C46A] font-bold mr-2">
-                  {t("map.author", "Arquiteto")}:
+                  {t("map.author", "Autoria")}:
                 </span>
 
                 {marker.architectName}
@@ -157,7 +160,7 @@ function MapPopupCard({
                 </span>
 
                 <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_work", "Explorar Obra")}
+                  {t("map.know_work", "Conhecer a obra")}
                 </span>
               </div>
 
@@ -178,7 +181,7 @@ function MapPopupCard({
                 </span>
 
                 <span className="uppercase tracking-wider text-sm">
-                  {t("map.know_author", "Sobre o Autor")}
+                  {t("map.know_author", "Conhecer o autor")}
                 </span>
               </div>
 

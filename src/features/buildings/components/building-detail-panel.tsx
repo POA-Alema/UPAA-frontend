@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
 import type { Building } from "@/data/buildings";
 import { BuildingMaterialsSection } from "./building-materials-section";
 
@@ -6,21 +10,24 @@ type BuildingDetailPanelProps = {
 };
 
 export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
+  const { t } = useTranslation("common");
+
   return (
     <div className="content-grid">
-      {/* TODO: Implement dynamic data fetching for building details */}
       <article className="info-card">
         <p className="meta-line">
           {building.location} - {building.constructionPeriod}
         </p>
-        <h3>Edificacao</h3>
+        <h3>{t("building_detail.content_title", "Edificacao")}</h3>
         <p>{building.description}</p>
       </article>
       <article className="info-card">
-        <h3>Mapa</h3>
+        <h3>{t("building_detail.map_title", "Mapa")}</h3>
         <p>
-          Integracao com o mapa sera conectada assim que a feature
-          correspondente estiver disponivel.
+          {t(
+            "building_detail.map_pending",
+            "Integracao com o mapa sera conectada assim que a feature correspondente estiver disponivel.",
+          )}
         </p>
       </article>
       <div className="content-grid__full">
