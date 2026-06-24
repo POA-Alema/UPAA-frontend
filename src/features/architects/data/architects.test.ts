@@ -57,7 +57,6 @@ describe("architect data layer", () => {
   });
 
   it("falls back to the curated mock when the API has no valid architect content", async () => {
-
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({

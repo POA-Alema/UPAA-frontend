@@ -128,6 +128,19 @@ export const resources = {
         expand: "Ampliar imagem",
         close: "Fechar imagem ampliada",
       },
+      building_materials: {
+        title: "Galeria de materiais",
+        slide_hint: "Deslize",
+        list_label: "Materiais adicionais da edificação",
+        open_label: "Abrir {{type}}: {{title}}",
+        empty: "Nenhum material adicional cadastrado.",
+        unnamed: "Material",
+        types: {
+          plant: "Planta",
+          document: "Documento",
+          analysis: "Análise",
+        },
+      },
     },
   },
 
@@ -255,6 +268,19 @@ export const resources = {
       image: {
         expand: "Expand image",
         close: "Close expanded image",
+      },
+      building_materials: {
+        title: "Materials gallery",
+        slide_hint: "Slide",
+        list_label: "Additional building materials",
+        open_label: "Open {{type}}: {{title}}",
+        empty: "No additional materials registered.",
+        unnamed: "Material",
+        types: {
+          plant: "Floor plan",
+          document: "Document",
+          analysis: "Analysis",
+        },
       },
     },
   },
@@ -384,6 +410,19 @@ export const resources = {
       image: {
         expand: "Bild vergrößern",
         close: "Vergrößertes Bild schließen",
+      },
+      building_materials: {
+        title: "Materialgalerie",
+        slide_hint: "Wischen",
+        list_label: "Zusätzliche Gebäudematerialien",
+        open_label: "{{type}} öffnen: {{title}}",
+        empty: "Keine zusätzlichen Materialien registriert.",
+        unnamed: "Material",
+        types: {
+          plant: "Plan",
+          document: "Dokument",
+          analysis: "Analyse",
+        },
       },
     },
   },

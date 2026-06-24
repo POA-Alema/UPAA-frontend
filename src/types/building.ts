@@ -20,6 +20,18 @@ export interface BuildingSource {
   url?: string;
 }
 
+export type BuildingMaterialType = 'plant' | 'document' | 'analysis';
+
+export interface BuildingMaterial {
+  id: string;
+  type: BuildingMaterialType;
+  title: string;
+  description?: string;
+  url?: string;
+  previewUrl?: string;
+  previewAlt?: string;
+}
+
 export type Building = {
   id: string;
   slug?: string;
@@ -41,6 +53,7 @@ export type Building = {
   history?: string;
   author?: string;
   sources?: BuildingSource[];
+  materials?: BuildingMaterial[];
   images?: ImageCategory;
   createdAt?: Date;
   updatedAt?: Date;
