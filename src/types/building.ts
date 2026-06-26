@@ -20,15 +20,29 @@ export interface BuildingSource {
   url?: string;
 }
 
+export type BuildingMaterialType = 'plant' | 'document' | 'analysis';
+
+export interface BuildingMaterial {
+  id: string;
+  type: BuildingMaterialType;
+  title: string;
+  description?: string;
+  url?: string;
+  previewUrl?: string;
+  previewAlt?: string;
+}
+
 export type Building = {
   id: string;
   slug?: string;
   title: string;
   location: string;
+  coordinates?: { lat?: number; lng?: number };
   latitude?: number;
   longitude?: number;
   constructionPeriod?: string;
   architect?: string;
+  architectId?: string;
   constructor?: string;
   ornamentsAuthor?: string;
   builtArea?: string;
@@ -36,8 +50,10 @@ export type Building = {
   restorationAndHeritage?: string;
   heritage?: string;
   description?: string;
+  history?: string;
   author?: string;
   sources?: BuildingSource[];
+  materials?: BuildingMaterial[];
   images?: ImageCategory;
   createdAt?: Date;
   updatedAt?: Date;

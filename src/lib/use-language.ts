@@ -1,11 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import i18n from '@/features/i18n';
 import {
   DEFAULT_LOCALE,
   detectBrowserLocale,
   persistLocale,
   readPersistedLocale,
+  toI18nLanguage,
   type SupportedLocale,
 } from '@/lib/language';
 
@@ -19,6 +22,7 @@ type UseLanguageReturn = {
 };
 
 export function useLanguage(): UseLanguageReturn {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<SupportedLocale>(DEFAULT_LOCALE);
   const [source, setSource] = useState<LanguageSource>('default');
   const [ready, setReady] = useState(false);
@@ -43,14 +47,22 @@ export function useLanguage(): UseLanguageReturn {
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang = locale;
+    const nextLanguage = toI18nLanguage(locale);
+    if (i18n.language !== nextLanguage) {
+      i18n.changeLanguage(nextLanguage)
+        .then(() => { document.documentElement.lang = locale; })
+        .catch(() => {});
+    } else {
+      document.documentElement.lang = locale;
+    }
   }, [locale]);
 
   const setLocale = useCallback((next: SupportedLocale) => {
     persistLocale(next);
     setLocaleState(next);
     setSource('persisted');
-  }, []);
+    router.refresh();
+  }, [router]);
 
   return { locale, source, ready, setLocale };
 }

@@ -1,14 +1,8 @@
-import type { BuildingFormData } from '@/types/building';
-import { createBuilding } from '@/services/buildings';
-import { BuildingForm } from '@/components/admin/BuildingForm';
-import { redirect } from 'next/navigation';
+import { getArchitects } from '@/services/architects';
+import { BuildingCreateClient } from '@/components/admin/BuildingCreateClient';
 
-export default function NewBuildingPage() {
-  const handleSubmit = async (data: BuildingFormData) => {
-    'use server';
-    await createBuilding(data);
-    redirect('/admin/buildings?status=created');
-  };
+export default async function NewBuildingPage() {
+  const architects = await getArchitects();
 
   return (
     <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
@@ -25,7 +19,7 @@ export default function NewBuildingPage() {
         </div>
 
         {/* Formulário */}
-        <BuildingForm onSubmit={handleSubmit} />
+        <BuildingCreateClient architects={architects} />
       </div>
     </section>
   );

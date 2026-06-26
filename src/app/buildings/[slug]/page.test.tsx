@@ -12,6 +12,12 @@ vi.mock("next/navigation", () => ({
   notFound: mocks.notFound,
 }));
 
+vi.mock("next/headers", () => ({
+  cookies: vi.fn().mockResolvedValue({
+    get: vi.fn().mockReturnValue(undefined),
+  }),
+}));
+
 vi.mock("@/features/buildings/components/BuildingPage", () => ({
   BuildingPage: () => null,
 }));
@@ -49,11 +55,12 @@ describe("BuildingDetailPage", () => {
       searchParams: Promise.resolve({ returnTo: "/mapa" }),
     });
 
-    expect(result).toMatchObject({
-      props: {
-        backToMapHref: "/mapa",
-        building,
-      },
+    // Page now renders <div><Header /><main><BuildingPage .../></main><Footer /></div>
+    const main = result.props.children[1];
+    const buildingPageEl = main.props.children;
+    expect(buildingPageEl.props).toMatchObject({
+      backToMapHref: "/mapa",
+      building,
     });
     expect(mocks.getBuildingBySlug).toHaveBeenCalledWith("margs", "pt");
   });

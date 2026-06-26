@@ -13,10 +13,11 @@ function getLandingPageRecord(
   return Array.isArray(payload) ? payload[0] ?? null : payload;
 }
 
-function mapLandingPageResponse(data: LandingPageRecord | null): LandingData {
+function mapLandingPageResponse(data: LandingPageRecord | null, lang = "pt"): LandingData {
+  const l = lang as keyof NonNullable<LandingPageRecord["mainTitle"]>;
   return {
-    title: data?.mainTitle?.pt?.trim() ?? "",
-    description: data?.subtitle?.pt?.trim() ?? "",
+    title: data?.mainTitle?.[l]?.trim() ?? "",
+    description: data?.subtitle?.[l]?.trim() ?? "",
   };
 }
 
@@ -45,7 +46,8 @@ export async function getLandingData(lang = DEFAULT_LANG): Promise<LandingData> 
     }
 
     const data = mapLandingPageResponse(
-      getLandingPageRecord((await response.json()) as LandingPageApiResponse)
+      getLandingPageRecord((await response.json()) as LandingPageApiResponse),
+      lang
     );
 
     return hasLandingContent(data) ? data : landingMock;

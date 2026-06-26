@@ -1,7 +1,6 @@
-import type { BuildingFormData } from '@/types/building';
-import { getBuildingById, updateBuilding } from '@/services/buildings';
-import { BuildingForm } from '@/components/admin/BuildingForm';
-import { redirect } from 'next/navigation';
+import { getBuildingById } from '@/services/buildings';
+import { getArchitects } from '@/services/architects';
+import { BuildingEditClient } from '@/components/admin/BuildingEditClient';
 import Link from 'next/link';
 
 interface EditBuildingPageProps {
@@ -12,7 +11,7 @@ interface EditBuildingPageProps {
 
 export default async function EditBuildingPage({ params }: EditBuildingPageProps) {
   const { id } = await params;
-  const building = await getBuildingById(id);
+  const [building, architects] = await Promise.all([getBuildingById(id), getArchitects()]);
 
   if (!building) {
     return (
@@ -33,12 +32,6 @@ export default async function EditBuildingPage({ params }: EditBuildingPageProps
       </section>
     );
   }
-
-  const handleSubmit = async (data: BuildingFormData) => {
-    'use server';
-    await updateBuilding(id, data);
-    redirect('/admin/buildings?status=updated');
-  };
 
   return (
     <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
@@ -64,7 +57,7 @@ export default async function EditBuildingPage({ params }: EditBuildingPageProps
         </div>
 
         {/* Formulário */}
-        <BuildingForm onSubmit={handleSubmit} initialData={building} />
+        <BuildingEditClient id={id} building={building} architects={architects} />
       </div>
     </section>
   );

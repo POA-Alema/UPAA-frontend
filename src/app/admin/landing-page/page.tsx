@@ -1,18 +1,9 @@
-import { getLandingPageData, updateLandingPageData } from '@/services/landingPage';
-import { LandingPageForm } from '@/components/admin/LandingPageForm';
-import { revalidatePath } from 'next/cache';
+import { getLandingPageData } from '@/services/landingPage';
+import { LandingPageEditClient } from '@/components/admin/LandingPageEditClient';
 import Link from 'next/link';
-import type { LandingPageData } from '@/types/landingPage';
 
 export default async function AdminLandingPageEdit() {
   const landingPageData = await getLandingPageData();
-
-  const handleSubmit = async (data: LandingPageData) => {
-    'use server';
-    await updateLandingPageData(data);
-    revalidatePath('/');
-    revalidatePath('/admin/landing-page');
-  };
 
   return (
     <section className="min-h-screen bg-background text-on-background pt-16 pb-20 px-8 font-body">
@@ -40,7 +31,7 @@ export default async function AdminLandingPageEdit() {
         </div>
 
         {/* Form */}
-        <LandingPageForm onSubmit={handleSubmit} initialData={landingPageData} />
+        <LandingPageEditClient initialData={landingPageData} />
       </div>
     </section>
   );

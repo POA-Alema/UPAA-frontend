@@ -63,7 +63,7 @@ export function MapPlaceholder({
   showPopups = true,
   showZoomControls,
 }: MapPlaceholderProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -82,7 +82,7 @@ export function MapPlaceholder({
 
     async function load() {
       try {
-        const response = await fetch("/api/buildings");
+        const response = await fetch(`/api/buildings?lang=${i18n.language}`);
         const didUseFallback = response.headers.get("x-upaa-fallback") != null;
 
         if (!response.ok) {
@@ -126,7 +126,7 @@ export function MapPlaceholder({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [i18n.language]);
 
   const getAlertMessage = useCallback(
     (reason: RecentralizationReason) => {

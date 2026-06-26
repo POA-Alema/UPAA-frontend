@@ -25,7 +25,7 @@ describe("GET /api/buildings", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -70,7 +70,7 @@ describe("GET /api/buildings", () => {
       });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(fetchMock).toHaveBeenNthCalledWith(
@@ -93,14 +93,14 @@ describe("GET /api/buildings", () => {
   it("deve retornar fallback quando a API real falhar", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(response.headers.get("x-upaa-fallback")).toBe("map-buildings-mock");
     expect(data.length).toBeGreaterThan(0);
   });
 
-  it("deve retornar fallback quando a API real nao trouxer imagem valida", async () => {
+  it("deve manter a edificacao no mapa mesmo sem imagem valida, descartando apenas o anexo", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_URL", "http://backend.test");
     vi.stubGlobal(
       "fetch",
@@ -112,16 +112,23 @@ describe("GET /api/buildings", () => {
             slug: "margs",
             name: "MARGS",
             coordinates: { lat: -30.01, lng: -51.22 },
-            media_gallery: [{ url: "/images/margs/fachada.jpg" }],
+            media_gallery: [{ url: "/images/margs/fachada-inexistente.jpg" }],
           },
         ]),
       }),
     );
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
-    expect(response.headers.get("x-upaa-fallback")).toBe("map-buildings-mock");
-    expect(data.length).toBeGreaterThan(0);
+    expect(response.headers.get("x-upaa-fallback")).toBeNull();
+    expect(data).toEqual([
+      expect.objectContaining({
+        id: "1",
+        name: "MARGS",
+        slug: "margs",
+        attachments: [],
+      }),
+    ]);
   });
 });

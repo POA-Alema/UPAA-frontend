@@ -5,6 +5,7 @@ import "@/features/i18n";
 
 import type { Building } from "@/data/buildings";
 import { BuildingRouteLink } from "./building-route-link";
+import { BuildingMaterialsSection } from "./building-materials-section";
 
 type BuildingDetailPanelProps = {
   building: Building;
@@ -36,6 +37,9 @@ export function BuildingDetailPanel({ building }: BuildingDetailPanelProps) {
           className="mt-3 inline-flex items-center gap-2 text-accent hover:text-ui-accent font-semibold no-underline"
         />
       </article>
+      <div className="content-grid__full">
+        <BuildingMaterialsSection materials={building.materials} />
+      </div>
     </div>
   );
 }

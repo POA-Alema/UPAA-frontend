@@ -1,4 +1,6 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
+import { getAuthHeader } from '@/lib/auth-storage';
+import { s3ImageUrl } from '@/lib/s3';
 import type { LandingPageData } from '@/types/landingPage';
 
 const LOCAL_STORAGE_KEY = 'upaa_landing_page';
@@ -16,7 +18,7 @@ export const INITIAL_LANDING_PAGE_DATA: LandingPageData = {
     de: 'Architektur, Erinnerung und Stadt aus dem Vermächtnis von Theodor Wiederspahn.',
   },
   architectSection: {
-    imageURL: '/images/architects/theodor-wiederspahn.jpg',
+    imageURL: s3ImageUrl('images/theodor.png'),
     imageSubtitle: {
       pt: 'Theodor Wiederspahn',
       en: 'Theodor Wiederspahn',
@@ -49,7 +51,7 @@ export const INITIAL_LANDING_PAGE_DATA: LandingPageData = {
     order: 1,
   },
   immigrationSection: {
-    imageURL: '/images/home/imigracao-alema-rs.jpg',
+    imageURL: s3ImageUrl('images/home/imigracao-alema-rs.jpg'),
     imgSubtitle: {
       pt: 'Registros da imigração alemã no Rio Grande do Sul',
       en: 'Records of German immigration in Rio Grande do Sul',
@@ -100,7 +102,7 @@ export const INITIAL_LANDING_PAGE_DATA: LandingPageData = {
           target: '/buildings/margs-museu-de-arte-do-rio-grande-do-sul',
           icon: 'building',
         },
-        imageURL: '/images/Margs.jpg',
+        imageURL: s3ImageUrl('images/Margs_2.jpg'),
         order: 1,
       },
       {
@@ -124,7 +126,7 @@ export const INITIAL_LANDING_PAGE_DATA: LandingPageData = {
           target: '/buildings/memorial-do-rio-grande-do-sul',
           icon: 'landmark',
         },
-        imageURL: '/images/Memorial RS.jpg',
+        imageURL: s3ImageUrl('images/Memorial RS.jpg'),
         order: 2,
       },
     ],
@@ -164,6 +166,7 @@ export async function getLandingPageData(): Promise<LandingPageData> {
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeader(),
       },
       cache: 'no-store',
     });
@@ -178,7 +181,6 @@ export async function getLandingPageData(): Promise<LandingPageData> {
       return getLocalData();
     }
 
-    // Normalizing DB data in case some optional fields are missing or not set
     return {
       id: data.id || data._id,
       mainTitle: data.mainTitle || INITIAL_LANDING_PAGE_DATA.mainTitle,
@@ -219,6 +221,7 @@ export async function updateLandingPageData(data: LandingPageData): Promise<Land
       method,
       headers: {
         'Content-Type': 'application/json',
+        ...getAuthHeader(),
       },
       body: JSON.stringify(data),
       signal: AbortSignal.timeout(API_TIMEOUT_MS),

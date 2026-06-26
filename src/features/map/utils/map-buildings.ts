@@ -1,6 +1,15 @@
 import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
+import type { ImageMetadata } from "@/types/image";
 
-export type BuildingAttachment = {
+// O acervo é dedicado a Theodor Wiederspahn; o payload do mapa só traz
+// architect_id, então o link "Sobre o Autor" usa a rota dele por padrão.
+const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
+
+// Placeholder de texto livre até o CMS enviar a descrição das imagens.
+const IMAGE_DESCRIPTION_PLACEHOLDER =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+export type BuildingAttachment = ImageMetadata & {
   src: string;
   alt: string;
   caption?: string;
@@ -26,6 +35,8 @@ type BackendMedia = {
   caption?: unknown;
   alt?: unknown;
   altText?: unknown;
+  title?: unknown;
+  description?: unknown;
 };
 
 export type BackendBuilding = {
@@ -81,7 +92,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function selectLocalizedText(value: LocalizedText, fallback = ""): string {
+function selectLocalizedText(value: LocalizedText, lang = "pt", fallback = ""): string {
   if (typeof value === "string") {
     return value;
   }
@@ -95,14 +106,12 @@ function selectLocalizedText(value: LocalizedText, fallback = ""): string {
   const last = typeof value.last === "string" ? value.last : "";
   const composedName = [first, last].filter(Boolean).join(" ");
 
-  return (
-    (typeof value.pt === "string" && value.pt) ||
-    (typeof value.en === "string" && value.en) ||
-    (typeof value.de === "string" && value.de) ||
-    full ||
-    composedName ||
-    fallback
-  );
+  const pt = typeof value.pt === "string" ? value.pt : "";
+  const en = typeof value.en === "string" ? value.en : "";
+  const de = typeof value.de === "string" ? value.de : "";
+  const preferred = lang === "en" ? en : lang === "de" ? de : pt;
+
+  return preferred || pt || en || de || full || composedName || fallback;
 }
 
 function toOptionalString(value: unknown): string | undefined {
@@ -137,6 +146,7 @@ function extractCoordinates(building: BackendBuilding): {
 function mapBackendMediaToAttachment(
   media: BackendMedia,
   buildingName: string,
+  lang: string,
 ): BuildingAttachment | null {
   const src = toOptionalString(media.url) ?? toOptionalString(media.src);
 
@@ -144,10 +154,10 @@ function mapBackendMediaToAttachment(
     return null;
   }
 
-  const caption = selectLocalizedText(media.caption as LocalizedText);
+  const caption = selectLocalizedText(media.caption as LocalizedText, lang);
   const alt =
-    selectLocalizedText(media.alt as LocalizedText) ||
-    selectLocalizedText(media.altText as LocalizedText) ||
+    selectLocalizedText(media.alt as LocalizedText, lang) ||
+    selectLocalizedText(media.altText as LocalizedText, lang) ||
     caption ||
     buildingName;
 
@@ -155,6 +165,12 @@ function mapBackendMediaToAttachment(
     src,
     alt,
     caption: caption || undefined,
+    // Placeholder até o CMS enviar título/texto livre das imagens.
+    title:
+      selectLocalizedText(media.title as LocalizedText, lang) || caption || buildingName,
+    description:
+      selectLocalizedText(media.description as LocalizedText, lang) ||
+      IMAGE_DESCRIPTION_PLACEHOLDER,
   };
 }
 
@@ -162,11 +178,12 @@ function extractAttachments(
   mediaGallery: unknown,
   images: unknown,
   buildingName: string,
+  lang: string,
 ): BuildingAttachment[] {
   if (Array.isArray(mediaGallery)) {
     return mediaGallery
       .filter(isRecord)
-      .map((media) => mapBackendMediaToAttachment(media, buildingName))
+      .map((media) => mapBackendMediaToAttachment(media, buildingName, lang))
       .filter((attachment): attachment is BuildingAttachment => Boolean(attachment));
   }
 
@@ -174,9 +191,14 @@ function extractAttachments(
     return images
       .map((image) =>
         typeof image === "string"
-          ? { src: image, alt: buildingName }
+          ? {
+              src: image,
+              alt: buildingName,
+              title: buildingName,
+              description: IMAGE_DESCRIPTION_PLACEHOLDER,
+            }
           : isRecord(image)
-            ? mapBackendMediaToAttachment(image, buildingName)
+            ? mapBackendMediaToAttachment(image, buildingName, lang)
             : null,
       )
       .filter((attachment): attachment is BuildingAttachment => Boolean(attachment));
@@ -188,10 +210,11 @@ function extractAttachments(
 export function mapBackendBuildingToMapBuilding(
   building: BackendBuilding,
   index: number,
+  lang = "pt",
 ): Building {
   const name =
-    selectLocalizedText(building.name) ||
-    selectLocalizedText(building.title as LocalizedText) ||
+    selectLocalizedText(building.name, lang) ||
+    selectLocalizedText(building.title as LocalizedText, lang) ||
     "Edificacao";
   const { latitude, longitude } = extractCoordinates(building);
 
@@ -199,18 +222,20 @@ export function mapBackendBuildingToMapBuilding(
     id: toOptionalString(building.id) ?? index,
     name,
     slug: toOptionalString(building.slug),
-    district: selectLocalizedText(building.location),
+    district: selectLocalizedText(building.location, lang),
     summary:
-      selectLocalizedText(building.description) ||
-      selectLocalizedText(building.current_occupation),
+      selectLocalizedText(building.description, lang) ||
+      selectLocalizedText(building.current_occupation, lang),
     yearLabel:
       toOptionalString(building.constructionPeriod) ??
       toOptionalNumber(building.buildYear)?.toString(),
-    architectName: selectLocalizedText(building.architect),
+    architectName: selectLocalizedText(building.architect, lang),
+    architectPath: ARCHITECT_DETAIL_PATH,
     attachments: extractAttachments(
       building.mediaGallery ?? building.media_gallery,
       building.images,
       name,
+      lang,
     ),
     latitude,
     longitude,
@@ -219,8 +244,9 @@ export function mapBackendBuildingToMapBuilding(
 
 export function mapBackendBuildingsToMapBuildings(
   buildings: BackendBuilding[],
+  lang = "pt",
 ): Building[] {
-  return buildings.map(mapBackendBuildingToMapBuilding);
+  return buildings.map((building, index) => mapBackendBuildingToMapBuilding(building, index, lang));
 }
 
 export function buildBuildingDetailPath(slug: string) {

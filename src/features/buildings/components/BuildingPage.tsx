@@ -1,16 +1,25 @@
+"use client";
+
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
+import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import { BuildingGallery } from "./BuildingGallery";
 import { buildingLabels } from "../data/building-labels";
 import type { BuildingPageProps } from "../types/building";
 
-export function BuildingPage({
-  building,
-  backToMapHref,
-  language = "pt",
-}: BuildingPageProps) {
-  const labels = buildingLabels[language];
+function isIconPath(icon: string): boolean {
+  return (
+    icon.startsWith("/") ||
+    icon.startsWith("http://") ||
+    icon.startsWith("https://")
+  );
+}
+
+export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
+  const { t } = useTranslation("common");
   const hasHero = Boolean(
     building.title || building.eyebrow || building.hero,
   );
@@ -41,10 +50,9 @@ export function BuildingPage({
         <section className="building-hero">
           {building.hero ? (
             <div className="building-hero__media">
-              <Image
-                alt={building.hero.alt || building.title}
-                className="building-hero__image"
-                fill
+              <ExpandableImage
+                image={{ ...building.hero, alt: building.hero.alt || building.title }}
+                imageClassName="building-hero__image"
                 priority
                 sizes="100vw"
                 src={building.hero.src}
@@ -92,7 +100,7 @@ export function BuildingPage({
             <div className="section-heading">
               <h2 className="building-section__headline">
                 <span className="building-section__headline-line"></span>{" "}
-                {labels.history}
+                {t("building.history_heading")}
               </h2>
             </div>
 
@@ -109,7 +117,7 @@ export function BuildingPage({
         <section className="building-section building-section--features building-flow__section">
           <div className="building-section__inner">
             <h2 className="building-section__title building-section__title--right">
-              {labels.characteristics}
+              {t("building.characteristics_heading")}
             </h2>
 
             <div className="building-feature-stack">
@@ -118,9 +126,21 @@ export function BuildingPage({
                   className={`info-card building-feature-card building-feature-card--${index % 2 === 0 ? "left" : "right"}`}
                   key={characteristic.title}
                 >
-                  <span className="material-symbols-outlined building-feature-icon">
-                    {characteristic.icon}
-                  </span>
+                  {isIconPath(characteristic.icon) ? (
+                    <Image
+                      alt=""
+                      aria-hidden
+                      className="building-feature-icon building-feature-icon--img"
+                      height={29}
+                      src={characteristic.icon}
+                      unoptimized
+                      width={29}
+                    />
+                  ) : (
+                    <span className="material-symbols-outlined building-feature-icon">
+                      {characteristic.icon}
+                    </span>
+                  )}
                   <h3>{characteristic.title}</h3>
                   <p>{characteristic.description}</p>
                 </article>
@@ -134,7 +154,7 @@ export function BuildingPage({
         <section className="building-section building-section--gallery building-flow__section">
           <div className="building-section__inner building-section__inner--wide">
             <div className="building-gallery__header">
-              <h2 className="building-gallery__title">{labels.gallery}</h2>
+              <h2 className="building-gallery__title">{t("building.gallery_heading")}</h2>
             </div>
           </div>
 
@@ -148,7 +168,7 @@ export function BuildingPage({
             <FeatureAction
               href={resolvedBackToMapHref}
               icon="map"
-              label={backToMapAction?.label ?? labels.backToMap}
+              label={backToMapAction?.label ?? t("building.back_to_map")}
               variant="primary"
             />
           </div>
@@ -159,7 +179,7 @@ export function BuildingPage({
         <section className="building-section building-section--architect-cta building-flow__section">
           <div className="building-section__inner">
             <div className="building-architect-cta">
-              <h2 className="building-architect-cta__title">{labels.architect}</h2>
+              <h2 className="building-architect-cta__title">{t("building.architect_cta_title")}</h2>
               <p className="building-architect-cta__copy">
                 {building.architectCta.description}
               </p>

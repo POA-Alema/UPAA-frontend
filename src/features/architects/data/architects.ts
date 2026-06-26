@@ -1,11 +1,21 @@
-import { architectsMock } from "../mocks/architect-mock";
+import { getArchitectsMock } from "../mocks/architect-mock";
 import type { Architect } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
 
+// Placeholder de texto livre até o CMS enviar a descrição das imagens.
+const IMAGE_DESCRIPTION_PLACEHOLDER =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
 type LocalizedField = {
   pt?: string;
+  en?: string;
+  de?: string;
 };
+
+function getLocalized(field: LocalizedField | undefined, lang: string): string | undefined {
+  return field?.[lang as keyof LocalizedField]?.trim();
+}
 
 type ArchitectApiRecord = Partial<Architect> & {
   name?: string;
@@ -61,7 +71,7 @@ function hasRequiredArchitectFields(
     architect.id &&
       architect.slug &&
       architect.title &&
-      architect.bioSummary !== undefined && 
+      architect.bioSummary !== undefined &&
       architect.bio
   );
 }
@@ -95,19 +105,19 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
           src: imageSrc,
           alt: record.image?.alt || title || "",
           caption: record.image?.caption,
+          // Placeholder até o CMS enviar título/texto livre das imagens.
+          title: record.image?.title || record.image?.caption || title,
+          description: record.image?.description ?? IMAGE_DESCRIPTION_PLACEHOLDER,
         }
       : record.image,
     actions: record.actions,
-    details: record.details,
-    characteristics: record.characteristics,
     works: record.works,
-    ctaDescription: record.ctaDescription,
   };
 
   return hasRequiredArchitectFields(architect) ? architect : null;
 }
 
-async function fetchArchitectsFromApi(): Promise<Architect[] | null> {
+async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[] | null> {
   const baseUrl = getApiBaseUrl();
 
   if (!baseUrl) {
@@ -115,7 +125,9 @@ async function fetchArchitectsFromApi(): Promise<Architect[] | null> {
   }
 
   try {
-    const response = await fetch(`${baseUrl}${ARCHITECTS_ENDPOINT}`, {
+    const url = new URL(ARCHITECTS_ENDPOINT, baseUrl);
+    url.searchParams.set("lang", lang);
+    const response = await fetch(url.toString(), {
       next: { revalidate: 3600 },
     });
 
@@ -140,34 +152,39 @@ async function fetchArchitectsFromApi(): Promise<Architect[] | null> {
 
 function mapFeaturedArchitect(
   payload: LandingPageResponse,
-  fallback: Architect
+  fallback: Architect,
+  lang: string
 ): Architect | null {
   const page = getLandingPageRecord(payload);
   const section = page?.architectSection;
-  const title = section?.title?.pt?.trim() || fallback.title;
-  const bio = section?.content?.pt?.trim();
+  const title = getLocalized(section?.title, lang) || fallback.title;
+  const bio = getLocalized(section?.content, lang);
 
   if (!title || !bio) {
     return null;
   }
 
   const imageSrc = section?.imageURL?.trim();
-  const imageCaption = section?.imageSubtitle?.pt?.trim();
-  const primaryLabel = section?.CTA?.label?.pt?.trim();
+  const imageCaption = getLocalized(section?.imageSubtitle, lang);
+  const primaryLabel = getLocalized(section?.CTA?.label, lang);
   const primaryHref = section?.CTA?.target?.trim();
+  const subtitle = getLocalized(section?.subtitle, lang);
 
   return {
     ...fallback,
     slug: extractSlug(primaryHref) || fallback.slug,
-    eyebrow: section?.subtitle?.pt?.trim() || fallback.eyebrow,
+    eyebrow: subtitle || fallback.eyebrow,
     title,
-    bioSummary: section?.subtitle?.pt?.trim() || fallback.bioSummary,
+    bioSummary: subtitle || fallback.bioSummary,
     bio,
     image: imageSrc
       ? {
           src: imageSrc,
           alt: imageCaption || title,
           caption: imageCaption || fallback.image?.caption,
+          // Placeholder até o CMS enviar título + texto livre da imagem.
+          title: fallback.image?.title,
+          description: fallback.image?.description,
         }
       : fallback.image,
     actions: {
@@ -183,17 +200,18 @@ function mapFeaturedArchitect(
   };
 }
 
-export async function listArchitects(): Promise<Architect[]> {
-  return (await fetchArchitectsFromApi()) ?? architectsMock;
+export async function listArchitects(lang = "pt"): Promise<Architect[]> {
+  const fromApi = await fetchArchitectsFromApi(lang);
+  return fromApi && fromApi.length > 0 ? fromApi : getArchitectsMock(lang);
 }
 
-export async function getArchitectBySlug(slug: string): Promise<Architect | null> {
-  const architects = await listArchitects();
+export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Architect | null> {
+  const architects = await listArchitects(lang);
   return architects.find((architect) => architect.slug === slug) ?? null;
 }
 
-export async function getFeaturedArchitect(): Promise<Architect | null> {
-  const fallback = architectsMock[0] ?? null;
+export async function getFeaturedArchitect(lang = "pt"): Promise<Architect | null> {
+  const fallback = getArchitectsMock(lang)[0] ?? null;
   const baseUrl = getApiBaseUrl();
 
   if (!fallback || !baseUrl) {
@@ -201,7 +219,9 @@ export async function getFeaturedArchitect(): Promise<Architect | null> {
   }
 
   try {
-    const response = await fetch(`${baseUrl}/landing-page`, {
+    const url = new URL("/landing-page", baseUrl);
+    url.searchParams.set("lang", lang);
+    const response = await fetch(url.toString(), {
       next: { revalidate: 3600 },
     });
 
@@ -211,7 +231,7 @@ export async function getFeaturedArchitect(): Promise<Architect | null> {
 
     const payload = (await response.json()) as LandingPageResponse;
 
-    return mapFeaturedArchitect(payload, fallback) ?? fallback;
+    return mapFeaturedArchitect(payload, fallback, lang) ?? fallback;
   } catch {
     return fallback;
   }
