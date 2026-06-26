@@ -606,7 +606,7 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
 
           <div>
             <label htmlFor="builtArea" className="mb-2 block font-label text-[0.85rem] uppercase tracking-[0.2em] text-on-surface/70">
-              Ýrea construída
+              Área construída
             </label>
             <div className="relative">
               <input
