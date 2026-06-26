@@ -1,14 +1,13 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { BuildingPage } from "@/features/buildings/components/BuildingPage";
-import {
-  getBuildingBySlug,
-  listBuildings,
-} from "@/features/buildings/data/buildings";
+import { getBuildingBySlug } from "@/features/buildings/data/buildings";
 import { resolveBuildingBackToMapHref } from "@/features/buildings/utils/navigation";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { resolveLocale, toI18nLanguage } from "@/lib/language";
+
+export const dynamic = "force-dynamic";
 
 type BuildingDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -31,15 +30,6 @@ export async function generateMetadata({ params }: BuildingDetailPageProps) {
     title: `${building.title} | Uma Porto Alegre Alemã`,
     description: building.summary,
   };
-}
-
-export async function generateStaticParams() {
-  try {
-    const buildings = await listBuildings();
-    return buildings.map((building) => ({ slug: building.slug }));
-  } catch {
-    return [];
-  }
 }
 
 export default async function BuildingDetailPage({

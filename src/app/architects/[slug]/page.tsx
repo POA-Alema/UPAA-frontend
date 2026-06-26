@@ -2,13 +2,15 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { ArchitectPage } from "@/features/architects/components/ArchitectPage";
-import { getArchitectBySlug, listArchitects } from "@/features/architects/data/architects";
+import { getArchitectBySlug } from "@/features/architects/data/architects";
 import { resolveArchitectBackToMapHref } from "@/features/architects/utils/navigation";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { resolveLocale, toI18nLanguage } from "@/lib/language";
 
 const cachedGetArchitectBySlug = cache(getArchitectBySlug);
+
+export const dynamic = "force-dynamic";
 
 type ArchitectDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -33,15 +35,6 @@ export async function generateMetadata({ params }: ArchitectDetailPageProps) {
     title: `${architect.title} | Uma Porto Alegre Alemã`,
     description: architect.bioSummary,
   };
-}
-
-export async function generateStaticParams() {
-  try {
-    const architects = await listArchitects();
-    return architects.map((architect) => ({ slug: architect.slug }));
-  } catch {
-    return [];
-  }
 }
 
 export default async function ArchitectDetailPage({
