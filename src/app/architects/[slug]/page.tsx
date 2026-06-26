@@ -36,10 +36,12 @@ export async function generateMetadata({ params }: ArchitectDetailPageProps) {
 }
 
 export async function generateStaticParams() {
-  const architects = await listArchitects();
-  return architects.map((architect) => ({
-    slug: architect.slug,
-  }));
+  try {
+    const architects = await listArchitects();
+    return architects.map((architect) => ({ slug: architect.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function ArchitectDetailPage({
