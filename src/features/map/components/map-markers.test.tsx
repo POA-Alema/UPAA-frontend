@@ -158,6 +158,21 @@ describe("MapMarkers", () => {
     expect(cta).toHaveAttribute("href", "/buildings/margs?returnTo=%2Fmapa");
   });
 
+  it("renderiza resumo rich text sem exibir tags HTML", () => {
+    const richTextMarker = {
+      ...marker,
+      summary: "<p>oi oi oi oi oi oi</p><p></p>",
+    };
+
+    render(<MapMarkers markers={[richTextMarker]} />);
+
+    fireEvent.click(screen.getByTestId("marker--30.02,-51.23"));
+
+    const sidebar = screen.getByRole("complementary");
+    expect(within(sidebar).getByText("oi oi oi oi oi oi")).toBeInTheDocument();
+    expect(within(sidebar).queryByText(/<p>/)).not.toBeInTheDocument();
+  });
+
   it("abre a bottom sheet no mobile e bloqueia o scroll", () => {
     mockMatchMedia(true);
 
