@@ -91,8 +91,6 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
                 imageClassName="architect-image"
                 priority
                 sizes="(max-width: 1024px) 280px, 340px"
-                src={architect.image.src}
-                unoptimized 
               />
               <div className="architect-image-overlay"></div>
             </div>
