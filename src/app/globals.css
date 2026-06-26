@@ -19,6 +19,10 @@
   --ui-secondary: #100E0D;
   --ui-surface: var(--page-background);
   --ui-overlay: #161413bf;
+
+  --material-card-bg: #f2eee7;
+  --material-card-text: #312b25;
+  --material-badge-bg: rgba(21, 19, 18, 0.82);
 }
 
 .text-accent {
@@ -512,6 +516,10 @@ button:focus-visible {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+}
+
+.content-grid__full {
+  grid-column: 1 / -1;
 }
 
 .architect-detail-grid--compact {
@@ -1257,6 +1265,173 @@ button:focus-visible {
   display: none;
 }
 
+.building-materials {
+  display: grid;
+  gap: 20px;
+  padding: 8px 0 4px;
+}
+
+.building-materials__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.building-materials__title {
+  margin: 0;
+  font-family: var(--font-headline), sans-serif;
+  font-size: clamp(1.9rem, 3vw, 3.1rem);
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.building-materials__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--foreground-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.building-materials__hint .material-symbols-outlined {
+  color: var(--accent-strong);
+  font-size: 1.15rem;
+}
+
+.building-materials__rail {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 4px 0 18px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(239, 193, 115, 0.72) rgba(255, 255, 255, 0.08);
+}
+
+.building-materials__rail:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 6px;
+}
+
+.building-materials__card {
+  flex: 0 0 min(74vw, 360px);
+  display: grid;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: start;
+}
+
+.building-materials__card:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 6px;
+}
+
+.building-materials__card-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(209, 166, 91, 0.24);
+  background: var(--material-card-bg);
+}
+
+.building-materials__card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.building-materials__card-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(214, 204, 188, 0.9)),
+    var(--material-card-bg);
+  color: var(--material-card-text);
+}
+
+.building-materials__card-fallback .material-symbols-outlined {
+  font-size: 3rem;
+}
+
+.building-materials__type-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  max-width: calc(100% - 24px);
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--material-badge-bg);
+  color: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.building-materials__type-badge .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.building-materials__caption {
+  display: grid;
+  gap: 6px;
+  min-height: 72px;
+  padding: 0 8px;
+  text-align: center;
+}
+
+.building-materials__caption strong {
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.building-materials__caption span {
+  color: var(--foreground-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.building-materials__empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 112px;
+  padding: 20px;
+  border: 1px dashed rgba(209, 166, 91, 0.34);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--foreground-muted);
+}
+
+.building-materials__empty .material-symbols-outlined {
+  color: var(--accent-strong);
+  font-size: 1.8rem;
+}
+
+.building-materials__empty p {
+  margin: 0;
+  line-height: 1.6;
+}
+
 .architect-work-card {
   flex: 0 0 288px;
   margin: 0;
@@ -1868,6 +2043,11 @@ button:focus-visible {
     flex-direction: column;
   }
 
+  .building-materials__header {
+    align-items: start;
+    flex-direction: column;
+  }
+
   .building-gallery__rail {
     padding: 8px 4vw 20px;
     scroll-padding-left: 4vw;
@@ -1876,6 +2056,10 @@ button:focus-visible {
   .building-gallery-card {
     flex-basis: 75vw;
     scroll-snap-align: center;
+  }
+
+  .building-materials__card {
+    flex-basis: 82vw;
   }
 }
 

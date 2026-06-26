@@ -1,19 +1,12 @@
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import AssetCard from "@/components/admin/AssetCard";
 import DeleteButton from "@/components/admin/DeleteButton";
 import StatusToast from "@/components/admin/StatusToast";
-import { deleteBuilding, getBuildings } from "@/services/buildings";
+import { getBuildings } from "@/services/buildings";
 
 export default async function BuildingsAdminPage() {
   const buildings = await getBuildings();
-
-  const handleDelete = async (id: string) => {
-    "use server";
-    await deleteBuilding(id);
-    revalidatePath("/admin/buildings");
-  };
 
   return (
     <section className="min-h-screen bg-background px-8 pb-20 pt-16 font-body text-on-background">
@@ -100,7 +93,7 @@ export default async function BuildingsAdminPage() {
                       <span className="material-symbols-outlined text-on-surface">edit</span>
                     </Link>
 
-                    <DeleteButton id={building.id} onDelete={handleDelete} />
+                    <DeleteButton id={building.id} />
                   </div>
                 </div>
               </div>

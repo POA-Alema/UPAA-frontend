@@ -25,7 +25,7 @@ describe("GET /api/buildings", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -70,7 +70,7 @@ describe("GET /api/buildings", () => {
       });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(fetchMock).toHaveBeenNthCalledWith(
@@ -93,7 +93,7 @@ describe("GET /api/buildings", () => {
   it("deve retornar fallback quando a API real falhar", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(response.headers.get("x-upaa-fallback")).toBe("map-buildings-mock");
@@ -118,7 +118,7 @@ describe("GET /api/buildings", () => {
       }),
     );
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
     expect(response.headers.get("x-upaa-fallback")).toBeNull();

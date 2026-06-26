@@ -8,91 +8,29 @@ import "@/features/i18n";
 import MenuToggle from "@/components/ui/MenuToggle";
 import { resolveLocale, toI18nLanguage } from "@/lib/language";
 import { useLanguage } from "@/lib/use-language";
+import { SECTION_IDS, SECTION_KEYS } from "@/lib/nav-sections";
+
+const LANGUAGES = [
+  { code: "pt", labelKey: "header.lang_pt" },
+  { code: "de", labelKey: "header.lang_de" },
+  { code: "en", labelKey: "header.lang_en" },
+] as const;
 
 const Header = function Header() {
   const pathname = usePathname() || "/";
-  const { i18n } = useTranslation();
-  const { locale, ready, setLocale, source } = useLanguage();
+  const { t } = useTranslation("common");
+  const { locale, setLocale, source } = useLanguage();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
-
-  type LangBundle = {
-    logoParts: string[];
-    actions: Record<string, string>;
-    sections: Record<string, string>;
-    languages: Record<string, string>;
-  };
-
-  const translations: Record<string, LangBundle> = {
-    pt: {
-      logoParts: ["Uma", "Porto Alegre", "Alemã"],
-      actions: {
-        map: "Mapa",
-        home: "Home",
-      },
-      sections: {
-        intro: "Introdução",
-        immigration: "Imigração",
-        "map-preview": "Mapa",
-        architects: "Arquitetos",
-      },
-      languages: {
-        pt: "Português",
-        de: "Deutsch",
-        en: "English",
-      }
-    },
-    en: {
-      logoParts: ["A", "Porto Alegre", "German"],
-      actions: {
-        map: "Map",
-        home: "Home",
-      },
-      sections: {
-        intro: "Intro",
-        immigration: "Immigration",
-        "map-preview": "Map",
-        architects: "Architects",
-      },
-      languages: {
-        pt: "Português",
-        de: "Deutsch",
-        en: "English",
-      }
-    },
-    de: {
-      logoParts: ["Ein", "Porto Alegre", "Deutsch"],
-      actions: {
-        map: "Karte",
-        home: "Start",
-      },
-      sections: {
-        intro: "Einführung",
-        immigration: "Immigration",
-        "map-preview": "Karte",
-        architects: "Architekten",
-      },
-      languages: {
-        pt: "Português",
-        de: "Deutsch",
-        en: "English",
-      }
-    }
-  };
 
   const lang = toI18nLanguage(locale);
 
   const isLanding = pathname === "/";
   const actionHref = isLanding ? "/mapa" : "/";
-  const actionLabel = isLanding ? (translations[lang]?.actions?.map || "Mapa") : (translations[lang]?.actions?.home || "Home");
-
-  const sections = [
-    { id: "intro" },
-    { id: "immigration" },
-    { id: "map-preview" },
-    { id: "architects" }
-  ];
+  const actionLabel = isLanding
+    ? t("header.action_map")
+    : t("header.action_home");
 
   function changeLang(lng: string) {
     setLocale(resolveLocale(lng));
@@ -147,28 +85,14 @@ const Header = function Header() {
     };
   }, [open]);
 
-  useEffect(function () {
-    if (!ready || !i18n?.changeLanguage) {
-      return;
-    }
-
-    const nextLanguage = toI18nLanguage(locale);
-    if (i18n.language !== nextLanguage) {
-      i18n.changeLanguage(nextLanguage).catch(function () {});
-    }
-  }, [i18n, locale, ready]);
-
   return (
     <header className="w-full sticky top-0 z-50 bg-ui-surface text-white border-b border-zinc-800 shadow-md backdrop-blur-sm">
       <div className="relative max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="flex flex-col leading-tight">
-            {["Uma","Porto Alegre","Alemã"].map(function (part: string, idx: number) {
-              const cls = idx === 2 ? "text-ui-accent" : "text-ui-primary";
-              return (
-                <span key={idx} className={`${cls} font-light text-sm md:text-base`}>{part}</span>
-              );
-            })}
+            <span className="text-ui-primary font-light text-sm md:text-base">Uma</span>
+            <span className="text-ui-primary font-light text-sm md:text-base">Porto Alegre</span>
+            <span className="text-ui-accent font-light text-sm md:text-base">Alemã</span>
           </div>
         </div>
 
@@ -188,19 +112,17 @@ const Header = function Header() {
           </button>
         </div>
 
-        {/* Floating menu */}
           <div ref={menuRef} className={`absolute right-6 top-full z-50 origin-top-right ${open ? "pointer-events-auto opacity-100 scale-y-100" : "pointer-events-none opacity-0 scale-y-0"} transition-[transform,opacity] duration-500`}>
             <div className="min-w-55 bg-ui-surface border border-white/10 rounded-md p-4 shadow-xl transform-origin-top-right">
               <div className="flex flex-col gap-2 pb-3">
-                {sections.map(function (s) {
-                  const label = (translations[lang] && translations[lang].sections && translations[lang].sections[s.id]) || s.id;
+                {SECTION_IDS.map(function (id) {
                   return (
                     <button
-                      key={s.id}
-                      onClick={() => { scrollToSection(s.id); }}
+                      key={id}
+                      onClick={() => { scrollToSection(id); }}
                       className="w-full text-left text-sm font-semibold text-ui-primary px-2 py-2 rounded hover:bg-white/5 transition-transform duration-500 hover:translate-x-1 uppercase"
                     >
-                      {label}
+                      {t(SECTION_KEYS[id])}
                     </button>
                   );
                 })}
@@ -209,40 +131,27 @@ const Header = function Header() {
               <div className="h-px bg-white/60 my-2" />
 
               <div className="flex items-center justify-between gap-1">
-                <button
-                  onClick={() => { changeLang("pt"); }}
-                  className="flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105"
-                  aria-describedby="language-source"
-                  aria-pressed={lang === "pt"}
-                >
-                  {(translations[lang] && translations[lang].languages && translations[lang].languages.pt) || "Português"}
-                </button>
-                <button
-                  onClick={() => { changeLang("de"); }}
-                  className="flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105"
-                  aria-describedby="language-source"
-                  aria-pressed={lang === "de"}
-                >
-                  {(translations[lang] && translations[lang].languages && translations[lang].languages.de) || "Deutsch"}
-                </button>
-                <button
-                  onClick={() => { changeLang("en"); }}
-                  className="flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105"
-                  aria-describedby="language-source"
-                  aria-pressed={lang === "en"}
-                >
-                  {(translations[lang] && translations[lang].languages && translations[lang].languages.en) || "English"}
-                </button>
+                {LANGUAGES.map(({ code, labelKey }) => (
+                  <button
+                    key={code}
+                    onClick={() => { changeLang(code); }}
+                    className={`flex-1 text-xs uppercase py-2 px-2 rounded bg-white/5 hover:bg-white/10 transition transform hover:scale-105 ${lang === code ? "ring-2 ring-ui-accent" : ""}`}
+                    aria-describedby="language-source"
+                    aria-pressed={lang === code}
+                  >
+                    {t(labelKey)}
+                  </button>
+                ))}
               </div>
               <span className="sr-only" id="language-source">
                 {source === "persisted"
-                  ? "Idioma definido pelo usuário"
+                  ? t("header.language_source_persisted")
                   : source === "browser"
-                    ? "Idioma detectado pelo navegador"
-                    : "Idioma padrão aplicado"}
+                    ? t("header.language_source_browser")
+                    : t("header.language_source_default")}
               </span>
             </div>
-          </div>
+        </div>
       </div>
     </header>
   );

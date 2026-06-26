@@ -51,13 +51,12 @@ describe("architect data layer", () => {
     expect(architects[0]?.image?.src).toBe(
       "/images/architects/theodor-wiederspahn.jpg"
     );
-    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/architects", {
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/architects?lang=pt", {
       next: { revalidate: 3600 },
     });
   });
 
   it("falls back to the curated mock when the API has no valid architect content", async () => {
-
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -199,7 +198,7 @@ describe("architect data layer", () => {
     await getFeaturedArchitect();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:3001/landing-page",
+      "http://localhost:3001/landing-page?lang=pt",
       { next: { revalidate: 3600 } }
     );
   });

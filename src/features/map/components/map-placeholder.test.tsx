@@ -1,11 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { useEffect, type ReactNode } from "react";
+import { render, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapPlaceholder } from "./map-placeholder";
 import { DEFAULT_MAP_CENTER } from "@/features/map/utils/location";
 import { trackMapRecentralization } from "@/features/map/utils/map-analytics";
 
-const flyToMock = vi.fn();
 const clearWatchMock = vi.fn();
 const translateMock = (_key: string, defaultValue: string) => defaultValue;
 let watchPositionMock: ReturnType<typeof vi.fn>;
@@ -13,6 +12,7 @@ let watchPositionMock: ReturnType<typeof vi.fn>;
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: translateMock,
+    i18n: { language: "pt" },
   }),
   initReactI18next: {
     type: "3rdParty",
@@ -49,26 +49,12 @@ vi.mock("next/dynamic", () => ({
       return MockTileLayer;
     }
 
-    if (loaderText.includes("map-recenter-controller")) {
-      function MockMapRecenterController({
-        onMapReady,
-        onOutsideLimit,
-      }: {
-        onMapReady?: (map: { flyTo: typeof flyToMock }) => void;
-        onOutsideLimit?: () => void;
-      }) {
-        useEffect(() => {
-          onMapReady?.({ flyTo: flyToMock });
-        }, [onMapReady]);
-
-        return (
-          <button data-testid="recenter-controller" onClick={onOutsideLimit}>
-            recenter
-          </button>
-        );
+    if (loaderText.includes("GeoJSON")) {
+      function MockGeoJSON() {
+        return <div data-testid="geojson-layer" />;
       }
 
-      return MockMapRecenterController;
+      return MockGeoJSON;
     }
 
     function MockMapMarkers({
@@ -160,7 +146,6 @@ describe("MapPlaceholder geolocation recentering", () => {
         json: vi.fn().mockResolvedValue([]),
       }),
     );
-    flyToMock.mockClear();
     clearWatchMock.mockClear();
   });
 
@@ -190,7 +175,7 @@ describe("MapPlaceholder geolocation recentering", () => {
     expect(trackMapRecentralization).not.toHaveBeenCalled();
   });
 
-  it("recenters and shows an accessible alert when the user is outside the limit", async () => {
+  it("keeps the user position and does not warn when the user is outside the neighborhood", async () => {
     mockGeolocation(
       geolocationPosition(
         DEFAULT_MAP_CENTER.latitude + 0.05,
@@ -200,19 +185,14 @@ describe("MapPlaceholder geolocation recentering", () => {
 
     render(<MapPlaceholder />);
 
-    expect(
-      await screen.findByText(/fora da.*mapa/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Recentralizando.*Centro/i)).toHaveAttribute(
-      "role",
-      "status",
-    );
-    expect(screen.getByTestId("map-markers")).toHaveTextContent(
-      "no-user-position",
-    );
-    expect(trackMapRecentralization).toHaveBeenCalledWith({
-      reason: "outside_limit",
+    await waitFor(() => {
+      expect(screen.getByTestId("map-markers")).toHaveTextContent(
+        `${DEFAULT_MAP_CENTER.latitude + 0.05},${DEFAULT_MAP_CENTER.longitude + 0.05}`,
+      );
     });
+
+    expect(screen.queryByText(/Recentralizando/i)).not.toBeInTheDocument();
+    expect(trackMapRecentralization).not.toHaveBeenCalled();
   });
 
   it("recenters and explains when geolocation permission is denied", async () => {
@@ -243,14 +223,14 @@ describe("MapPlaceholder geolocation recentering", () => {
     render(<MapPlaceholder showPopups={false} />);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/buildings");
+      expect(fetch).toHaveBeenCalledWith("/api/buildings?lang=pt");
     });
 
     expect(watchPositionMock).not.toHaveBeenCalled();
     expect(screen.queryByText(/Recentralizando/i)).not.toBeInTheDocument();
   });
 
-  it("recenters when the map viewport moves outside the useful area", async () => {
+  it("renders the Centro Historico boundary without a forced recenter control", async () => {
     mockGeolocation(
       geolocationPosition(
         DEFAULT_MAP_CENTER.latitude + 0.001,
@@ -260,12 +240,7 @@ describe("MapPlaceholder geolocation recentering", () => {
 
     render(<MapPlaceholder />);
 
-    fireEvent.click(await screen.findByTestId("recenter-controller"));
-
-    expect(await screen.findByText(/fora da.*mapa/i)).toBeInTheDocument();
-    expect(flyToMock).toHaveBeenCalled();
-    expect(trackMapRecentralization).toHaveBeenCalledWith({
-      reason: "outside_limit",
-    });
+    expect(await screen.findAllByTestId("geojson-layer")).toHaveLength(2);
+    expect(screen.queryByTestId("recenter-controller")).not.toBeInTheDocument();
   });
 });

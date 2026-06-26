@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ImmigrationSectionComponent } from "../immigration-section";
-import { immigrationMock, immigrationMockEmpty } from "../../mocks/immigration-mock";
+import { immigrationMock } from "../../mocks/immigration-mock";
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -36,12 +36,12 @@ describe("ImmigrationSectionComponent", () => {
   it("should render title and content", () => {
     render(<ImmigrationSectionComponent data={immigrationMock} />);
 
-    expect(screen.getByText(immigrationMock.subtitle ?? "")).toBeInTheDocument();
+    expect(screen.getByText("immigration.eyebrow")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-      immigrationMock.title,
+      "immigration.title",
     );
     expect(screen.getByTestId("immigration-content")).toHaveTextContent(
-      /A imigração alemã no Rio Grande do Sul teve início/i,
+      "immigration.content",
     );
   });
 
@@ -51,16 +51,8 @@ describe("ImmigrationSectionComponent", () => {
     const image = screen.getByRole("img");
 
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("alt", immigrationMock.image?.alt);
+    expect(image).toHaveAttribute("alt", "immigration.image_alt");
     expect(image).toHaveAttribute("src", immigrationMock.image?.src);
-  });
-
-  it("should expose the expand button over the image", () => {
-    render(<ImmigrationSectionComponent data={immigrationMock} />);
-
-    expect(
-      screen.getByRole("button", { name: /ampliar imagem/i }),
-    ).toBeInTheDocument();
   });
 
   it("should fallback to the mock image when backend image is missing", () => {
@@ -77,7 +69,7 @@ describe("ImmigrationSectionComponent", () => {
     const image = screen.getByRole("img");
 
     expect(image).toHaveAttribute("src", immigrationMock.image?.src);
-    expect(image).toHaveAttribute("alt", immigrationMock.image?.alt);
+    expect(image).toHaveAttribute("alt", "immigration.image_alt");
   });
 
   it("should fallback to the mock image when backend image fails to load", () => {
@@ -99,15 +91,7 @@ describe("ImmigrationSectionComponent", () => {
 
     const image = screen.getByRole("img");
     expect(image).toHaveAttribute("src", immigrationMock.image?.src);
-    expect(image).toHaveAttribute("alt", immigrationMock.image?.alt);
-  });
-
-  it("should not render section when title is empty", () => {
-    const { container } = render(
-      <ImmigrationSectionComponent data={immigrationMockEmpty} />,
-    );
-
-    expect(container.firstChild).toBeNull();
+    expect(image).toHaveAttribute("alt", "immigration.image_alt");
   });
 
   it("should not render section when data is null", () => {

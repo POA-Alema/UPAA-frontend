@@ -1,7 +1,8 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
+import { getAuthHeader } from '@/lib/auth-storage';
 import { s3ImageUrl } from '@/lib/s3';
 import { getArchitects } from './architects';
-import type { ImageCategory, Building, BuildingFormData, BuildingImage } from '@/types/building';
+import type { ImageCategory, Building, BuildingFormData, BuildingImage, BuildingMaterial } from '@/types/building';
 
 const ENDPOINT_CANDIDATES = [
   '/buildings',
@@ -27,6 +28,27 @@ function normalizeImage(image: Partial<BuildingImage>, index: number): BuildingI
     fallbackUrl: image.fallbackUrl ?? DEFAULT_FALLBACK_IMAGE,
     alt: image.alt ?? 'Imagem da edificação',
     caption: image.caption,
+  };
+}
+
+function normalizeMaterial(
+  material: Partial<BuildingMaterial>,
+  index: number
+): BuildingMaterial {
+  const allowedTypes = ['plant', 'document', 'analysis'] as const;
+  const materialType = material.type as BuildingMaterial['type'] | undefined;
+  const type = materialType && allowedTypes.includes(materialType)
+    ? materialType
+    : 'document';
+
+  return {
+    id: material.id ?? `material-${index + 1}`,
+    type,
+    title: material.title ?? '',
+    description: material.description,
+    url: material.url,
+    previewUrl: material.previewUrl,
+    previewAlt: material.previewAlt,
   };
 }
 
@@ -58,6 +80,7 @@ function normalizeBuilding(building: Partial<Building>): Building {
     history: building.history,
     author: building.author,
     sources: building.sources ?? [],
+    materials: (building.materials ?? []).map(normalizeMaterial),
     images: normalizeImages(building.images),
     createdAt: building.createdAt ? new Date(building.createdAt) : undefined,
     updatedAt: building.updatedAt ? new Date(building.updatedAt) : undefined,
@@ -81,6 +104,7 @@ async function requestBuildingsApi<T>(
         signal: AbortSignal.timeout(API_TIMEOUT_MS),
         headers: {
           'Content-Type': 'application/json',
+          ...getAuthHeader(),
           ...(init?.headers ?? {}),
         },
         cache: 'no-store',
@@ -404,6 +428,9 @@ export async function uploadBuildingImage(file: File, type = 'externa'): Promise
 
   const response = await fetch(`${baseUrl}/buildings/upload`, {
     method: 'POST',
+    headers: {
+      ...getAuthHeader(),
+    },
     body: formData,
   });
 

@@ -1,12 +1,33 @@
+"use client";
+
 import { ExpandableImage } from "@/components/media/ExpandableImage";
+import { useTranslation } from "react-i18next";
+import "@/features/i18n";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import type { ArchitectPreviewProps } from "../types/architect";
 
 export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
+  const { t } = useTranslation("common");
+
   if (!architect.title || !architect.bio) {
     return null;
   }
+
+  const details = architect.details?.length
+    ? architect.details
+    : [
+        {
+          label: t("architect.detail_origin_label"),
+          value: t("architect.detail_origin_value"),
+          subValue: t("architect.detail_origin_sub"),
+        },
+        {
+          label: t("architect.detail_death_label"),
+          value: t("architect.detail_death_value"),
+          subValue: t("architect.detail_death_sub"),
+        },
+      ];
 
   return (
     <article id="architects" className="section-card section-card--dark architect-preview home-flow__section">
@@ -27,20 +48,18 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
             emphasizeFirstParagraph
           />
 
-          {architect.details?.length ? (
-            <div className="architect-detail-grid architect-detail-grid--compact">
-              {architect.details.map((detail) => (
-                <article
-                  className="info-card info-card--dark"
-                  key={`${detail.label}-${detail.value}`}
-                >
-                  <p className="meta-line">{detail.label}</p>
-                  <h3>{detail.value}</h3>
-                  {detail.subValue ? <p>{detail.subValue}</p> : null}
-                </article>
-              ))}
-            </div>
-          ) : null}
+          <div className="architect-detail-grid architect-detail-grid--compact">
+            {details.map((detail) => (
+              <article
+                className="info-card info-card--dark"
+                key={`${detail.label}-${detail.value}`}
+              >
+                <p className="meta-line">{detail.label}</p>
+                <h3>{detail.value}</h3>
+                {detail.subValue ? <p>{detail.subValue}</p> : null}
+              </article>
+            ))}
+          </div>
 
           {architect.actions?.primary || architect.actions?.secondary ? (
             <div className="section-actions section-actions--row">
@@ -48,7 +67,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
                 <FeatureAction
                   href={architect.actions.primary.href}
                   icon="menu_book"
-                  label={architect.actions.primary.label}
+                  label={t("architect.action_biography")}
                   variant="primary"
                 />
               ) : null}
@@ -56,7 +75,7 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
                 <FeatureAction
                   href={architect.actions.secondary.href}
                   icon="explore"
-                  label={architect.actions.secondary.label}
+                  label={t("architect.action_explore_works")}
                   variant="secondary"
                 />
               ) : null}
@@ -76,11 +95,9 @@ export function ArchitectPreview({ architect }: ArchitectPreviewProps) {
               <div className="architect-image-overlay"></div>
             </div>
 
-            {architect.image.caption ? (
-              <figcaption className="architect-caption architect-caption--light">
-                {architect.image.caption}
-              </figcaption>
-            ) : null}
+            <figcaption className="architect-caption architect-caption--light">
+              {architect.image.caption ?? t("architect.image_caption")}
+            </figcaption>
           </figure>
         ) : null}
       </section>

@@ -46,9 +46,9 @@ describe("ArchitectPage", () => {
 
     expect(screen.queryByRole("heading", { level: 2, name: /história/i })).toBeInTheDocument();
     expect(screen.queryByText(/um dos maiores nomes da arquitetura gaúcha/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 2, name: /características/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 2, name: /obras marcantes/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /explorar obras/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2, name: /características/i })).toBeInTheDocument();
   });
 
   it("returns no markup when every renderable field is empty", () => {

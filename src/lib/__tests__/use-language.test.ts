@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LANGUAGE_STORAGE_KEY } from '../language';
 import { useLanguage } from '../use-language';
 
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({ refresh: vi.fn() })),
+}));
+
 function mockNavigatorLanguages(languages: string[]) {
   Object.defineProperty(global, 'navigator', {
     value: { languages, language: languages[0] ?? '' },
