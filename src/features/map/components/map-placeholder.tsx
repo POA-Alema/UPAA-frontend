@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { LatLngExpression, Map as LeafletMap } from "leaflet";
+import type { Feature, Polygon } from "geojson";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
+import { CENTRO_HISTORICO_GEOJSON } from "@/features/map/constants/centro-historico-boundary";
 import type { MapMarker, Building } from "@/features/map/utils/map-buildings";
 import { mapBuildingsToMarkers } from "@/features/map/utils/map-buildings";
 import {
@@ -29,14 +31,13 @@ const TileLayer = dynamic(
   { ssr: false },
 );
 
-const MapMarkers = dynamic(
-  () => import("./map-markers").then((m) => m.MapMarkers),
+const GeoJSON = dynamic(
+  () => import("react-leaflet").then((m) => m.GeoJSON),
   { ssr: false },
 );
 
-const MapRecenterController = dynamic(
-  () =>
-    import("./map-recenter-controller").then((m) => m.MapRecenterController),
+const MapMarkers = dynamic(
+  () => import("./map-markers").then((m) => m.MapMarkers),
   { ssr: false },
 );
 
@@ -137,13 +138,6 @@ export function MapPlaceholder({
         );
       }
 
-      if (reason === "outside_limit") {
-        return t(
-          "map.alert_recentered_outside_limit",
-          "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
-        );
-      }
-
       return t(
         "map.alert_geolocation_unavailable",
         "Geolocalizacao nao disponivel. Exibindo o mapa centralizado no Centro Historico.",
@@ -188,14 +182,6 @@ export function MapPlaceholder({
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        const status = getRecentralizationStatus(position, null);
-
-        if (status.shouldRecenter) {
-          setUserPosition(null);
-          maybeRecenter(status);
-          return;
-        }
-
         setAlertState(null);
         setUserPosition([position.coords.latitude, position.coords.longitude]);
       },
@@ -249,26 +235,33 @@ export function MapPlaceholder({
           maxZoom={20}
         />
 
+        <GeoJSON
+          data={CENTRO_HISTORICO_GEOJSON as unknown as Feature<Polygon>}
+          style={{
+            color: "#111111",
+            weight: 6,
+            opacity: 0.45,
+            fillColor: "#ffd400",
+            fillOpacity: 0.16,
+          }}
+        />
+
+        <GeoJSON
+          data={CENTRO_HISTORICO_GEOJSON as unknown as Feature<Polygon>}
+          style={{
+            color: "#ffd400",
+            weight: 3,
+            opacity: 1,
+            dashArray: "10 6",
+            fillOpacity: 0,
+          }}
+        />
+
         <MapMarkers
           markers={markers}
           showPopups={showPopups}
           userPosition={shouldUseGeolocation ? userPosition : null}
         />
-
-        {shouldUseGeolocation ? (
-          <MapRecenterController
-            center={mapCenter}
-            onMapReady={(map) => {
-              mapRef.current = map;
-            }}
-            onOutsideLimit={() => {
-              maybeRecenter({
-                shouldRecenter: true,
-                reason: "outside_limit",
-              });
-            }}
-          />
-        ) : null}
       </MapContainer>
 
       {alertState ? (
