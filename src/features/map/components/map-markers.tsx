@@ -6,6 +6,7 @@ import "@/features/i18n";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { RichText } from "@/components/content/rich-text";
 import { ExpandableImage } from "@/components/media/ExpandableImage";
 import L, { type LatLngExpression } from "leaflet";
 import { Marker, Tooltip, useMap } from "react-leaflet";
@@ -121,9 +122,10 @@ function MapPopupCard({
           </h1>
 
           {marker.summary && (
-            <p className="text-white/70 leading-relaxed text-base font-light">
-              {marker.summary}
-            </p>
+            <RichText
+              className="text-white/70 leading-relaxed text-base font-light [&_.rich-text__paragraph]:mb-3 [&_.rich-text__paragraph:last-child]:mb-0"
+              content={marker.summary}
+            />
           )}
 
           <div className="flex flex-wrap gap-3">
