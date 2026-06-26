@@ -1,8 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getBuildingBySlug: vi.fn(),
   listBuildings: vi.fn(),
+  notFound: vi.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
+}));
+
+vi.mock("next/navigation", () => ({
+  notFound: mocks.notFound,
 }));
 
 vi.mock("next/headers", () => ({
@@ -18,11 +25,19 @@ vi.mock("@/features/buildings/components/BuildingPage", () => ({
 vi.mock("@/features/buildings/data/buildings", () => ({
   getBuildingBySlug: mocks.getBuildingBySlug,
   listBuildings: mocks.listBuildings,
+  resolveBuildingLanguage: (value?: string | string[]) => {
+    const language = Array.isArray(value) ? value[0] : value;
+    return language === "en" || language === "de" ? language : "pt";
+  },
 }));
 
 import BuildingDetailPage from "./page";
 
 describe("BuildingDetailPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("passes the resolved return-to-map href to the building page", async () => {
     const building = {
       id: "margs",
@@ -47,5 +62,35 @@ describe("BuildingDetailPage", () => {
       backToMapHref: "/mapa",
       building,
     });
+    expect(mocks.getBuildingBySlug).toHaveBeenCalledWith("margs", "pt");
+  });
+
+  it("passes a supported language to the detail data layer", async () => {
+    mocks.getBuildingBySlug.mockResolvedValue({
+      id: "margs",
+      slug: "margs",
+      summary: "Summary",
+      title: "Museum",
+      history: "History",
+    });
+
+    await BuildingDetailPage({
+      params: Promise.resolve({ slug: "margs" }),
+      searchParams: Promise.resolve({ lang: "en" }),
+    });
+
+    expect(mocks.getBuildingBySlug).toHaveBeenCalledWith("margs", "en");
+  });
+
+  it("uses the not-found fallback when the slug is not found", async () => {
+    mocks.getBuildingBySlug.mockResolvedValue(null);
+
+    await expect(
+      BuildingDetailPage({
+        params: Promise.resolve({ slug: "inexistente" }),
+      }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(mocks.notFound).toHaveBeenCalledOnce();
   });
 });

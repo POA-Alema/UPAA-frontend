@@ -1,6 +1,30 @@
-import { getPublicRuntimeConfig } from '@/lib/config';
+import { getPublicRuntimeConfig } from "@/lib/config";
+import type {
+  Building,
+  BuildingCharacteristic,
+  BuildingImage,
+  BuildingTechnicalSpec,
+} from "../types/building";
 import { getBuildingsMock } from "../mocks/building-mock";
-import type { Building, BuildingImage, BuildingTechnicalSpec, BuildingCharacteristic } from "../types/building";
+
+export type BuildingLanguage = "pt" | "en" | "de";
+
+// Função reintroduzida para resolver a linguagem na página dinâmica [slug]/page.tsx
+export function resolveBuildingLanguage(
+  value?: string | string[],
+): BuildingLanguage {
+  const normalizedValue = Array.isArray(value) ? value[0] : value;
+
+  if (
+    normalizedValue === "pt" ||
+    normalizedValue === "en" ||
+    normalizedValue === "de"
+  ) {
+    return normalizedValue;
+  }
+
+  return "pt";
+}
 
 const API_TIMEOUT_MS = 2_000;
 
@@ -20,13 +44,13 @@ const SPEC_LABELS: Record<string, Record<SpecLang, string>> = {
   ornaments:    { pt: 'Ornamentos',      en: 'Ornamentation',  de: 'Ornamentik' },
   builtArea:    { pt: 'Área Construída', en: 'Built Area',     de: 'Bebaute Fläche' },
   currentOcc:   { pt: 'Ocupação Atual',  en: 'Current Use',    de: 'Aktuelle Nutzung' },
-  restoration:  { pt: 'Restauração',     en: 'Restoration',    de: 'Restaurierung' },
+  restoration:  { pt: 'Restauração',      en: 'Restoration',    de: 'Restaurierung' },
 };
 
 const ARCHITECT_CTA_DESCRIPTION: Record<SpecLang, (name: string) => string> = {
   pt: (name) => `Explore a vida e o legado de ${name}, o arquiteto que moldou a paisagem urbana de Porto Alegre com suas obras monumentais.`,
   en: (name) => `Explore the life and legacy of ${name}, the architect who shaped Porto Alegre's urban landscape with monumental works.`,
-  de: (name) => `Erkunden Sie das Leben und Vermächtnis von ${name}, dem Architekten, der die Stadtlandschaft von Porto Alegre mit monumentalen Werken prägte.`,
+  de: (name) => `Erkunden Sie das Leben und Vermächtnis von ${name}, dem Architekten, der die Stadtlandschaft von Porto Alegre com suas obras monumentais prägte.`,
 };
 
 const ARCHITECT_CTA_LABEL: Record<SpecLang, string> = {
@@ -153,8 +177,6 @@ export async function listBuildings(lang = 'pt'): Promise<Building[]> {
 }
 
 export async function getBuildingBySlug(slug: string, lang = 'pt'): Promise<Building | null> {
-  // The listing endpoint returns a trimmed shape; fetch the detail endpoint for the
-  // full resolved building (description, history, features, …).
   const { apiUrl } = getPublicRuntimeConfig();
   const baseUrl = apiUrl.replace(/\/$/, '');
 
