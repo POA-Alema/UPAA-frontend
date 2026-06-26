@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AdminUserForm } from '@/components/admin/AdminUserForm';
 import { getAdminUser, updateAdminUser } from '@/services/adminUsers';
@@ -12,7 +11,6 @@ type AdminUserEditClientProps = {
 };
 
 export function AdminUserEditClient({ id }: AdminUserEditClientProps) {
-  const router = useRouter();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,8 +36,6 @@ export function AdminUserEditClient({ id }: AdminUserEditClientProps) {
 
   const handleSubmit = async (data: AdminUserFormData) => {
     await updateAdminUser(id, data);
-    router.push('/admin/users?status=updated');
-    router.refresh();
   };
 
   return (

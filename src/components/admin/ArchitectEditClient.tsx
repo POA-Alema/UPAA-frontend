@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArchitectForm } from '@/components/admin/ArchitectForm';
 import { getAdminArchitect, updateAdminArchitect } from '@/services/architects';
@@ -12,7 +11,6 @@ type ArchitectEditClientProps = {
 };
 
 export function ArchitectEditClient({ id }: ArchitectEditClientProps) {
-  const router = useRouter();
   const [architect, setArchitect] = useState<AdminArchitect | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,8 +38,6 @@ export function ArchitectEditClient({ id }: ArchitectEditClientProps) {
 
   const handleSubmit = async (data: ArchitectFormData) => {
     await updateAdminArchitect(id, data);
-    router.push('/admin/architects?status=updated');
-    router.refresh();
   };
 
   return (
