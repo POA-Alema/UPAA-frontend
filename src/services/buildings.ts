@@ -1,6 +1,5 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
 import { getAuthHeader } from '@/lib/auth-storage';
-import { s3ImageUrl } from '@/lib/s3';
 import { getArchitects } from './architects';
 import type { ImageCategory, Building, BuildingFormData, BuildingImage, BuildingMaterial } from '@/types/building';
 
@@ -19,13 +18,10 @@ function _buildBackendImageUrl(path: string): string {
   return `${apiUrl.replace(/\/$/, '')}${path}`;
 }
 
-const DEFAULT_FALLBACK_IMAGE = s3ImageUrl('images/margs/Margs.jpg');
-
 function normalizeImage(image: Partial<BuildingImage>, index: number): BuildingImage {
   return {
     id: image.id ?? `image-${index + 1}`,
-    url: image.url ?? image.fallbackUrl ?? DEFAULT_FALLBACK_IMAGE,
-    fallbackUrl: image.fallbackUrl ?? DEFAULT_FALLBACK_IMAGE,
+    url: image.url ?? '',
     alt: image.alt ?? 'Imagem da edificação',
     caption: image.caption,
   };
@@ -156,7 +152,7 @@ function mapMediaGalleryToImages(mediaGallery: Record<string, unknown>[] | undef
     const raw = String(item['url'] ?? item['path'] ?? item['src'] ?? '');
     const img = normalizeImage({
       id: String(item['id'] ?? raw ?? ''),
-      url: raw || DEFAULT_FALLBACK_IMAGE,
+      url: raw,
       alt: extractLocalizedString(item['alt']) ?? extractLocalizedString(item['description']) ?? extractLocalizedString(item['caption']) ?? 'Imagem da edificação',
       caption: extractLocalizedString(item['caption']) || undefined,
     }, 0);

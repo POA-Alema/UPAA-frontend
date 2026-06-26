@@ -2,7 +2,17 @@ import type { ComponentPropsWithoutRef } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ImmigrationSectionComponent } from "../immigration-section";
-import { immigrationMock } from "../../mocks/immigration-mock";
+import type { ImmigrationSection } from "../../types/immigration";
+
+const immigrationData: ImmigrationSection = {
+  subtitle: "Cidade e memoria",
+  title: "Imigracao",
+  content: "<p>Conteudo vindo do backend.</p>",
+  image: {
+    src: "/images/backend.jpg",
+    alt: "Imagem vinda do backend",
+  },
+};
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -34,7 +44,7 @@ vi.mock("next/image", () => ({
 
 describe("ImmigrationSectionComponent", () => {
   it("should render title and content", () => {
-    render(<ImmigrationSectionComponent data={immigrationMock} />);
+    render(<ImmigrationSectionComponent data={immigrationData} />);
 
     expect(screen.getByText("immigration.eyebrow")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
@@ -46,16 +56,16 @@ describe("ImmigrationSectionComponent", () => {
   });
 
   it("should render image when present", () => {
-    render(<ImmigrationSectionComponent data={immigrationMock} />);
+    render(<ImmigrationSectionComponent data={immigrationData} />);
 
     const image = screen.getByRole("img");
 
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("alt", "immigration.image_alt");
-    expect(image).toHaveAttribute("src", immigrationMock.image?.src);
+    expect(image).toHaveAttribute("src", immigrationData.image?.src);
   });
 
-  it("should fallback to the mock image when backend image is missing", () => {
+  it("should not render an image when backend image is missing", () => {
     render(
       <ImmigrationSectionComponent
         data={{
@@ -66,13 +76,10 @@ describe("ImmigrationSectionComponent", () => {
       />,
     );
 
-    const image = screen.getByRole("img");
-
-    expect(image).toHaveAttribute("src", immigrationMock.image?.src);
-    expect(image).toHaveAttribute("alt", "immigration.image_alt");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
-  it("should fallback to the mock image when backend image fails to load", () => {
+  it("should hide the image when backend image fails to load", () => {
     render(
       <ImmigrationSectionComponent
         data={{
@@ -89,9 +96,7 @@ describe("ImmigrationSectionComponent", () => {
 
     fireEvent.error(screen.getByRole("img"));
 
-    const image = screen.getByRole("img");
-    expect(image).toHaveAttribute("src", immigrationMock.image?.src);
-    expect(image).toHaveAttribute("alt", "immigration.image_alt");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("should not render section when data is null", () => {
@@ -101,7 +106,7 @@ describe("ImmigrationSectionComponent", () => {
   });
 
   it("should render content with proper formatting", () => {
-    render(<ImmigrationSectionComponent data={immigrationMock} />);
+    render(<ImmigrationSectionComponent data={immigrationData} />);
 
     const contentElement = screen.getByTestId("immigration-content");
     const paragraphs = contentElement.querySelectorAll("p");
@@ -111,7 +116,7 @@ describe("ImmigrationSectionComponent", () => {
   });
 
   it("should emphasize first paragraph", () => {
-    render(<ImmigrationSectionComponent data={immigrationMock} />);
+    render(<ImmigrationSectionComponent data={immigrationData} />);
 
     const firstParagraph = screen
       .getByTestId("immigration-content")

@@ -1,6 +1,5 @@
 type MapLoadAnalyticsPayload = {
   markerCount?: number;
-  fallback?: boolean;
   error?: string;
 };
 

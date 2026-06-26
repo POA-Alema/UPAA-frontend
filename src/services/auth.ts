@@ -5,14 +5,14 @@ import type { AuthResponse, AuthUser, LoginCredentials, RegisterCredentials } fr
 const API_TIMEOUT_MS = 5_000;
 
 async function parseAuthError(response: Response): Promise<string> {
-  const fallback = `Erro ${response.status}: não foi possível autenticar.`;
+  const defaultMessage = `Erro ${response.status}: não foi possível autenticar.`;
 
   try {
     const json = (await response.json()) as { message?: string | string[] };
     if (Array.isArray(json.message)) return json.message.join('; ');
-    return json.message || fallback;
+    return json.message || defaultMessage;
   } catch {
-    return fallback;
+    return defaultMessage;
   }
 }
 

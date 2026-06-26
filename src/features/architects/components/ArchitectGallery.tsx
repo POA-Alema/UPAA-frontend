@@ -80,11 +80,7 @@ export function ArchitectGallery({ items }: ArchitectGalleryProps) {
                     sizes="(max-width: 768px) 82vw, 288px"
                     src={work.image.src}
                   />
-                ) : (
-                  <span className="material-symbols-outlined architect-work-card__fallback">
-                    image
-                  </span>
-                )}
+                ) : null}
               </div>
               <figcaption className="architect-work-card__caption">
                 <strong>{work.title}</strong>

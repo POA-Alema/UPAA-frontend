@@ -1,14 +1,9 @@
 import { getPublicRuntimeConfig } from '@/lib/config';
-import { getBuildingsMock } from "../mocks/building-mock";
 import type { Building, BuildingImage, BuildingTechnicalSpec, BuildingCharacteristic } from "../types/building";
 
 const API_TIMEOUT_MS = 2_000;
 
 const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
-
-// Placeholder de texto livre até o CMS enviar a descrição das imagens.
-const IMAGE_DESCRIPTION_PLACEHOLDER =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 type SpecLang = 'pt' | 'en' | 'de';
 
@@ -74,10 +69,9 @@ function mapApiToBuilding(api: Record<string, unknown>, lang = 'pt'): Building {
       src: String(item['url'] ?? ''),
       alt: itemCaption || buildingName || 'Imagem da edificação',
       caption: itemCaption || undefined,
-      // Placeholder até o CMS enviar título/texto livre das imagens.
       title:
-        extractLocalized(item['title'], lang) || itemCaption || buildingName || 'Imagem da edificação',
-      description: extractLocalized(item['description'], lang) || IMAGE_DESCRIPTION_PLACEHOLDER,
+        extractLocalized(item['title'], lang) || undefined,
+      description: extractLocalized(item['description'], lang) || undefined,
     };
   });
 
@@ -135,17 +129,21 @@ async function fetchBuildings(lang = 'pt'): Promise<Building[]> {
   const { apiUrl } = getPublicRuntimeConfig();
   const baseUrl = apiUrl.replace(/\/$/, '');
 
-  try {
-    const response = await fetch(`${baseUrl}/buildings?lang=${lang}`, {
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-      cache: 'no-store',
-    });
-    if (!response.ok) return getBuildingsMock(lang);
-    const data = await response.json() as Record<string, unknown>[];
-    return data.map((item) => mapApiToBuilding(item, lang));
-  } catch {
-    return getBuildingsMock(lang);
+  const response = await fetch(`${baseUrl}/buildings?lang=${lang}`, {
+    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar edificacoes.`);
   }
+
+  const data = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error('Resposta invalida ao carregar edificacoes.');
+  }
+
+  return data.map((item) => mapApiToBuilding(item, lang));
 }
 
 export async function listBuildings(lang = 'pt'): Promise<Building[]> {
@@ -158,20 +156,21 @@ export async function getBuildingBySlug(slug: string, lang = 'pt'): Promise<Buil
   const { apiUrl } = getPublicRuntimeConfig();
   const baseUrl = apiUrl.replace(/\/$/, '');
 
-  try {
-    const response = await fetch(`${baseUrl}/buildings/${slug}?lang=${lang}`, {
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-      cache: 'no-store',
-    });
-    if (response.ok) {
-      const data = await response.json() as Record<string, unknown>;
-      return mapApiToBuilding(data, lang);
-    }
-  } catch {
-    // fall through to mock
+  const response = await fetch(`${baseUrl}/buildings/${slug}?lang=${lang}`, {
+    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    cache: 'no-store',
+  });
+
+  if (response.status === 404) {
+    return null;
   }
 
-  return getBuildingsMock(lang).find((b) => b.slug === slug) ?? null;
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar a edificacao.`);
+  }
+
+  const data = await response.json() as Record<string, unknown>;
+  return mapApiToBuilding(data, lang);
 }
 
 export async function getFeaturedBuilding(lang = 'pt'): Promise<Building | null> {

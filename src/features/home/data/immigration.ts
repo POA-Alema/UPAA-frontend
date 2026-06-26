@@ -1,8 +1,10 @@
-import { immigrationMock } from "../mocks/immigration-mock";
+import { getPublicRuntimeConfig } from "@/lib/config";
 import type { ImmigrationSection } from "../types/immigration";
 
 type LocalizedField = {
   pt?: string;
+  en?: string;
+  de?: string;
 };
 
 type LandingPageRecord = {
@@ -21,6 +23,8 @@ type LandingPageRecord = {
     image?: {
       src?: string;
       alt?: string;
+      title?: string;
+      description?: string;
     };
   } | null;
 } | null;
@@ -53,33 +57,25 @@ function mapImmigrationSection(
       ? {
           src: imageSrc,
           alt: imageAlt || title,
-          // Placeholder até o CMS enviar título + texto livre da imagem.
-          title: immigrationMock.image?.title,
-          description: immigrationMock.image?.description,
+          title: section?.image?.title,
+          description: section?.image?.description,
         }
       : undefined,
   };
 }
 
-export async function getImmigrationData(): Promise<ImmigrationSection> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+export async function getImmigrationData(): Promise<ImmigrationSection | null> {
+  const { apiUrl } = getPublicRuntimeConfig();
+  const url = new URL("/landing-page", apiUrl);
 
-  if (!baseUrl) {
-    return immigrationMock;
+  const response = await fetch(url, {
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar a secao de imigracao.`);
   }
 
-  try {
-    const response = await fetch(`${baseUrl}/landing-page`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!response.ok) {
-      return immigrationMock;
-    }
-
-    const data: LandingPageResponse = await response.json();
-    return mapImmigrationSection(data) ?? immigrationMock;
-  } catch {
-    return immigrationMock;
-  }
+  const data: LandingPageResponse = await response.json();
+  return mapImmigrationSection(data);
 }

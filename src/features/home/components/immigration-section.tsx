@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 import { RichText } from "@/components/content/rich-text";
 import { PageSection } from "@/components/layout/page-section";
-import { immigrationMock } from "../mocks/immigration-mock";
 import type { ImmigrationSection } from "../types/immigration";
 
 type ImmigrationSectionComponentProps = {
@@ -22,7 +21,7 @@ export function ImmigrationSectionComponent({
     return null;
   }
 
-  const image = hasImageError ? immigrationMock.image : data.image ?? immigrationMock.image;
+  const image = hasImageError ? undefined : data.image;
 
   return (
     <PageSection

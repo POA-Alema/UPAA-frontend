@@ -6,8 +6,8 @@
  * O `description` é um texto livre que será editado como rich text no CMS
  * (aceita HTML simples; o componente `RichText` higieniza e quebra em parágrafos).
  *
- * Enquanto o backend não envia estes campos, eles vêm dos mocks. Quando o
- * backend passar a enviá-los, as funções de normalização devem mapeá-los para cá.
+ * Quando o backend enviar estes campos, as funções de normalização devem
+ * mapeá-los para cá.
  */
 export interface ImageMetadata {
   /** Título da imagem (nome exibido como cabeçalho do painel). */

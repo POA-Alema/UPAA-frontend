@@ -1,11 +1,40 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ArchitectPage } from "../ArchitectPage";
-import { architectsMock } from "../../mocks/architect-mock";
+import type { Architect } from "../../types/architect";
+
+const architect: Architect = {
+  id: "theodor-wiederspahn",
+  slug: "theodor-wiederspahn",
+  eyebrow: "Arquiteto",
+  title: "Theodor Wiederspahn",
+  bioSummary: "Resumo vindo do backend.",
+  bio: "<p>Theodor Alexander conhecido como Theo Wiederspahn marcou a paisagem urbana de Porto Alegre.</p>",
+  image: {
+    src: "/images/architects/theodor.jpg",
+    alt: "Theodor Wiederspahn",
+    caption: "Um dos maiores nomes da arquitetura gaúcha",
+  },
+  actions: {
+    secondary: {
+      label: "Explorar obras",
+      href: "/mapa",
+    },
+  },
+  works: [
+    {
+      title: "MARGS",
+      image: {
+        src: "/images/margs.jpg",
+        alt: "MARGS",
+      },
+      href: "/buildings/margs",
+    },
+  ],
+  ctaDescription: "Conheca as obras mapeadas do arquiteto.",
+};
 
 describe("ArchitectPage", () => {
-  const architect = architectsMock[0];
-
   it("renders title, bio, image, caption and action content", () => {
     render(<ArchitectPage architect={architect} backToMapHref="/mapa" />);
 
@@ -22,7 +51,7 @@ describe("ArchitectPage", () => {
       "href",
       "/mapa",
     );
-    expect(screen.getByRole("button", { name: /explorar obras/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /explorar obras/i })).toBeInTheDocument();
   });
 
   it("does not render optional sections when their data is empty", () => {
@@ -47,7 +76,7 @@ describe("ArchitectPage", () => {
     expect(screen.queryByRole("heading", { level: 2, name: /história/i })).toBeInTheDocument();
     expect(screen.queryByText(/um dos maiores nomes da arquitetura gaúcha/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 2, name: /obras marcantes/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /explorar obras/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /explorar obras/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 2, name: /características/i })).toBeInTheDocument();
   });
 

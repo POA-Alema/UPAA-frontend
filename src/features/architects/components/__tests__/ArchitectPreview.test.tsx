@@ -1,11 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ArchitectPreview } from "../ArchitectPreview";
-import { architectsMock } from "../../mocks/architect-mock";
+import type { Architect } from "../../types/architect";
+
+const architect: Architect = {
+  id: "theodor-wiederspahn",
+  slug: "theodor-wiederspahn",
+  title: "Theodor Wiederspahn",
+  bioSummary: "Resumo vindo do backend.",
+  bio: "Biografia vinda do backend.",
+  image: {
+    src: "/images/architects/theodor.jpg",
+    alt: "Theodor Wiederspahn",
+  },
+};
 
 describe("ArchitectPreview", () => {
-  const architect = architectsMock[0];
-
   it("renders architect content when required backend fields are present", () => {
     render(
       <ArchitectPreview

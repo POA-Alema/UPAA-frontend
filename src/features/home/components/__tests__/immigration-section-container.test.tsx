@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ImmigrationSection } from "../immigration-section-container";
 import { getImmigrationData } from "../../data/immigration";
-import { immigrationMock } from "../../mocks/immigration-mock";
+import type { ImmigrationSection as ImmigrationSectionData } from "../../types/immigration";
+
+const immigrationData: ImmigrationSectionData = {
+  title: "Imigracao vinda do backend",
+  content: "Conteudo vindo do backend",
+};
 
 vi.mock("../../data/immigration", () => ({
   getImmigrationData: vi.fn(),
@@ -20,7 +25,7 @@ describe("ImmigrationSection Container", () => {
   });
 
   it("should fetch data and render the component with the returned payload", async () => {
-    vi.mocked(getImmigrationData).mockResolvedValue(immigrationMock);
+    vi.mocked(getImmigrationData).mockResolvedValue(immigrationData);
 
     const result = await ImmigrationSection();
 
@@ -28,7 +33,7 @@ describe("ImmigrationSection Container", () => {
 
     expect(getImmigrationData).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("immigration-component")).toHaveTextContent(
-      immigrationMock.title
+      immigrationData.title
     );
   });
 });
