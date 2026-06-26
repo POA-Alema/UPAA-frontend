@@ -46,12 +46,12 @@ describe("ImmigrationSectionComponent", () => {
   it("should render title and content", () => {
     render(<ImmigrationSectionComponent data={immigrationData} />);
 
-    expect(screen.getByText("immigration.eyebrow")).toBeInTheDocument();
+    expect(screen.getByText("Cidade e memoria")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-      "immigration.title",
+      "Imigracao",
     );
     expect(screen.getByTestId("immigration-content")).toHaveTextContent(
-      "immigration.content",
+      "Conteudo vindo do backend.",
     );
   });
 
@@ -61,7 +61,7 @@ describe("ImmigrationSectionComponent", () => {
     const image = screen.getByRole("img");
 
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("alt", "immigration.image_alt");
+    expect(image).toHaveAttribute("alt", "Imagem vinda do backend");
     expect(image).toHaveAttribute("src", immigrationData.image?.src);
   });
 

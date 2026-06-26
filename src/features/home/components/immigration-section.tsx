@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import "@/features/i18n";
 import { RichText } from "@/components/content/rich-text";
 import { PageSection } from "@/components/layout/page-section";
 import type { ImmigrationSection } from "../types/immigration";
@@ -14,7 +12,6 @@ type ImmigrationSectionComponentProps = {
 export function ImmigrationSectionComponent({
   data,
 }: ImmigrationSectionComponentProps) {
-  const { t } = useTranslation("common");
   const [hasImageError, setHasImageError] = useState(false);
 
   if (!data) {
@@ -26,14 +23,14 @@ export function ImmigrationSectionComponent({
   return (
     <PageSection
       id="immigration"
-      eyebrow={t("immigration.eyebrow")}
-      title={<strong>{t("immigration.title")}</strong>}
+      eyebrow={data.subtitle}
+      title={<strong>{data.title}</strong>}
       className="home-flow__section immigration-section"
     >
       <div className="section-divider section-divider--accent"></div>
     
       <RichText
-        content={t("immigration.content")}
+        content={data.content}
         emphasizeFirstParagraph
         className="immigration-section__content"
         data-testid="immigration-content"
@@ -45,7 +42,7 @@ export function ImmigrationSectionComponent({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image.src}
-              alt={t("immigration.image_alt")}
+              alt={image.alt}
               className="architect-image immigration-section__image"
               data-testid="immigration-image"
               onError={() => setHasImageError(true)}

@@ -51,7 +51,7 @@ describe("architect data layer", () => {
       "/images/architects/theodor-wiederspahn.jpg"
     );
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/architects?lang=pt", {
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
   });
 
@@ -171,6 +171,42 @@ describe("architect data layer", () => {
     expect(architect).toBeNull();
   });
 
+  it("supports featured architect payload already translated by the backend", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          architectSection: {
+            imageURL: "/images/architects/theodor-wiederspahn.jpg",
+            imageSubtitle: "Theodor Wiederspahn",
+            title: "O arquiteto",
+            subtitle: "Um nome central",
+            content: "Conteudo traduzido pelo backend.",
+            CTA: {
+              label: "Conhecer arquiteto",
+              target: "/architects/theodor-wiederspahn",
+            },
+          },
+        }),
+      })
+    );
+
+    const architect = await getFeaturedArchitect();
+
+    expect(architect).toEqual(
+      expect.objectContaining({
+        title: "O arquiteto",
+        bio: "Conteudo traduzido pelo backend.",
+        eyebrow: "Um nome central",
+      })
+    );
+    expect(architect?.actions?.primary).toEqual({
+      label: "Conhecer arquiteto",
+      href: "/architects/theodor-wiederspahn",
+    });
+  });
+
   it("propagates the error when the featured architect request fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
 
@@ -194,7 +230,7 @@ describe("architect data layer", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3001/landing-page?lang=pt",
-      { next: { revalidate: 3600 } }
+      { cache: "no-store" }
     );
   });
 

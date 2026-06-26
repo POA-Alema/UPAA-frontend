@@ -13,11 +13,20 @@ function getLandingPageRecord(
   return Array.isArray(payload) ? payload[0] ?? null : payload;
 }
 
+type LocalizedValue = string | { pt?: string; en?: string; de?: string };
+
+function getLocalized(value: LocalizedValue | undefined, lang: string): string {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  return value?.[lang as "pt" | "en" | "de"]?.trim() ?? "";
+}
+
 function mapLandingPageResponse(data: LandingPageRecord | null, lang = "pt"): LandingData {
-  const l = lang as keyof NonNullable<LandingPageRecord["mainTitle"]>;
   return {
-    title: data?.mainTitle?.[l]?.trim() ?? "",
-    description: data?.subtitle?.[l]?.trim() ?? "",
+    title: getLocalized(data?.mainTitle, lang),
+    description: getLocalized(data?.subtitle, lang),
   };
 }
 
@@ -32,7 +41,7 @@ export async function getLandingData(lang = DEFAULT_LANG): Promise<LandingData |
   url.searchParams.set("lang", lang);
 
   const response = await fetch(url, {
-    next: { revalidate: 3600 },
+    cache: "no-store",
   });
 
   if (!response.ok) {

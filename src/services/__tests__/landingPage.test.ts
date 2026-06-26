@@ -39,22 +39,72 @@ describe('landingPage service', () => {
   });
 
   it('should fetch and normalize landing page data from API', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => landingPageData,
-      })
-    );
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => landingPageData,
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
 
     const result = await getLandingPageData();
 
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3001/landing-page?lang=all',
+      expect.objectContaining({ cache: 'no-store' })
+    );
     expect(result.id).toBe('landing-page-id');
     expect(result.mainTitle.pt).toBe('Titulo Principal PT');
     expect(result.subtitle.en).toBe('Subtitle EN');
     expect(result.architectSection.imageURL).toBe('/images/test.jpg');
     expect(result.immigrationSection?.title?.pt).toBe('Imigracao PT');
     expect(result.institutionsSection.institutions).toEqual([]);
+  });
+
+  it('should normalize translated string payloads for the admin form', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          ...landingPageData,
+          mainTitle: 'Titulo Principal PT',
+          subtitle: 'Subtitulo PT',
+          architectSection: {
+            ...landingPageData.architectSection,
+            title: 'O Arquiteto PT',
+            content: '<p>Descricao PT</p>',
+            CTA: { label: 'Botao', target: '/test', icon: 'test-icon' },
+          },
+          immigrationSection: {
+            ...landingPageData.immigrationSection,
+            title: 'Imigracao PT',
+            content: '<p>Imigracao descricao PT</p>',
+          },
+          institutionsSection: {
+            title: 'Instituicoes PT',
+            institutions: [
+              {
+                id: 'institution-id',
+                title: 'Instituicao PT',
+                description: '<p>Descricao PT</p>',
+                CTA: { label: 'Ver mais', target: '/institution' },
+                order: 1,
+              },
+            ],
+          },
+        }),
+      })
+    );
+
+    const result = await getLandingPageData();
+
+    expect(result.mainTitle.pt).toBe('Titulo Principal PT');
+    expect(result.subtitle.pt).toBe('Subtitulo PT');
+    expect(result.architectSection.title.pt).toBe('O Arquiteto PT');
+    expect(result.architectSection.CTA.label.pt).toBe('Botao');
+    expect(result.immigrationSection?.content.pt).toBe('<p>Imigracao descricao PT</p>');
+    expect(result.institutionsSection.title.pt).toBe('Instituicoes PT');
+    expect(result.institutionsSection.institutions[0].title.pt).toBe('Instituicao PT');
   });
 
   it('should throw when fetch fails', async () => {
