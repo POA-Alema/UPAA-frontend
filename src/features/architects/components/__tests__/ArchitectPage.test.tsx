@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { ArchitectPage } from "../ArchitectPage";
 import type { Architect } from "../../types/architect";
+import i18n from "@/features/i18n";
 
 const architect: Architect = {
   id: "theodor-wiederspahn",
@@ -35,6 +36,10 @@ const architect: Architect = {
 };
 
 describe("ArchitectPage", () => {
+  afterEach(async () => {
+    await i18n.changeLanguage("pt");
+  });
+
   it("renders title, bio, image, caption and action content", () => {
     render(<ArchitectPage architect={architect} backToMapHref="/mapa" />);
 
@@ -77,7 +82,15 @@ describe("ArchitectPage", () => {
     expect(screen.queryByText(/um dos maiores nomes da arquitetura gaúcha/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 2, name: /obras marcantes/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /explorar obras/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 2, name: /características/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2, name: /características/i })).not.toBeInTheDocument();
+  });
+
+  it("uses the page language for translated labels", async () => {
+    render(<ArchitectPage architect={architect} backToMapHref="/mapa" lang="en" />);
+
+    expect(await screen.findByRole("heading", { level: 2, name: /history/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /back to map/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /explore works/i })).toBeInTheDocument();
   });
 
   it("returns no markup when every renderable field is empty", () => {

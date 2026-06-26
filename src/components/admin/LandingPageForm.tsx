@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import type { LandingPageData, InstitutionItem } from '@/types/landingPage';
 import { ConfirmationModal } from './ConfirmationModal';
 import { ImageSelector } from './ImageSelector';
@@ -34,6 +34,13 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
 
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const submitMessageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (submitMessage) {
+      submitMessageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [submitMessage]);
 
   // Helper to handle multilingual changes for basic fields
   const handleMultilingualChange = (
@@ -265,6 +272,7 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
     <form onSubmit={handleFormSubmit} className="mx-auto max-w-4xl font-body relative">
       {submitMessage && (
         <div
+          ref={submitMessageRef}
           className={`mb-8 rounded-lg border p-4 ${
             submitMessage.type === 'success'
               ? 'border-green-700/50 bg-green-900/20 text-green-200 shadow-lg'
@@ -290,19 +298,26 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
             Campos multilíngues serão alternados automaticamente.
           </p>
         </div>
-        <div className="flex bg-surface-container-high/40 p-1 rounded-xl border border-outline-variant/10">
+        <div className="flex gap-1 rounded-xl border border-outline-variant/20 bg-surface-container-high/40 p-1">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.key}
               type="button"
+              aria-pressed={activeLang === lang.key}
               onClick={() => setActiveLang(lang.key)}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg font-headline text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`group flex items-center gap-2 rounded-lg border px-5 py-2 font-headline text-xs font-bold uppercase tracking-wider transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 activeLang === lang.key
-                  ? 'bg-primary text-on-primary shadow'
-                  : 'hover:bg-surface-container-high/60 text-on-surface-variant'
+                  ? 'border-accent bg-accent/15 text-accent shadow-[0_0_0_1px_rgba(209,166,91,0.35),0_12px_24px_rgba(0,0,0,0.22)]'
+                  : 'border-transparent text-on-surface-variant hover:border-primary/50 hover:bg-primary/10 hover:text-primary'
               }`}
             >
-              <span className="material-symbols-outlined text-sm">translate</span>
+              <span
+                className={`material-symbols-outlined text-sm transition-colors ${
+                  activeLang === lang.key ? 'text-accent' : 'text-on-surface-variant group-hover:text-primary'
+                }`}
+              >
+                translate
+              </span>
               {lang.label}
             </button>
           ))}

@@ -2,9 +2,6 @@ import { getPublicRuntimeConfig } from '@/lib/config';
 import type { Building, BuildingImage, BuildingTechnicalSpec, BuildingCharacteristic } from "../types/building";
 
 const API_TIMEOUT_MS = 2_000;
-
-const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
-
 type SpecLang = 'pt' | 'en' | 'de';
 
 const SPEC_LABELS: Record<string, Record<SpecLang, string>> = {
@@ -18,10 +15,16 @@ const SPEC_LABELS: Record<string, Record<SpecLang, string>> = {
   restoration:  { pt: 'Restauração',     en: 'Restoration',    de: 'Restaurierung' },
 };
 
-const ARCHITECT_CTA_DESCRIPTION: Record<SpecLang, (name: string) => string> = {
-  pt: (name) => `Explore a vida e o legado de ${name}, o arquiteto que moldou a paisagem urbana de Porto Alegre com suas obras monumentais.`,
-  en: (name) => `Explore the life and legacy of ${name}, the architect who shaped Porto Alegre's urban landscape with monumental works.`,
-  de: (name) => `Erkunden Sie das Leben und Vermächtnis von ${name}, dem Architekten, der die Stadtlandschaft von Porto Alegre mit monumentalen Werken prägte.`,
+const ARCHITECT_CTA_DESCRIPTION: Record<SpecLang, (name?: string) => string> = {
+  pt: (name) => name
+    ? `Explore a vida e o legado de ${name}, o arquiteto que moldou a paisagem urbana de Porto Alegre com suas obras monumentais.`
+    : 'Explore a vida e o legado do arquiteto vinculado a esta edificação.',
+  en: (name) => name
+    ? `Explore the life and legacy of ${name}, the architect who shaped Porto Alegre's urban landscape with monumental works.`
+    : 'Explore the life and legacy of the architect linked to this building.',
+  de: (name) => name
+    ? `Erkunden Sie das Leben und Vermächtnis von ${name}, dem Architekten, der die Stadtlandschaft von Porto Alegre mit monumentalen Werken prägte.`
+    : 'Erkunden Sie das Leben und Vermächtnis des mit diesem Gebäude verbundenen Architekten.',
 };
 
 const ARCHITECT_CTA_LABEL: Record<SpecLang, string> = {
@@ -41,7 +44,8 @@ function extractLocalized(value: unknown, lang = 'pt'): string {
   if (typeof value === 'object') {
     const obj = value as Record<string, string>;
     const l = lang as SpecLang;
-    return obj[l] ?? obj.pt ?? obj.en ?? obj.de ?? '';
+    const composedName = [obj.first, obj.last].filter(Boolean).join(' ');
+    return obj[l] ?? obj.pt ?? obj.en ?? obj.de ?? obj.full ?? composedName ?? '';
   }
   return '';
 }
@@ -54,8 +58,22 @@ function pick(api: Record<string, unknown>, ...keys: string[]): unknown {
   return undefined;
 }
 
+function getArchitectInfo(api: Record<string, unknown>, lang: string) {
+  const architect = typeof api['architect'] === 'object' && api['architect']
+    ? api['architect'] as Record<string, unknown>
+    : undefined;
+  const slug = String(pick(api, 'architect_slug') ?? architect?.['slug'] ?? '').trim();
+  const name = architect
+    ? extractLocalized(architect['name'], lang)
+    : String(api['architect'] ?? '');
+
+  return {
+    name,
+    href: slug ? `/architects/${slug}` : undefined,
+  };
+}
+
 function mapApiToBuilding(api: Record<string, unknown>, lang = 'pt'): Building {
-  // Backend stores absolute URLs pointing at the public S3 bucket (see src/lib/s3.ts).
   const mediaGallery = Array.isArray(api['mediaGallery'])
     ? (api['mediaGallery'] as Record<string, unknown>[])
     : Array.isArray(api['media_gallery'])
@@ -98,9 +116,8 @@ function mapApiToBuilding(api: Record<string, unknown>, lang = 'pt'): Building {
   if (pick(api, 'currentOccupation', 'current_occupation')) technicalSpecs.push({ label: specLabel('currentOcc', lang), value: extractLocalized(pick(api, 'currentOccupation', 'current_occupation'), lang) });
   if (pick(api, 'restorationAndHeritage', 'restoration_and_heritage')) technicalSpecs.push({ label: specLabel('restoration', lang), value: extractLocalized(pick(api, 'restorationAndHeritage', 'restoration_and_heritage'), lang) });
 
-  const architectName = typeof api['architect'] === 'object' && api['architect']
-    ? extractLocalized((api['architect'] as Record<string, unknown>)['name'], lang)
-    : String(api['architect'] ?? '');
+  const architect = getArchitectInfo(api, lang);
+  const architectName = architect.name;
 
   const eyebrowParts = [architectName, constructionPeriod].filter(Boolean);
   const l = (lang === 'en' || lang === 'de' ? lang : 'pt') as SpecLang;
@@ -118,9 +135,9 @@ function mapApiToBuilding(api: Record<string, unknown>, lang = 'pt'): Building {
     characteristics: characteristics.length > 0 ? characteristics : undefined,
     gallery: gallery.length > 0 ? gallery : undefined,
     architectCta: {
-      description: ARCHITECT_CTA_DESCRIPTION[l](architectName || 'Theodor Wiederspahn'),
+      description: ARCHITECT_CTA_DESCRIPTION[l](architectName || undefined),
       label: ARCHITECT_CTA_LABEL[l],
-      href: ARCHITECT_DETAIL_PATH,
+      href: architect.href,
     },
   };
 }
@@ -151,8 +168,6 @@ export async function listBuildings(lang = 'pt'): Promise<Building[]> {
 }
 
 export async function getBuildingBySlug(slug: string, lang = 'pt'): Promise<Building | null> {
-  // The listing endpoint returns a trimmed shape; fetch the detail endpoint for the
-  // full resolved building (description, history, features, …).
   const { apiUrl } = getPublicRuntimeConfig();
   const baseUrl = apiUrl.replace(/\/$/, '');
 

@@ -143,6 +143,10 @@ describe("mapBackendBuildingsToMapBuildings", () => {
         id: "backend-map-id",
         slug: "margs",
         name: "MARGS",
+        architect: {
+          slug: "joao-da-silva",
+          name: "Joao da Silva",
+        },
         summary: "Resumo da edificacao",
         coordinates: { latitude: -30.01, longitude: -51.22 },
         coverImage: {
@@ -157,6 +161,8 @@ describe("mapBackendBuildingsToMapBuildings", () => {
       id: "backend-map-id",
       name: "MARGS",
       slug: "margs",
+      architectName: "Joao da Silva",
+      architectPath: "/architects/joao-da-silva",
       summary: "Resumo da edificacao",
       latitude: -30.01,
       longitude: -51.22,
@@ -180,7 +186,7 @@ describe("mapBackendBuildingsToMapBuildings", () => {
         coordinates: { lat: -30.01, lng: -51.22 },
         constructionPeriod: "1913",
         description: { pt: "Descricao da edificacao" },
-        architect: { full: "Theo Wiederspahn" },
+        architect: { slug: "theo-wiederspahn", name: { full: "Theo Wiederspahn" } },
         mediaGallery: [
           {
             url: "/images/Margs.jpg",
@@ -198,6 +204,7 @@ describe("mapBackendBuildingsToMapBuildings", () => {
       summary: "Descricao da edificacao",
       yearLabel: "1913",
       architectName: "Theo Wiederspahn",
+      architectPath: "/architects/theo-wiederspahn",
       latitude: -30.01,
       longitude: -51.22,
     });

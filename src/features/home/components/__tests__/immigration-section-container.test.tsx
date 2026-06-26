@@ -31,9 +31,19 @@ describe("ImmigrationSection Container", () => {
 
     render(result);
 
-    expect(getImmigrationData).toHaveBeenCalledTimes(1);
+    expect(getImmigrationData).toHaveBeenCalledWith("pt");
     expect(screen.getByTestId("immigration-component")).toHaveTextContent(
       immigrationData.title
     );
+  });
+
+  it("should forward the selected language to the data layer", async () => {
+    vi.mocked(getImmigrationData).mockResolvedValue(immigrationData);
+
+    const result = await ImmigrationSection({ lang: "en" });
+
+    render(result);
+
+    expect(getImmigrationData).toHaveBeenCalledWith("en");
   });
 });

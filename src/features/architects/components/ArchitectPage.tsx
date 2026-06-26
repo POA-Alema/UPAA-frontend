@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 import { ExpandableImage } from "@/components/media/ExpandableImage";
@@ -9,56 +10,27 @@ import { ArchitectGallery } from "./ArchitectGallery";
 import { useArchitectDetailTracking } from "../hooks";
 import type { ArchitectPageProps } from "../types/architect";
 
-export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) {
-  const { t } = useTranslation("common");
+export function ArchitectPage({ architect, backToMapHref, lang = "pt" }: ArchitectPageProps) {
+  const { t, i18n } = useTranslation("common");
+
+  useEffect(() => {
+    if (i18n.language !== lang) {
+      void i18n.changeLanguage(lang);
+    }
+  }, [i18n, lang]);
 
   useArchitectDetailTracking(architect.slug, architect.title);
-
-  const details = architect.details?.length
-    ? architect.details
-    : [
-        {
-          label: t("architect.detail_origin_label"),
-          value: t("architect.detail_origin_value"),
-          subValue: t("architect.detail_origin_sub"),
-        },
-        {
-          label: t("architect.detail_death_label"),
-          value: t("architect.detail_death_value"),
-          subValue: t("architect.detail_death_sub"),
-        },
-      ];
-
-  const characteristics = architect.characteristics?.length
-    ? architect.characteristics
-    : [
-        {
-          icon: "auto_awesome",
-          title: t("architect.char_eclectic_title"),
-          description: t("architect.char_eclectic_desc"),
-        },
-        {
-          icon: "palette",
-          title: t("architect.char_detail_title"),
-          description: t("architect.char_detail_desc"),
-        },
-        {
-          icon: "domain",
-          title: t("architect.char_innovation_title"),
-          description: t("architect.char_innovation_desc"),
-        },
-      ];
-
-  const ctaDescription = architect.ctaDescription || t("architect.cta_description");
 
   const hasHero = Boolean(
     architect.title || architect.eyebrow || architect.image,
   );
   const hasBiography = Boolean(architect.bio);
+  const hasDetails = Boolean(architect.details?.length);
+  const hasCharacteristics = Boolean(architect.characteristics?.length);
   const hasWorks = Boolean(architect.works?.length);
   const hasCta = Boolean(architect.actions?.secondary || backToMapHref);
 
-  if (!hasHero && !hasBiography && !hasWorks && !hasCta) {
+  if (!hasHero && !hasBiography && !hasCharacteristics && !hasWorks && !hasCta) {
     return null;
   }
 
@@ -88,7 +60,9 @@ export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) 
             ) : null}
 
             <div className="architect-hero__copy">
-              <p className="eyebrow eyebrow--light">{t("architect.eyebrow")}</p>
+              {architect.eyebrow ? (
+                <p className="eyebrow eyebrow--light">{architect.eyebrow}</p>
+              ) : null}
               {architect.title ? (
                 <h1 className="architect-title architect-title--light">
                   {t("architect.page_legacy_prefix")} <br /> <strong>{architect.title}</strong>
@@ -116,8 +90,9 @@ export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) 
               emphasizeFirstParagraph
             />
 
-            <div className="architect-detail-grid">
-                {details.map((detail) => (
+            {hasDetails && architect.details ? (
+              <div className="architect-detail-grid">
+                {architect.details.map((detail) => (
                   <article
                     className="info-card info-card--architect"
                     key={`${detail.label}-${detail.value}`}
@@ -128,32 +103,35 @@ export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) 
                   </article>
                 ))}
               </div>
+            ) : null}
           </div>
         </section>
       ) : null}
 
-      <section className="architect-section architect-section--features architect-flow__section">
-        <div className="architect-section__inner">
-          <h2 className="architect-section__title">
-            {t("architect.page_characteristics_heading")}
-          </h2>
+      {hasCharacteristics && architect.characteristics ? (
+        <section className="architect-section architect-section--features architect-flow__section">
+          <div className="architect-section__inner">
+            <h2 className="architect-section__title">
+              {t("architect.page_characteristics_heading")}
+            </h2>
 
-          <div className="feature-grid">
-            {characteristics.map((characteristic) => (
-              <article
-                className="info-card info-card--architect info-card--feature"
-                key={characteristic.title}
-              >
-                <span className="material-symbols-outlined architect-feature-icon">
-                  {characteristic.icon}
-                </span>
-                <h3>{characteristic.title}</h3>
-                <p>{characteristic.description}</p>
-              </article>
-            ))}
+            <div className="feature-grid">
+              {architect.characteristics.map((characteristic) => (
+                <article
+                  className="info-card info-card--architect info-card--feature"
+                  key={characteristic.title}
+                >
+                  <span className="material-symbols-outlined architect-feature-icon">
+                    {characteristic.icon}
+                  </span>
+                  <h3>{characteristic.title}</h3>
+                  <p>{characteristic.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {hasWorks ? (
         <section className="architect-section architect-section--works architect-flow__section">
@@ -170,9 +148,11 @@ export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) 
       {hasCta ? (
         <section className="architect-cta architect-flow__section">
           <div className="architect-cta__content">
-            <p className="section-copy architect-cta__copy">
-              {ctaDescription}
-            </p>
+            {architect.ctaDescription ? (
+              <p className="section-copy architect-cta__copy">
+                {architect.ctaDescription}
+              </p>
+            ) : null}
 
             <div className="section-actions section-actions--row section-actions--center">
               {architect.actions?.secondary ? (

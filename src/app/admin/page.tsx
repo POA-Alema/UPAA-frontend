@@ -64,6 +64,23 @@ export default function AdminPage() {
             </p>
           </Link>
 
+           <Link
+            href="/admin/architects"
+            className="bg-surface-container-high/40 p-8 rounded-xl border border-outline-variant/10 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span className="material-symbols-outlined text-primary text-2xl">
+                person
+              </span>
+              <h2 className="font-headline font-bold text-xl text-on-surface">
+                Arquitetos
+              </h2>
+            </div>
+            <p className="text-on-surface-variant text-sm">
+              Gerencie todos os arquitetos cadastrados, crie novos e edite existentes.
+            </p>
+          </Link>
+
           {role === 'ADMIN' && (
             <Link
               href="/admin/users"

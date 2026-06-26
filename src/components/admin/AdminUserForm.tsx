@@ -1,7 +1,7 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import type { AdminRole } from '@/types/auth';
 import type { AdminUser, AdminUserFormData } from '@/types/adminUser';
 
@@ -30,7 +30,14 @@ export function AdminUserForm({ initialData, onSubmit }: AdminUserFormProps) {
   const [role, setRole] = useState<AdminRole>(initialData?.role ?? 'CONTENT_MANAGER');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const messageRef = useRef<HTMLDivElement>(null);
   const isEditing = Boolean(initialData);
+
+  useEffect(() => {
+    if (message) {
+      messageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [message]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -69,6 +76,7 @@ export function AdminUserForm({ initialData, onSubmit }: AdminUserFormProps) {
     <form className="grid gap-6" onSubmit={handleSubmit}>
       {message && (
         <div
+          ref={messageRef}
           className={`rounded-lg border px-4 py-3 text-sm ${
             message.type === 'success'
               ? 'border-green-700/50 bg-green-900/20 text-green-200'

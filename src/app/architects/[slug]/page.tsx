@@ -66,6 +66,7 @@ export default async function ArchitectDetailPage({
         <ArchitectPage
           architect={architect}
           backToMapHref={resolveArchitectBackToMapHref(resolvedSearchParams)}
+          lang={lang}
         />
       </main>
       <Footer />

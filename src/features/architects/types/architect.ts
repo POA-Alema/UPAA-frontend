@@ -54,4 +54,5 @@ export interface ArchitectPreviewProps {
 export interface ArchitectPageProps {
   architect: Architect;
   backToMapHref?: string;
+  lang?: string;
 }
