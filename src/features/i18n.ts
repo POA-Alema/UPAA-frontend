@@ -159,9 +159,9 @@ export const resources = {
   en: {
     common: {
       brand: {
-        line_one: "A",
-        line_two: "Germanic",
-        line_three: "Porto Alegre",
+        line_one: "Uma",
+        line_two: "Porto Alegre",
+        line_three: "Alemã",
       },
 
       nav: {
@@ -313,9 +313,9 @@ export const resources = {
   de: {
     common: {
       brand: {
-        line_one: "Ein",
-        line_two: "deutsches",
-        line_three: "Porto Alegre",
+        line_one: "Uma",
+        line_two: "Porto Alegre",
+        line_three: "Alemã",
       },
 
       nav: {
