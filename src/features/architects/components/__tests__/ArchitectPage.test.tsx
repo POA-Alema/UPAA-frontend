@@ -77,7 +77,7 @@ describe("ArchitectPage", () => {
     expect(screen.queryByText(/um dos maiores nomes da arquitetura gaúcha/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { level: 2, name: /obras marcantes/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /explorar obras/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 2, name: /características/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2, name: /características/i })).not.toBeInTheDocument();
   });
 
   it("returns no markup when every renderable field is empty", () => {
