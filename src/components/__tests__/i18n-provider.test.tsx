@@ -106,6 +106,7 @@ describe("i18n provider — language switching and re-render", () => {
     const criticalKeys = [
       "header.action_map",
       "header.action_home",
+      "header.menu_label",
       "header.lang_pt",
       "header.lang_de",
       "header.lang_en",
@@ -113,6 +114,8 @@ describe("i18n provider — language switching and re-render", () => {
       "nav.section_immigration",
       "nav.section_map",
       "nav.section_architects",
+      "nav.section_partners",
+      "partners.eyebrow",
       "footer.title",
       "footer.subtitle",
       "footer.project_line",
@@ -123,6 +126,10 @@ describe("i18n provider — language switching and re-render", () => {
       "map.loading",
       "map.empty",
       "map.you_are_here",
+      "brand.line_one",
+      "brand.line_two",
+      "building.page_title",
+      "building.page_description",
       "building.section_title",
     ] as const;
 

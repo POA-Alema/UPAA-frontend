@@ -90,9 +90,15 @@ const Header = function Header() {
       <div className="relative max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="flex flex-col leading-tight">
-            <span className="text-ui-primary font-light text-sm md:text-base">Uma</span>
-            <span className="text-ui-primary font-light text-sm md:text-base">Porto Alegre</span>
-            <span className="text-ui-accent font-light text-sm md:text-base">Alemã</span>
+            <span className="text-ui-primary font-light text-sm md:text-base">
+              {t("brand.line_one")}
+            </span>
+            <span className="text-ui-primary font-light text-sm md:text-base">
+              {t("brand.line_two")}
+            </span>
+            <span className="text-ui-accent font-light text-sm md:text-base">
+              {t("brand.line_three")}
+            </span>
           </div>
         </div>
 
@@ -102,7 +108,7 @@ const Header = function Header() {
           </Link>
 
           <button
-            aria-label="menu"
+            aria-label={t("header.menu_label")}
             aria-expanded={open}
             ref={toggleRef}
             onClick={() => {setOpen(open => !open)} }
