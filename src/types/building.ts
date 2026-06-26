@@ -3,7 +3,6 @@ export interface BuildingImage {
   url: string;
   alt: string;
   caption?: string;
-  fallbackUrl?: string;
 }
 
 export interface ImageCategory {

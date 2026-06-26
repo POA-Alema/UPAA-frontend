@@ -101,8 +101,6 @@ export const resources = {
         loading: "Carregando dados do mapa.",
         empty: "Nenhum ponto disponivel para exibir.",
         load_error: "Nao foi possivel carregar os dados do mapa.",
-        fallback:
-          "Dados reais indisponiveis. Exibindo pontos de referencia.",
         you_are_here: "Voce esta aqui",
         alert_recentered_outside_limit:
           "Você está fora da área útil do mapa. Recentralizando no Centro Histórico.",
@@ -243,7 +241,6 @@ export const resources = {
         loading: "Loading map data.",
         empty: "No points available to display.",
         load_error: "Unable to load map data.",
-        fallback: "Live data unavailable. Showing reference points.",
         you_are_here: "You are here",
         alert_recentered_outside_limit:
           "You are outside the useful map area. Recentering to the Historic Center.",
@@ -384,8 +381,6 @@ export const resources = {
         loading: "Kartendaten werden geladen.",
         empty: "Keine Punkte zum Anzeigen verfuegbar.",
         load_error: "Kartendaten konnten nicht geladen werden.",
-        fallback:
-          "Echtzeitdaten nicht verfuegbar. Referenzpunkte werden angezeigt.",
         you_are_here: "Du bist hier",
         alert_recentered_outside_limit:
           "Sie befinden sich ausserhalb des nutzbaren Kartenbereichs. Karte wird auf das historische Zentrum zentriert.",

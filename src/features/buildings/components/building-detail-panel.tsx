@@ -3,7 +3,7 @@
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 
-import type { Building } from "@/data/buildings";
+import type { Building } from "@/types/building";
 import { BuildingRouteLink } from "./building-route-link";
 import { BuildingMaterialsSection } from "./building-materials-section";
 

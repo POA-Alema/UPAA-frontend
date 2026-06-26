@@ -92,13 +92,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function selectLocalizedText(value: LocalizedText, lang = "pt", fallback = ""): string {
+function selectLocalizedText(value: LocalizedText, lang = "pt", defaultValue = ""): string {
   if (typeof value === "string") {
     return value;
   }
 
   if (!isRecord(value)) {
-    return fallback;
+    return defaultValue;
   }
 
   const full = typeof value.full === "string" ? value.full : "";
@@ -111,7 +111,7 @@ function selectLocalizedText(value: LocalizedText, lang = "pt", fallback = ""): 
   const de = typeof value.de === "string" ? value.de : "";
   const preferred = lang === "en" ? en : lang === "de" ? de : pt;
 
-  return preferred || pt || en || de || full || composedName || fallback;
+  return preferred || pt || en || de || full || composedName || defaultValue;
 }
 
 function toOptionalString(value: unknown): string | undefined {

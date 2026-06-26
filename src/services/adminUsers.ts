@@ -5,14 +5,14 @@ import type { AdminUser, AdminUserFormData } from '@/types/adminUser';
 const API_TIMEOUT_MS = 5_000;
 
 async function parseAdminUserError(response: Response): Promise<string> {
-  const fallback = `Erro ${response.status}: não foi possível concluir a operação.`;
+  const defaultMessage = `Erro ${response.status}: não foi possível concluir a operação.`;
 
   try {
     const json = (await response.json()) as { message?: string | string[] };
     if (Array.isArray(json.message)) return json.message.join('; ');
-    return json.message || fallback;
+    return json.message || defaultMessage;
   } catch {
-    return fallback;
+    return defaultMessage;
   }
 }
 

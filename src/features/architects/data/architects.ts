@@ -1,11 +1,7 @@
-import { getArchitectsMock } from "../mocks/architect-mock";
+import { getPublicRuntimeConfig } from "@/lib/config";
 import type { Architect } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
-
-// Placeholder de texto livre até o CMS enviar a descrição das imagens.
-const IMAGE_DESCRIPTION_PLACEHOLDER =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 type LocalizedField = {
   pt?: string;
@@ -61,7 +57,8 @@ function extractSlug(target?: string): string | undefined {
 }
 
 function getApiBaseUrl(): string | null {
-  return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || null;
+  const { apiUrl } = getPublicRuntimeConfig();
+  return apiUrl.replace(/\/$/, "") || null;
 }
 
 function hasRequiredArchitectFields(
@@ -105,9 +102,8 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
           src: imageSrc,
           alt: record.image?.alt || title || "",
           caption: record.image?.caption,
-          // Placeholder até o CMS enviar título/texto livre das imagens.
-          title: record.image?.title || record.image?.caption || title,
-          description: record.image?.description ?? IMAGE_DESCRIPTION_PLACEHOLDER,
+          title: record.image?.title,
+          description: record.image?.description,
         }
       : record.image,
     actions: record.actions,
@@ -124,40 +120,32 @@ async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[] | null> 
     return null;
   }
 
-  try {
-    const url = new URL(ARCHITECTS_ENDPOINT, baseUrl);
-    url.searchParams.set("lang", lang);
-    const response = await fetch(url.toString(), {
-      next: { revalidate: 3600 },
-    });
+  const url = new URL(ARCHITECTS_ENDPOINT, baseUrl);
+  url.searchParams.set("lang", lang);
+  const response = await fetch(url.toString(), {
+    next: { revalidate: 3600 },
+  });
 
-    if (!response.ok) {
-      return null;
-    }
-
-    const payload = (await response.json()) as
-      | ArchitectApiRecord
-      | ArchitectApiRecord[];
-    const records = Array.isArray(payload) ? payload : [payload];
-    const architects = records
-      .map((record) => mapArchitectFromApi(record))
-      .filter((architect): architect is Architect => Boolean(architect));
-
-    return architects;
-  } catch (error) {
-    console.error("[architects] fetchArchitectsFromApi failed:", error);
-    return null;
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar arquitetos.`);
   }
+
+  const payload = (await response.json()) as
+    | ArchitectApiRecord
+    | ArchitectApiRecord[];
+  const records = Array.isArray(payload) ? payload : [payload];
+  return records
+    .map((record) => mapArchitectFromApi(record))
+    .filter((architect): architect is Architect => Boolean(architect));
 }
 
 function mapFeaturedArchitect(
   payload: LandingPageResponse,
-  fallback: Architect,
   lang: string
 ): Architect | null {
   const page = getLandingPageRecord(payload);
   const section = page?.architectSection;
-  const title = getLocalized(section?.title, lang) || fallback.title;
+  const title = getLocalized(section?.title, lang);
   const bio = getLocalized(section?.content, lang);
 
   if (!title || !bio) {
@@ -169,40 +157,37 @@ function mapFeaturedArchitect(
   const primaryLabel = getLocalized(section?.CTA?.label, lang);
   const primaryHref = section?.CTA?.target?.trim();
   const subtitle = getLocalized(section?.subtitle, lang);
+  const slug = extractSlug(primaryHref) || "featured-architect";
 
   return {
-    ...fallback,
-    slug: extractSlug(primaryHref) || fallback.slug,
-    eyebrow: subtitle || fallback.eyebrow,
+    id: slug,
+    slug,
+    eyebrow: subtitle,
     title,
-    bioSummary: subtitle || fallback.bioSummary,
+    bioSummary: subtitle || "",
     bio,
     image: imageSrc
       ? {
           src: imageSrc,
           alt: imageCaption || title,
-          caption: imageCaption || fallback.image?.caption,
-          // Placeholder até o CMS enviar título + texto livre da imagem.
-          title: fallback.image?.title,
-          description: fallback.image?.description,
+          caption: imageCaption,
         }
-      : fallback.image,
+      : undefined,
     actions: {
-      ...fallback.actions,
       primary:
         primaryLabel || primaryHref
           ? {
-              label: primaryLabel || fallback.actions?.primary?.label || "",
-              href: primaryHref || fallback.actions?.primary?.href,
+              label: primaryLabel || "",
+              href: primaryHref,
             }
-          : fallback.actions?.primary,
+          : undefined,
     },
   };
 }
 
 export async function listArchitects(lang = "pt"): Promise<Architect[]> {
   const fromApi = await fetchArchitectsFromApi(lang);
-  return fromApi && fromApi.length > 0 ? fromApi : getArchitectsMock(lang);
+  return fromApi ?? [];
 }
 
 export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Architect | null> {
@@ -211,28 +196,22 @@ export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Arc
 }
 
 export async function getFeaturedArchitect(lang = "pt"): Promise<Architect | null> {
-  const fallback = getArchitectsMock(lang)[0] ?? null;
   const baseUrl = getApiBaseUrl();
 
-  if (!fallback || !baseUrl) {
-    return fallback;
+  if (!baseUrl) {
+    return null;
   }
 
-  try {
-    const url = new URL("/landing-page", baseUrl);
-    url.searchParams.set("lang", lang);
-    const response = await fetch(url.toString(), {
-      next: { revalidate: 3600 },
-    });
+  const url = new URL("/landing-page", baseUrl);
+  url.searchParams.set("lang", lang);
+  const response = await fetch(url.toString(), {
+    next: { revalidate: 3600 },
+  });
 
-    if (!response.ok) {
-      return fallback;
-    }
-
-    const payload = (await response.json()) as LandingPageResponse;
-
-    return mapFeaturedArchitect(payload, fallback, lang) ?? fallback;
-  } catch {
-    return fallback;
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar o arquiteto em destaque.`);
   }
+
+  const payload = (await response.json()) as LandingPageResponse;
+  return mapFeaturedArchitect(payload, lang);
 }

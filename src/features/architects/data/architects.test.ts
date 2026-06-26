@@ -4,7 +4,6 @@ import {
   getFeaturedArchitect,
   listArchitects,
 } from "./architects";
-import { architectsMock } from "../mocks/architect-mock";
 
 describe("architect data layer", () => {
   const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -56,7 +55,7 @@ describe("architect data layer", () => {
     });
   });
 
-  it("falls back to the curated mock when the API has no valid architect content", async () => {
+  it("returns an empty collection when the API has no valid architect content", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -73,15 +72,13 @@ describe("architect data layer", () => {
 
     const architects = await listArchitects();
 
-    expect(architects).toEqual(architectsMock);
+    expect(architects).toEqual([]);
   });
 
-  it("returns the mock collection when the architects API request fails", async () => {
+  it("propagates the error when the architects API request fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
 
-    const architects = await listArchitects();
-
-    expect(architects).toEqual(architectsMock);
+    await expect(listArchitects()).rejects.toThrow("Network error");
   });
 
   it("returns the requested architect from the API by slug", async () => {
@@ -156,7 +153,7 @@ describe("architect data layer", () => {
     });
   });
 
-  it("falls back to the mock when the API returns incomplete featured architect content", async () => {
+  it("returns null when the API returns incomplete featured architect content", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -171,15 +168,13 @@ describe("architect data layer", () => {
 
     const architect = await getFeaturedArchitect();
 
-    expect(architect).toEqual(architectsMock[0]);
+    expect(architect).toBeNull();
   });
 
-  it("returns the featured architect from the mock source when the request fails", async () => {
+  it("propagates the error when the featured architect request fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
 
-    const architect = await getFeaturedArchitect();
-
-    expect(architect).toEqual(architectsMock[0]);
+    await expect(getFeaturedArchitect()).rejects.toThrow("Network error");
   });
 
   it("calls the landing-page endpoint for the featured architect preview", async () => {

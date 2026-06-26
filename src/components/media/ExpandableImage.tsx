@@ -12,7 +12,7 @@ interface ExpandableImageProps {
   imageClassName?: string;
   sizes?: string;
   priority?: boolean;
-  /** Repassado ao next/image — útil para fallback de imagem quebrada. */
+  /** Repassado ao next/image para tratamento de erro de carregamento. */
   onError?: () => void;
 }
 
