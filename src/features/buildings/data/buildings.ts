@@ -2,7 +2,6 @@ import { getPublicRuntimeConfig } from '@/lib/config';
 import type { Building, BuildingImage, BuildingTechnicalSpec, BuildingCharacteristic } from "../types/building";
 
 const API_TIMEOUT_MS = 2_000;
-
 type SpecLang = 'pt' | 'en' | 'de';
 
 const SPEC_LABELS: Record<string, Record<SpecLang, string>> = {

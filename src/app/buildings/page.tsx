@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import { PageSection } from '@/components/layout/page-section';
-import { BuildingList } from '@/features/buildings/components/building-list';
+import { BuildingsPageSection } from '@/features/buildings/components/buildings-page-section';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,13 +12,7 @@ export const metadata: Metadata = {
 export default function BuildingsPage() {
   return (
     <main className="page-shell">
-      <PageSection
-        eyebrow="Edificações"
-        title="Edificações"
-        description="Descrição"
-      >
-        <BuildingList />
-      </PageSection>
+      <BuildingsPageSection />
     </main>
   );
 }

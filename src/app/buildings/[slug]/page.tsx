@@ -34,10 +34,12 @@ export async function generateMetadata({ params }: BuildingDetailPageProps) {
 }
 
 export async function generateStaticParams() {
-  const buildings = await listBuildings();
-  return buildings.map((building) => ({
-    slug: building.slug,
-  }));
+  try {
+    const buildings = await listBuildings();
+    return buildings.map((building) => ({ slug: building.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function BuildingDetailPage({

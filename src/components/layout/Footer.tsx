@@ -13,14 +13,13 @@ export default function Footer({ minimized }: Props) {
   function renderNavGrid() {
     return (
       <nav className="w-full footer-nav-grid">
-        <div className="grid grid-cols-3 gap-4 text-center nav-items">
-          {SECTION_IDS.map(function (id, idx) {
-            const extra = idx === 3 ? "col-start-2" : "";
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center nav-items">
+          {SECTION_IDS.map(function (id) {
             return (
               <Link
                 key={id}
                 href={`/#${id}`}
-                className={`text-accent font-semibold text-xs leading-4 tracking-wide uppercase px-2 py-1 block hover:underline transition ${extra}`}
+                className="text-accent font-semibold text-xs leading-4 tracking-wide uppercase px-2 py-1 block hover:underline transition"
               >
                 {t(SECTION_KEYS[id])}
               </Link>

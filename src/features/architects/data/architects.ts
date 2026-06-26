@@ -89,9 +89,7 @@ type LandingPageRecord = {
 
 type LandingPageResponse = LandingPageRecord | LandingPageRecord[];
 
-function getLandingPageRecord(
-  payload: LandingPageResponse
-): LandingPageRecord | null {
+function getLandingPageRecord(payload: LandingPageResponse): LandingPageRecord | null {
   return Array.isArray(payload) ? payload[0] ?? null : payload;
 }
 
@@ -140,15 +138,13 @@ function getApiBaseUrl(): string | null {
   return apiUrl.replace(/\/$/, "") || null;
 }
 
-function hasRequiredArchitectFields(
-  architect: Partial<Architect>
-): architect is Architect {
+function hasRequiredArchitectFields(architect: Partial<Architect>): architect is Architect {
   return Boolean(
     architect.id &&
       architect.slug &&
       architect.title &&
       architect.bioSummary !== undefined &&
-      architect.bio
+      architect.bio,
   );
 }
 
@@ -271,7 +267,7 @@ function mapDetails(record: ArchitectApiRecord, lang: string): ArchitectDetail[]
 
 function mapCharacteristics(
   record: ArchitectApiRecord,
-  lang: string
+  lang: string,
 ): ArchitectCharacteristic[] | undefined {
   const labels = getCharacteristicLabels(lang);
   const style = getLocalized(record.characteristics?.style, lang);
@@ -318,7 +314,7 @@ function mapWorks(record: ArchitectApiRecord, lang: string): ArchitectWork[] | u
 
           return mappedWork;
         })
-        .filter((work): work is ArchitectWork => work !== null)
+        .filter((work): work is ArchitectWork => work !== null),
     );
   }
 
@@ -349,7 +345,7 @@ function mapWorks(record: ArchitectApiRecord, lang: string): ArchitectWork[] | u
 
           return mappedWork;
         })
-        .filter((work): work is ArchitectWork => work !== null)
+        .filter((work): work is ArchitectWork => work !== null),
     );
   }
 
@@ -426,19 +422,46 @@ async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[]> {
     throw new Error(`Erro ${response.status}: nao foi possivel carregar arquitetos.`);
   }
 
-  const payload = (await response.json()) as
-    | ArchitectApiRecord
-    | ArchitectApiRecord[];
+  const payload = (await response.json()) as ArchitectApiRecord | ArchitectApiRecord[];
   const records = Array.isArray(payload) ? payload : [payload];
   return records
     .map((record) => mapArchitectFromApi(record, lang))
     .filter((architect): architect is Architect => Boolean(architect));
 }
 
-function mapFeaturedArchitect(
-  payload: LandingPageResponse,
-  lang: string
-): Architect | null {
+async function fetchArchitectBySlugFromApi(
+  slug: string,
+  lang = "pt",
+): Promise<Architect | null> {
+  const baseUrl = getApiBaseUrl();
+
+  if (!baseUrl || !slug) {
+    return null;
+  }
+
+  try {
+    const url = new URL(
+      `${ARCHITECTS_ENDPOINT}/${encodeURIComponent(slug)}`,
+      baseUrl,
+    );
+    url.searchParams.set("lang", lang);
+    const response = await fetch(url.toString(), {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as ArchitectApiRecord;
+    return mapArchitectFromApi(payload, lang);
+  } catch (error) {
+    console.error("[architects] fetchArchitectBySlugFromApi failed:", error);
+    return null;
+  }
+}
+
+function mapFeaturedArchitect(payload: LandingPageResponse, lang: string): Architect | null {
   const page = getLandingPageRecord(payload);
   const section = page?.architectSection;
   const title = getLocalized(section?.title, lang);
@@ -485,28 +508,17 @@ export async function listArchitects(lang = "pt"): Promise<Architect[]> {
   return fetchArchitectsFromApi(lang);
 }
 
-export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Architect | null> {
-  const baseUrl = getApiBaseUrl();
-
-  if (!baseUrl || !slug) {
-    return null;
+export async function getArchitectBySlug(
+  slug: string,
+  lang = "pt",
+): Promise<Architect | null> {
+  const fromApi = await fetchArchitectBySlugFromApi(slug, lang);
+  if (fromApi) {
+    return fromApi;
   }
 
-  const url = new URL(`${ARCHITECTS_ENDPOINT}/${encodeURIComponent(slug)}`, baseUrl);
-  url.searchParams.set("lang", lang);
-  const response = await fetch(url.toString(), {
-    cache: "no-store",
-  });
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error(`Erro ${response.status}: nao foi possivel carregar o arquiteto.`);
-  }
-
-  return mapArchitectFromApi((await response.json()) as ArchitectApiRecord, lang);
+  const architects = await listArchitects(lang);
+  return architects.find((architect) => architect.slug === slug) ?? null;
 }
 
 export async function getFeaturedArchitect(lang = "pt"): Promise<Architect | null> {

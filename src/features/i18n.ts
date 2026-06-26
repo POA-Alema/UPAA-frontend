@@ -4,11 +4,18 @@ import { initReactI18next } from "react-i18next";
 export const resources = {
   pt: {
     common: {
+      brand: {
+        line_one: "Uma",
+        line_two: "Porto Alegre",
+        line_three: "Alemã",
+      },
+
       nav: {
         section_intro: "Introdução",
         section_immigration: "Imigração",
         section_map: "Mapa",
         section_architects: "Arquitetos",
+        section_partners: "Parceiros",
       },
 
       header: {
@@ -17,6 +24,7 @@ export const resources = {
         lang_pt: "Português",
         lang_de: "Deutsch",
         lang_en: "English",
+        menu_label: "Menu",
         language_source_persisted: "Idioma definido pelo usuário",
         language_source_browser: "Idioma detectado pelo navegador",
         language_source_default: "Idioma padrão aplicado",
@@ -42,6 +50,10 @@ export const resources = {
         title: "O Legado da Arquitetura Alemã",
         description:
           "Explorando edifícios, memórias e instituições que marcaram o Centro Histórico de Porto Alegre.",
+      },
+
+      partners: {
+        eyebrow: "Acesse",
       },
 
       immigration: {
@@ -111,6 +123,8 @@ export const resources = {
       },
 
       building: {
+        page_title: "Edificações",
+        page_description: "Explore as edificações mapeadas no projeto.",
         section_title: "Edificação",
         map_title: "Mapa",
         map_placeholder:
@@ -144,11 +158,18 @@ export const resources = {
 
   en: {
     common: {
+      brand: {
+        line_one: "A",
+        line_two: "Germanic",
+        line_three: "Porto Alegre",
+      },
+
       nav: {
         section_intro: "Intro",
         section_immigration: "Immigration",
         section_map: "Map",
         section_architects: "Architects",
+        section_partners: "Partners",
       },
 
       header: {
@@ -157,6 +178,7 @@ export const resources = {
         lang_pt: "Português",
         lang_de: "Deutsch",
         lang_en: "English",
+        menu_label: "Menu",
         language_source_persisted: "Language set by user",
         language_source_browser: "Language detected from browser",
         language_source_default: "Default language applied",
@@ -182,6 +204,10 @@ export const resources = {
         title: "The Legacy of German Architecture",
         description:
           "Exploring buildings, memories and institutions that shaped Porto Alegre's Historic Center.",
+      },
+
+      partners: {
+        eyebrow: "Access",
       },
 
       immigration: {
@@ -251,6 +277,8 @@ export const resources = {
       },
 
       building: {
+        page_title: "Buildings",
+        page_description: "Explore the buildings mapped in the project.",
         section_title: "Building",
         map_title: "Map",
         map_placeholder:
@@ -284,11 +312,18 @@ export const resources = {
 
   de: {
     common: {
+      brand: {
+        line_one: "Ein",
+        line_two: "deutsches",
+        line_three: "Porto Alegre",
+      },
+
       nav: {
         section_intro: "Einführung",
         section_immigration: "Immigration",
         section_map: "Karte",
         section_architects: "Architekten",
+        section_partners: "Partner",
       },
 
       header: {
@@ -297,6 +332,7 @@ export const resources = {
         lang_pt: "Português",
         lang_de: "Deutsch",
         lang_en: "English",
+        menu_label: "Menu",
         language_source_persisted: "Sprache vom Benutzer festgelegt",
         language_source_browser: "Sprache vom Browser erkannt",
         language_source_default: "Standardsprache angewendet",
@@ -322,6 +358,10 @@ export const resources = {
         title: "Das Erbe der deutschen Architektur",
         description:
           "Erkundung von Gebäuden, Erinnerungen und Institutionen, die das historische Zentrum von Porto Alegre geprägt haben.",
+      },
+
+      partners: {
+        eyebrow: "Zugriff",
       },
 
       immigration: {
@@ -391,6 +431,8 @@ export const resources = {
       },
 
       building: {
+        page_title: "Gebäude",
+        page_description: "Erkunden Sie die im Projekt kartierten Gebäude.",
         section_title: "Gebäude",
         map_title: "Karte",
         map_placeholder:

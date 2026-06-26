@@ -98,7 +98,7 @@ describe("GET /api/buildings", () => {
 
     expect(response.status).toBe(502);
     expect(response.headers.get("x-upaa-fallback")).toBeNull();
-    expect(data).toEqual({ error: "offline" });
+    expect(data).toEqual({ error: "Failed to load map buildings" });
   });
 
   it("deve manter a edificacao no mapa mesmo sem imagem valida, descartando apenas o anexo", async () => {

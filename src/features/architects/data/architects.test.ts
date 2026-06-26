@@ -1,9 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  getArchitectBySlug,
-  getFeaturedArchitect,
-  listArchitects,
-} from "./architects";
+import { getArchitectBySlug, getFeaturedArchitect, listArchitects } from "./architects";
 
 describe("architect data layer", () => {
   const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -48,7 +44,7 @@ describe("architect data layer", () => {
     expect(architects[0]?.bio).toBe("Biografia vinda do banco de dados.");
     expect(architects[0]?.bioSummary).toBe("Resumo vindo do banco.");
     expect(architects[0]?.image?.src).toBe(
-      "/images/architects/theodor-wiederspahn.jpg"
+      "/images/architects/theodor-wiederspahn.jpg",
     );
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/architects?lang=pt", {
       cache: "no-store",
@@ -67,7 +63,7 @@ describe("architect data layer", () => {
             name: "Theodor Wiederspahn",
           },
         ],
-      })
+      }),
     );
 
     const architects = await listArchitects();
@@ -111,7 +107,7 @@ describe("architect data layer", () => {
     expect(architect?.works?.[0]?.href).toBe("/buildings/margs");
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3001/architects/theodor-wiederspahn?lang=pt",
-      { cache: "no-store" }
+      { next: { revalidate: 3600 } },
     );
   });
 
@@ -149,7 +145,7 @@ describe("architect data layer", () => {
             legacy: "Legado historico.",
           },
         }),
-      })
+      }),
     );
 
     const architect = await getArchitectBySlug("theodor-wiederspahn");
@@ -162,10 +158,10 @@ describe("architect data layer", () => {
         bio: "Theodor Wiederspahn foi um arquiteto alemao.",
         bioSummary: "Theodor Wiederspahn foi um arquiteto alemao.",
         eyebrow: "Arquiteto",
-      })
+      }),
     );
     expect(architect?.image?.src).toBe(
-      "https://liderpoaalema.s3.us-east-2.amazonaws.com/images/theodor.png"
+      "https://liderpoaalema.s3.us-east-2.amazonaws.com/images/theodor.png",
     );
     expect(architect?.details).toEqual(
       expect.arrayContaining([
@@ -173,29 +169,42 @@ describe("architect data layer", () => {
         { label: "Falecimento", value: "1953", subValue: "Porto Alegre, Brasil" },
         { label: "Nacionalidade", value: "alema" },
         { label: "Ocupacao", value: "Arquiteto" },
-      ])
+      ]),
     );
     expect(architect?.characteristics).toEqual(
       expect.arrayContaining([
         { icon: "architecture", title: "Estilo", description: "Arquitetura ecletica." },
         { icon: "travel_explore", title: "Influencias", description: "Formacao europeia." },
         { icon: "account_balance", title: "Legado", description: "Legado historico." },
-      ])
+      ]),
     );
   });
 
-  it("returns null when the slug endpoint returns not found", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-    });
+  it("falls back to list endpoint when slug endpoint returns not found", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: "1",
+            slug: "theodor-wiederspahn",
+            name: "Theodor Wiederspahn",
+            summary: "Resumo",
+            biography: "Biografia completa vinda do banco.",
+          },
+        ],
+      });
 
     vi.stubGlobal("fetch", fetchMock);
 
     const architect = await getArchitectBySlug("theodor-wiederspahn");
 
-    expect(architect).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(architect?.bio).toBe("Biografia completa vinda do banco.");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("returns the featured architect mapped from the landing-page payload", async () => {
@@ -226,22 +235,16 @@ describe("architect data layer", () => {
             },
           },
         }),
-      })
+      }),
     );
 
     const architect = await getFeaturedArchitect();
 
     expect(architect?.title).toBe("O arquiteto");
-    expect(architect?.eyebrow).toBe(
-      "Um nome central na paisagem de Porto Alegre"
-    );
-    expect(architect?.bioSummary).toBe(
-      "Um nome central na paisagem de Porto Alegre"
-    );
+    expect(architect?.eyebrow).toBe("Um nome central na paisagem de Porto Alegre");
+    expect(architect?.bioSummary).toBe("Um nome central na paisagem de Porto Alegre");
     expect(architect?.bio).toContain("veio do backend");
-    expect(architect?.image?.src).toBe(
-      "/images/architects/theodor-wiederspahn.jpg"
-    );
+    expect(architect?.image?.src).toBe("/images/architects/theodor-wiederspahn.jpg");
     expect(architect?.actions?.primary).toEqual({
       label: "Conhecer arquiteto",
       href: "/architects/theodor-wiederspahn",
@@ -258,7 +261,7 @@ describe("architect data layer", () => {
             imageSubtitle: { pt: "Theodor Wiederspahn" },
           },
         }),
-      })
+      }),
     );
 
     const architect = await getFeaturedArchitect();
@@ -284,7 +287,7 @@ describe("architect data layer", () => {
             },
           },
         }),
-      })
+      }),
     );
 
     const architect = await getFeaturedArchitect();
@@ -294,7 +297,7 @@ describe("architect data layer", () => {
         title: "O arquiteto",
         bio: "Conteudo traduzido pelo backend.",
         eyebrow: "Um nome central",
-      })
+      }),
     );
     expect(architect?.actions?.primary).toEqual({
       label: "Conhecer arquiteto",
@@ -325,18 +328,23 @@ describe("architect data layer", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3001/landing-page?lang=pt",
-      { cache: "no-store" }
+      { cache: "no-store" },
     );
   });
 
-  it("returns null when the requested architect does not exist", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+  it("returns null when both slug and list endpoints do not find the architect", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 404 })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
 
     vi.stubGlobal("fetch", fetchMock);
 
     const architect = await getArchitectBySlug("inexistente");
 
     expect(architect).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

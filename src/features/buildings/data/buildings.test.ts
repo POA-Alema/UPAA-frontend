@@ -71,11 +71,11 @@ describe("building data layer", () => {
       json: async () => apiBuilding,
     }));
 
-    const building = await getBuildingBySlug("margs");
+  const building = await getBuildingBySlug("margs");
 
-    expect(building?.title).toBe("Museu de Arte do Rio Grande do Sul");
-    expect(building?.architectCta?.href).toBe("/architects/joao-da-silva");
-    expect(building?.architectCta?.description).toContain("Joao da Silva");
+  expect(building?.title).toBe("Museu de Arte do Rio Grande do Sul");
+  expect(building?.architectCta?.href).toBe("/architects/joao-da-silva");
+  expect(building?.architectCta?.description).toContain("Joao da Silva");
   });
 
   it("returns the featured building from the API collection", async () => {
