@@ -7,7 +7,6 @@ import { ExpandableImage } from "@/components/media/ExpandableImage";
 import { RichText } from "@/components/content/rich-text";
 import { FeatureAction } from "@/components/ui/feature-action";
 import { BuildingGallery } from "./BuildingGallery";
-import { buildingLabels } from "../data/building-labels";
 import type { BuildingPageProps } from "../types/building";
 
 function isIconPath(icon: string): boolean {
@@ -55,8 +54,6 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
                 imageClassName="building-hero__image"
                 priority
                 sizes="100vw"
-                src={building.hero.src}
-                unoptimized
               />
               <div className="building-hero__overlay"></div>
             </div>
@@ -158,7 +155,7 @@ export function BuildingPage({ building, backToMapHref }: BuildingPageProps) {
             </div>
           </div>
 
-          <BuildingGallery items={building.gallery} language={language} />
+          <BuildingGallery items={building.gallery} />
         </section>
       ) : null}
 

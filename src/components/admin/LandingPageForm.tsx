@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Image from 'next/image';
 import type { LandingPageData, InstitutionItem } from '@/types/landingPage';
 import { ConfirmationModal } from './ConfirmationModal';
 import { ImageSelector } from './ImageSelector';
@@ -246,12 +247,12 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
         await onSubmit(formData);
         setSubmitMessage({
           type: 'success',
-          text: 'Landing Page atualizada com sucesso!',
+          text: 'Landing Page updated successfully!',
         });
       } catch (error) {
         setSubmitMessage({
           type: 'error',
-          text: error instanceof Error ? error.message : 'Erro ao salvar alterações.',
+          text: error instanceof Error ? error.message : 'Error saving changes.',
         });
       }
     });
@@ -425,7 +426,7 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
                   type="text"
                   value={(formData.architectSection.subtitle && formData.architectSection.subtitle[activeLang]) || ''}
                   onChange={(e) => handleArchitectMultilingualChange('subtitle', activeLang, e.target.value)}
-                  placeholder="Ex: Um nome central..."
+                  placeholder="Ex: Um name central..."
                   className="w-full rounded-lg border border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-on-surface transition-all focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -685,10 +686,12 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
                       className="rounded-xl border border-outline-variant/20 bg-surface-container-high/40 p-4 flex gap-4 items-start shadow-md hover:border-primary/30 transition-all group"
                     >
                       {inst.imageURL ? (
-                        <img
+                        <Image
                           src={inst.imageURL}
                           alt={inst.title.pt}
-                          className="w-20 h-20 rounded-lg object-cover bg-surface-container-high"
+                          width={80}
+                          height={80}
+                          className="rounded-lg object-cover bg-surface-container-high"
                         />
                       ) : (
                         <div className="w-20 h-20 rounded-lg bg-surface-container-high/80 border border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-on-surface-variant/40">
@@ -979,7 +982,7 @@ export function LandingPageForm({ onSubmit, initialData }: LandingPageFormProps)
             </div>
 
             {/* Modal Footer */}
-            <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-outline-variant/20">
+            <div className="flex justify-end gap-3 mt-8 pt-4 border-b border-outline-variant/20">
               <button
                 type="button"
                 onClick={() => {
