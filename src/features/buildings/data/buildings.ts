@@ -74,7 +74,6 @@ function getArchitectInfo(api: Record<string, unknown>, lang: string) {
 }
 
 function mapApiToBuilding(api: Record<string, unknown>, lang = 'pt'): Building {
-  // Backend stores absolute URLs pointing at the public S3 bucket (see src/lib/s3.ts).
   const mediaGallery = Array.isArray(api['mediaGallery'])
     ? (api['mediaGallery'] as Record<string, unknown>[])
     : Array.isArray(api['media_gallery'])
@@ -169,8 +168,6 @@ export async function listBuildings(lang = 'pt'): Promise<Building[]> {
 }
 
 export async function getBuildingBySlug(slug: string, lang = 'pt'): Promise<Building | null> {
-  // The listing endpoint returns a trimmed shape; fetch the detail endpoint for the
-  // full resolved building (description, history, features, …).
   const { apiUrl } = getPublicRuntimeConfig();
   const baseUrl = apiUrl.replace(/\/$/, '');
 

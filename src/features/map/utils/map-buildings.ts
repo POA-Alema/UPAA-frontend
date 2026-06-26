@@ -1,5 +1,6 @@
 import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
 import type { ImageMetadata } from "@/types/image";
+
 export type BuildingAttachment = ImageMetadata & {
   src: string;
   alt: string;

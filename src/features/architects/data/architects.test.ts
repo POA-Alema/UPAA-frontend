@@ -225,7 +225,7 @@ describe("architect data layer", () => {
               pt: "Um nome central na paisagem de Porto Alegre",
             },
             content: {
-              pt: "A trajetoria de Theodor Wiederspahn veio do backend.",
+              pt: "A trajectoria de Theodor Wiederspahn veio do backend.",
             },
             CTA: {
               label: {
