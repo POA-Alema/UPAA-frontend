@@ -1167,8 +1167,14 @@ button:focus-visible {
 }
 
 .architect-hero__media {
+  width: min(100%, 260px);
+  margin: 0;
   justify-self: center;
   text-align: center;
+}
+
+.architect-preview__media {
+  margin: 0;
 }
 
 .architect-hero__grid {
