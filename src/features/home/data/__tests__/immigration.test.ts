@@ -134,6 +134,43 @@ describe("getImmigrationData", () => {
     });
   });
 
+  it("should request and map the selected language", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        immigrationSection: {
+          subtitle: { pt: "Subtitulo PT", en: "English subtitle" },
+          title: { pt: "Titulo PT", en: "German immigration" },
+          content: { pt: "Conteudo PT", en: "English content" },
+          imgSubtitle: { pt: "Legenda PT", en: "English caption" },
+          imageURL: "/images/backend.jpg",
+        },
+      }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getImmigrationData("en");
+
+    expect(result).toEqual({
+      subtitle: "English subtitle",
+      title: "German immigration",
+      content: "English content",
+      image: {
+        src: "/images/backend.jpg",
+        alt: "English caption",
+        title: undefined,
+        description: undefined,
+      },
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "http://localhost:3001/landing-page?lang=en",
+      }),
+      { cache: "no-store" }
+    );
+  });
+
   it("should propagate request failures", async () => {
     vi.stubGlobal(
       "fetch",

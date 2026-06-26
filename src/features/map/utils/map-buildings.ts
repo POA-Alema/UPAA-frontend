@@ -1,10 +1,6 @@
 import { buildBuildingDetailHref } from "@/features/buildings/utils/navigation";
 import type { ImageMetadata } from "@/types/image";
 
-// O acervo é dedicado a Theodor Wiederspahn; o payload do mapa só traz
-// architect_id, então o link "Sobre o Autor" usa a rota dele por padrão.
-const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
-
 export type BuildingAttachment = ImageMetadata & {
   src: string;
   alt: string;
@@ -49,8 +45,10 @@ export type BackendBuilding = {
   description?: LocalizedText;
   constructionPeriod?: unknown;
   buildYear?: unknown;
-  architect?: LocalizedText;
+  architect?: LocalizedText | Record<string, unknown>;
   architect_id?: unknown;
+  architectPath?: unknown;
+  architect_slug?: unknown;
   current_occupation?: LocalizedText;
   currentOccupation?: LocalizedText;
   coverImage?: unknown;
@@ -119,6 +117,36 @@ function toOptionalString(value: unknown): string | undefined {
 
 function toOptionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function extractArchitectPath(building: BackendBuilding): string | undefined {
+  const explicitPath = toOptionalString(building.architectPath);
+  if (explicitPath) {
+    return explicitPath;
+  }
+
+  const slugFromField = toOptionalString(building.architect_slug);
+  if (slugFromField) {
+    return `/architects/${slugFromField}`;
+  }
+
+  if (isRecord(building.architect)) {
+    const slug = toOptionalString((building.architect as Record<string, unknown>).slug);
+    return slug ? `/architects/${slug}` : undefined;
+  }
+
+  return undefined;
+}
+
+function extractArchitectName(building: BackendBuilding, lang: string): string {
+  if (isRecord(building.architect)) {
+    const architect = building.architect as Record<string, unknown>;
+    if (architect.name !== undefined) {
+      return selectLocalizedText(architect.name as LocalizedText, lang);
+    }
+  }
+
+  return selectLocalizedText(building.architect as LocalizedText, lang);
 }
 
 function extractCoordinates(building: BackendBuilding): {
@@ -234,8 +262,8 @@ export function mapBackendBuildingToMapBuilding(
     yearLabel:
       toOptionalString(building.constructionPeriod) ??
       toOptionalNumber(building.buildYear)?.toString(),
-    architectName: selectLocalizedText(building.architect, lang),
-    architectPath: ARCHITECT_DETAIL_PATH,
+    architectName: extractArchitectName(building, lang),
+    architectPath: extractArchitectPath(building),
     attachments: extractAttachments(
       building.coverImage,
       building.mediaGallery ?? building.media_gallery,

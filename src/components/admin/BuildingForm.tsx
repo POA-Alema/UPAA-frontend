@@ -168,6 +168,13 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
   const [uploadingCategory, setUploadingCategory] = useState<string | null>(null);
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const submitMessageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (submitMessage) {
+      submitMessageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [submitMessage]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -424,6 +431,7 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
 
       {submitMessage && (
         <div
+          ref={submitMessageRef}
           className={`mb-8 rounded-lg border p-4 ${
             submitMessage.type === 'success'
               ? 'border-green-700/50 bg-green-900/20 text-green-200'

@@ -28,6 +28,12 @@ export function AdminSidebarNav() {
       exact: false,
     },
     {
+      href: '/admin/architects',
+      label: 'Arquitetos',
+      icon: 'person',
+      exact: false,
+    },
+    {
       href: '/admin/landing-page',
       label: 'Landing Page',
       icon: 'title',

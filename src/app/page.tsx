@@ -25,7 +25,7 @@ export default async function HomePage() {
             <LandingContent lang={lang} />
           </Suspense>
           <MapPreviewSection />
-          <ImmigrationSection />
+          <ImmigrationSection lang={lang} />
           {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
         </div>
       </main>

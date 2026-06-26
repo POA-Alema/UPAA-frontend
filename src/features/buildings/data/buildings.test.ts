@@ -9,7 +9,7 @@ const apiBuilding = {
   history: { pt: "Historia vinda do backend." },
   location: { pt: "Centro Historico" },
   construction_period: { pt: "1913" },
-  architect: { name: { pt: "Theodor Wiederspahn" } },
+  architect: { slug: "joao-da-silva", name: { first: "Joao", last: "da Silva" } },
   media_gallery: [
     {
       url: "/images/margs/Margs.jpg",
@@ -74,6 +74,8 @@ describe("building data layer", () => {
     const building = await getBuildingBySlug("margs");
 
     expect(building?.title).toBe("Museu de Arte do Rio Grande do Sul");
+    expect(building?.architectCta?.href).toBe("/architects/joao-da-silva");
+    expect(building?.architectCta?.description).toContain("Joao da Silva");
   });
 
   it("returns the featured building from the API collection", async () => {

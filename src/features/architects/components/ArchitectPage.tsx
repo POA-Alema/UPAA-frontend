@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "@/features/i18n";
 import { ExpandableImage } from "@/components/media/ExpandableImage";
@@ -9,8 +10,14 @@ import { ArchitectGallery } from "./ArchitectGallery";
 import { useArchitectDetailTracking } from "../hooks";
 import type { ArchitectPageProps } from "../types/architect";
 
-export function ArchitectPage({ architect, backToMapHref }: ArchitectPageProps) {
-  const { t } = useTranslation("common");
+export function ArchitectPage({ architect, backToMapHref, lang = "pt" }: ArchitectPageProps) {
+  const { t, i18n } = useTranslation("common");
+
+  useEffect(() => {
+    if (i18n.language !== lang) {
+      void i18n.changeLanguage(lang);
+    }
+  }, [i18n, lang]);
 
   useArchitectDetailTracking(architect.slug, architect.title);
 

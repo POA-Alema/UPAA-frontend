@@ -16,7 +16,9 @@ type ArchitectDetailPageProps = {
 
 export async function generateMetadata({ params }: ArchitectDetailPageProps) {
   const { slug } = await params;
-  const architect = await getArchitectBySlug(slug);
+  const cookieStore = await cookies();
+  const lang = toI18nLanguage(resolveLocale(cookieStore.get("upaa:locale")?.value));
+  const architect = await getArchitectBySlug(slug, lang);
 
   if (!architect) {
     return {
@@ -59,6 +61,7 @@ export default async function ArchitectDetailPage({
         <ArchitectPage
           architect={architect}
           backToMapHref={resolveArchitectBackToMapHref(resolvedSearchParams)}
+          lang={lang}
         />
       </main>
       <Footer />
