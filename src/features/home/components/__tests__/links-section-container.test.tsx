@@ -27,8 +27,17 @@ describe("LinksSection Container", () => {
     render(result);
 
     expect(getLinksData).toHaveBeenCalledTimes(1);
+    expect(getLinksData).toHaveBeenCalledWith("pt");
     expect(screen.getByTestId("links-component")).toHaveTextContent(
       linksMock.title,
     );
+  });
+
+  it("passes the selected language to the data loader", async () => {
+    vi.mocked(getLinksData).mockResolvedValue(linksMock);
+
+    await LinksSection({ lang: "en" });
+
+    expect(getLinksData).toHaveBeenCalledWith("en");
   });
 });

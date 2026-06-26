@@ -25,10 +25,10 @@ export default async function HomePage() {
           <Suspense fallback={<MainContainerSkeleton />}>
             <LandingContent lang={lang} />
           </Suspense>
-          <LinksSection />
           <MapPreviewSection />
           <ImmigrationSection />
           {featuredArchitect ? <ArchitectPreview architect={featuredArchitect} /> : null}
+          <LinksSection lang={lang} />
         </div>
       </main>
       <Footer />

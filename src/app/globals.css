@@ -243,16 +243,20 @@ button:focus-visible {
 }
 
 .home-links-section {
-  display: grid;
-  gap: 20px;
   padding-top: 24px;
   padding-bottom: 16px;
+}
+
+.home-links-section .section-title {
+  max-width: 18ch;
 }
 
 .home-links-section__list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
+  margin: 22px 0 0;
+  padding: 0;
 }
 
 .home-links-section__item {

@@ -24,7 +24,7 @@ describe("getLinksData", () => {
             {
               id: "inst-1",
               title: { pt: "Museu" },
-              description: { pt: "Descrição do museu" },
+              description: { pt: "Descricao do museu" },
               CTA: {
                 label: { pt: "Abrir museu" },
                 target: "https://example.com/museu",
@@ -46,15 +46,82 @@ describe("getLinksData", () => {
       { next: { revalidate: 3600 } },
     );
     expect(result).toEqual({
-      title: "Links do backend",
+      title: "Parceiros Institucionais",
       items: [
         {
           id: "inst-1",
-          label: "Abrir museu",
+          label: "Museu",
           href: "https://example.com/museu",
-          description: "Descrição do museu",
+          description: "Descricao do museu",
         },
       ],
+    });
+  });
+
+  it("falls back to the CTA label when the institution title is missing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          institutionsSection: {
+            institutions: [
+              {
+                id: "inst-cta",
+                CTA: {
+                  label: { pt: "AGES" },
+                  target: "https://www.ages.pucrs.br/",
+                },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+
+    const result = await getLinksData();
+
+    expect(result?.items[0]?.label).toBe("AGES");
+  });
+
+  it("maps localized backend fields by selected language", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          institutionsSection: {
+            institutions: [
+              {
+                id: "inst-localized",
+                title: {
+                  pt: "Parceiro",
+                  en: "Partner",
+                  de: "Partner DE",
+                },
+                description: {
+                  pt: "Descricao",
+                  en: "Description",
+                  de: "Beschreibung",
+                },
+                CTA: {
+                  target: "https://example.com/partner",
+                },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+
+    const result = await getLinksData("en");
+
+    expect(result?.title).toBe("Institutional Partners");
+    expect(result?.items[0]).toEqual({
+      id: "inst-localized",
+      label: "Partner",
+      href: "https://example.com/partner",
+      description: "Description",
     });
   });
 
@@ -63,7 +130,7 @@ describe("getLinksData", () => {
       "fetch",
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ([
+        json: async () => [
           {
             institutionsSection: {
               title: { pt: "Links em lista" },
@@ -79,17 +146,86 @@ describe("getLinksData", () => {
               ],
             },
           },
-        ]),
+        ],
       }),
     );
 
     const result = await getLinksData();
 
-    expect(result?.title).toBe("Links em lista");
+    expect(result?.title).toBe("Parceiros Institucionais");
     expect(result?.items[0]?.href).toBe("https://example.com/biblioteca");
   });
 
-  it("returns null when backend responds empty", async () => {
+  it("keeps only two links by default", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          institutionsSection: {
+            institutions: [
+              {
+                id: "inst-1",
+                title: { pt: "DELFOS" },
+                CTA: { target: "https://www.pucrs.br/delfos/" },
+              },
+              {
+                id: "inst-2",
+                title: { pt: "AGES" },
+                CTA: { target: "https://www.ages.pucrs.br/" },
+              },
+              {
+                id: "inst-3",
+                title: { pt: "Outro" },
+                CTA: { target: "https://example.com/outro" },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+
+    const result = await getLinksData();
+
+    expect(result?.items).toHaveLength(2);
+    expect(result?.items.map((item) => item.label)).toEqual(["DELFOS", "AGES"]);
+  });
+
+  it("falls back to the mock when backend only returns internal building links", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          institutionsSection: {
+            institutions: [
+              {
+                id: "inst-margs",
+                title: { pt: "MARGS" },
+                CTA: {
+                  target: "/buildings/margs-museu-de-arte-do-rio-grande-do-sul",
+                },
+              },
+              {
+                id: "inst-memorial",
+                title: { pt: "Memorial do RS" },
+                CTA: {
+                  target: "/buildings/memorial-do-rio-grande-do-sul",
+                },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+
+    const result = await getLinksData("de");
+
+    expect(result?.title).toBe("Institutionelle Partner");
+    expect(result?.items.map((item) => item.label)).toEqual(["DELFOS", "AGES"]);
+  });
+
+  it("falls back to the mock when backend responds empty", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -105,7 +241,7 @@ describe("getLinksData", () => {
 
     const result = await getLinksData();
 
-    expect(result).toBeNull();
+    expect(result).toEqual(linksMock);
   });
 
   it("falls back to the mock when request fails", async () => {

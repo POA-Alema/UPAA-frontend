@@ -18,21 +18,18 @@ describe("LinksSectionComponent", () => {
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
       linksMock.title,
     );
+    expect(screen.getByText("Acesse")).toBeInTheDocument();
     expect(screen.getAllByRole("link")).toHaveLength(linksMock.items.length);
-    expect(screen.getByRole("link", { name: /margs/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /ages/i })).toBeInTheDocument();
   });
 
   it("opens links in a new tab", () => {
     render(<LinksSectionComponent data={linksMock} />);
 
-    expect(screen.getByRole("link", { name: /margs/i })).toHaveAttribute(
-      "target",
-      "_blank",
-    );
-    expect(screen.getByRole("link", { name: /margs/i })).toHaveAttribute(
-      "rel",
-      expect.stringContaining("noopener"),
-    );
+    screen.getAllByRole("link").forEach((link) => {
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    });
   });
 
   it("does not render when data is empty", () => {

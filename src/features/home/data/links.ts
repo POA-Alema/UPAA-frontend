@@ -1,8 +1,12 @@
-import { linksMock } from "../mocks/links-mock";
+import { getLinksMock } from "../mocks/links-mock";
 import type { LinkItem, LinksSection } from "../types/links";
+
+const DEFAULT_LINKS_LIMIT = 2;
 
 type LocalizedField = {
   pt?: string;
+  en?: string;
+  de?: string;
 };
 
 type LandingPageRecord = {
@@ -29,16 +33,29 @@ function getLandingPageRecord(
   return Array.isArray(payload) ? payload[0] ?? null : payload;
 }
 
-function mapLinksSection(payload: LandingPageResponse): LinksSection | null {
+function isExternalLink(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
+function getLocalizedText(field: LocalizedField | undefined, lang: string): string {
+  const language = lang === "en" || lang === "de" ? lang : "pt";
+  return field?.[language]?.trim() || field?.pt?.trim() || "";
+}
+
+function mapLinksSection(payload: LandingPageResponse, lang: string): LinksSection | null {
   const page = getLandingPageRecord(payload);
   const section = page?.institutionsSection;
-  const title = section?.title?.pt?.trim() || linksMock.title;
+  const fallback = getLinksMock(lang);
+  const title = fallback.title;
 
-  const items = (section?.institutions ?? [])
+  const items = [...(section?.institutions ?? [])]
+    .sort((first, second) => (first?.order ?? 0) - (second?.order ?? 0))
     .map((item, index): LinkItem | null => {
-      const label = item?.CTA?.label?.pt?.trim() || item?.title?.pt?.trim();
+      const label =
+        getLocalizedText(item?.title, lang) ||
+        getLocalizedText(item?.CTA?.label, lang);
       const href = item?.CTA?.target?.trim();
-      const description = item?.description?.pt?.trim();
+      const description = getLocalizedText(item?.description, lang);
       const id = item?.id?.trim() || `${href ?? label ?? "link"}-${index}`;
 
       if (!label || !href) {
@@ -52,10 +69,13 @@ function mapLinksSection(payload: LandingPageResponse): LinksSection | null {
         description,
       };
     })
-    .filter((item): item is LinkItem => Boolean(item));
+    .filter(
+      (item): item is LinkItem => item !== null && isExternalLink(item.href),
+    )
+    .slice(0, DEFAULT_LINKS_LIMIT);
 
-  if (!title || items.length === 0) {
-    return null;
+  if (items.length === 0) {
+    return fallback;
   }
 
   return {
@@ -64,11 +84,11 @@ function mapLinksSection(payload: LandingPageResponse): LinksSection | null {
   };
 }
 
-export async function getLinksData(): Promise<LinksSection | null> {
+export async function getLinksData(lang = "pt"): Promise<LinksSection | null> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   if (!baseUrl) {
-    return linksMock;
+    return getLinksMock(lang);
   }
 
   try {
@@ -78,12 +98,12 @@ export async function getLinksData(): Promise<LinksSection | null> {
     });
 
     if (!response.ok) {
-      return linksMock;
+      return getLinksMock(lang);
     }
 
     const data = (await response.json()) as LandingPageResponse;
-    return mapLinksSection(data) ?? null;
+    return mapLinksSection(data, lang) ?? null;
   } catch {
-    return linksMock;
+    return getLinksMock(lang);
   }
 }
