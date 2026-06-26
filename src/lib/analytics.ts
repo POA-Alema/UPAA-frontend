@@ -3,6 +3,8 @@
  * These events are sent to the backend for analysis.
  */
 
+import { getPublicRuntimeConfig } from './config';
+
 export type AnalyticsEventType =
   | 'architect-detail-open'
   | 'building-detail-open'
@@ -31,10 +33,10 @@ export async function trackEvent(
     };
 
     // Send to backend analytics endpoint if available
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const { apiUrl } = getPublicRuntimeConfig();
     if (!apiUrl) return;
 
-    await fetch(`${apiUrl}/analytics`, {
+    await fetch(`${apiUrl.replace(/\/$/, '')}/analytics`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(event),

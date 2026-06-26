@@ -1,4 +1,5 @@
 import { getLinksMock } from "../mocks/links-mock";
+import { getPublicRuntimeConfig } from "@/lib/config";
 import type { LinkItem, LinksSection } from "../types/links";
 
 const DEFAULT_LINKS_LIMIT = 2;
@@ -85,7 +86,8 @@ function mapLinksSection(payload: LandingPageResponse, lang: string): LinksSecti
 }
 
 export async function getLinksData(lang = "pt"): Promise<LinksSection | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const { apiUrl } = getPublicRuntimeConfig();
+  const baseUrl = apiUrl.replace(/\/$/, "");
 
   if (!baseUrl) {
     return getLinksMock(lang);
