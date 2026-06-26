@@ -1,20 +1,21 @@
-import { getArchitectsMock } from "../mocks/architect-mock";
-import type { Architect } from "../types/architect";
+import { getPublicRuntimeConfig } from "@/lib/config";
+import type { Architect, ArchitectWork } from "../types/architect";
 
 const ARCHITECTS_ENDPOINT = "/architects";
 
-// Placeholder de texto livre até o CMS enviar a descrição das imagens.
-const IMAGE_DESCRIPTION_PLACEHOLDER =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 type LocalizedField = {
   pt?: string;
   en?: string;
   de?: string;
-};
+} | string;
 
 function getLocalized(field: LocalizedField | undefined, lang: string): string | undefined {
-  return field?.[lang as keyof LocalizedField]?.trim();
+  if (typeof field === "string") {
+    return field.trim();
+  }
+
+  return field?.[lang as "pt" | "en" | "de"]?.trim();
 }
 
 type ArchitectApiRecord = Partial<Architect> & {
@@ -26,6 +27,22 @@ type ArchitectApiRecord = Partial<Architect> & {
   resumo?: string;
   imageUrl?: string;
   imageURL?: string;
+  works?: Array<{
+    id?: string;
+    title?: string;
+    slug?: string;
+    description?: string;
+    imageUrl?: string;
+    imageURL?: string;
+  }>;
+  buildingIds?: string[];
+  relatedBuildings?: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    summary?: string;
+    imageUrl?: string;
+  }>;
 };
 
 type LandingPageRecord = {
@@ -61,7 +78,8 @@ function extractSlug(target?: string): string | undefined {
 }
 
 function getApiBaseUrl(): string | null {
-  return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || null;
+  const { apiUrl } = getPublicRuntimeConfig();
+  return apiUrl.replace(/\/$/, "") || null;
 }
 
 function hasRequiredArchitectFields(
@@ -93,6 +111,48 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
     record.imageUrl?.trim() ||
     record.imageURL?.trim();
 
+  const works: Array<ArchitectWork> = [];
+
+  if (Array.isArray(record.works) && record.works.length > 0) {
+    works.push(
+      ...record.works
+        .filter((w): w is typeof record.works[0] & { title: string } => Boolean(w?.title))
+        .map((work) => ({
+          title: work.title,
+          href: work.slug ? `/buildings/${work.slug}` : undefined,
+          image: work.imageURL || work.imageUrl
+            ? {
+                src: (work.imageURL || work.imageUrl) as string,
+                alt: work.title,
+                caption: work.description,
+                title: work.title,
+                description: work.description,
+              }
+            : undefined,
+        }))
+    );
+  }
+
+  if (Array.isArray(record.relatedBuildings) && record.relatedBuildings.length > 0) {
+    works.push(
+      ...record.relatedBuildings
+        .filter((b): b is typeof record.relatedBuildings[0] & { title: string; slug: string } => Boolean(b?.title && b?.slug))
+        .map((building) => ({
+          title: building.title,
+          href: `/buildings/${building.slug}`,
+          image: building.imageUrl
+            ? {
+                src: building.imageUrl,
+                alt: building.title,
+                caption: building.summary,
+                title: building.title,
+                description: building.summary,
+              }
+            : undefined,
+        }))
+    );
+  }
+
   const architect: Partial<Architect> = {
     id: record.id ? String(record.id) : slug,
     slug,
@@ -105,13 +165,12 @@ function mapArchitectFromApi(record: ArchitectApiRecord): Architect | null {
           src: imageSrc,
           alt: record.image?.alt || title || "",
           caption: record.image?.caption,
-          // Placeholder até o CMS enviar título/texto livre das imagens.
-          title: record.image?.title || record.image?.caption || title,
-          description: record.image?.description ?? IMAGE_DESCRIPTION_PLACEHOLDER,
+          title: record.image?.title,
+          description: record.image?.description,
         }
       : record.image,
     actions: record.actions,
-    works: record.works,
+    works: works.length > 0 ? works : (record.works as ArchitectWork[] | undefined),
   };
 
   return hasRequiredArchitectFields(architect) ? architect : null;
@@ -124,8 +183,34 @@ async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[] | null> 
     return null;
   }
 
+  const url = new URL(ARCHITECTS_ENDPOINT, baseUrl);
+  url.searchParams.set("lang", lang);
+  const response = await fetch(url.toString(), {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar arquitetos.`);
+  }
+
+  const payload = (await response.json()) as
+    | ArchitectApiRecord
+    | ArchitectApiRecord[];
+  const records = Array.isArray(payload) ? payload : [payload];
+  return records
+    .map((record) => mapArchitectFromApi(record))
+    .filter((architect): architect is Architect => Boolean(architect));
+}
+
+async function fetchArchitectBySlugFromApi(slug: string, lang = "pt"): Promise<Architect | null> {
+  const baseUrl = getApiBaseUrl();
+
+  if (!baseUrl || !slug) {
+    return null;
+  }
+
   try {
-    const url = new URL(ARCHITECTS_ENDPOINT, baseUrl);
+    const url = new URL(`${ARCHITECTS_ENDPOINT}/${slug}`, baseUrl);
     url.searchParams.set("lang", lang);
     const response = await fetch(url.toString(), {
       next: { revalidate: 3600 },
@@ -135,29 +220,21 @@ async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[] | null> 
       return null;
     }
 
-    const payload = (await response.json()) as
-      | ArchitectApiRecord
-      | ArchitectApiRecord[];
-    const records = Array.isArray(payload) ? payload : [payload];
-    const architects = records
-      .map((record) => mapArchitectFromApi(record))
-      .filter((architect): architect is Architect => Boolean(architect));
-
-    return architects;
+    const payload = (await response.json()) as ArchitectApiRecord;
+    return mapArchitectFromApi(payload);
   } catch (error) {
-    console.error("[architects] fetchArchitectsFromApi failed:", error);
+    console.error("[architects] fetchArchitectBySlugFromApi failed:", error);
     return null;
   }
 }
 
 function mapFeaturedArchitect(
   payload: LandingPageResponse,
-  fallback: Architect,
   lang: string
 ): Architect | null {
   const page = getLandingPageRecord(payload);
   const section = page?.architectSection;
-  const title = getLocalized(section?.title, lang) || fallback.title;
+  const title = getLocalized(section?.title, lang);
   const bio = getLocalized(section?.content, lang);
 
   if (!title || !bio) {
@@ -169,70 +246,67 @@ function mapFeaturedArchitect(
   const primaryLabel = getLocalized(section?.CTA?.label, lang);
   const primaryHref = section?.CTA?.target?.trim();
   const subtitle = getLocalized(section?.subtitle, lang);
+  const slug = extractSlug(primaryHref) || "featured-architect";
 
   return {
-    ...fallback,
-    slug: extractSlug(primaryHref) || fallback.slug,
-    eyebrow: subtitle || fallback.eyebrow,
+    id: slug,
+    slug,
+    eyebrow: subtitle,
     title,
-    bioSummary: subtitle || fallback.bioSummary,
+    bioSummary: subtitle || "",
     bio,
     image: imageSrc
       ? {
           src: imageSrc,
           alt: imageCaption || title,
-          caption: imageCaption || fallback.image?.caption,
-          // Placeholder até o CMS enviar título + texto livre da imagem.
-          title: fallback.image?.title,
-          description: fallback.image?.description,
+          caption: imageCaption,
         }
-      : fallback.image,
+      : undefined,
     actions: {
-      ...fallback.actions,
       primary:
         primaryLabel || primaryHref
           ? {
-              label: primaryLabel || fallback.actions?.primary?.label || "",
-              href: primaryHref || fallback.actions?.primary?.href,
+              label: primaryLabel || "",
+              href: primaryHref,
             }
-          : fallback.actions?.primary,
+          : undefined,
     },
   };
 }
 
 export async function listArchitects(lang = "pt"): Promise<Architect[]> {
   const fromApi = await fetchArchitectsFromApi(lang);
-  return fromApi && fromApi.length > 0 ? fromApi : getArchitectsMock(lang);
+  return fromApi ?? [];
 }
 
 export async function getArchitectBySlug(slug: string, lang = "pt"): Promise<Architect | null> {
+  // First try to fetch the detailed architect data from the dedicated endpoint
+  const fromApi = await fetchArchitectBySlugFromApi(slug, lang);
+  if (fromApi) {
+    return fromApi;
+  }
+
   const architects = await listArchitects(lang);
   return architects.find((architect) => architect.slug === slug) ?? null;
 }
 
 export async function getFeaturedArchitect(lang = "pt"): Promise<Architect | null> {
-  const fallback = getArchitectsMock(lang)[0] ?? null;
   const baseUrl = getApiBaseUrl();
 
-  if (!fallback || !baseUrl) {
-    return fallback;
+  if (!baseUrl) {
+    return null;
   }
 
-  try {
-    const url = new URL("/landing-page", baseUrl);
-    url.searchParams.set("lang", lang);
-    const response = await fetch(url.toString(), {
-      next: { revalidate: 3600 },
-    });
+  const url = new URL("/landing-page", baseUrl);
+  url.searchParams.set("lang", lang);
+  const response = await fetch(url.toString(), {
+    cache: "no-store",
+  });
 
-    if (!response.ok) {
-      return fallback;
-    }
-
-    const payload = (await response.json()) as LandingPageResponse;
-
-    return mapFeaturedArchitect(payload, fallback, lang) ?? fallback;
-  } catch {
-    return fallback;
+  if (!response.ok) {
+    throw new Error(`Erro ${response.status}: nao foi possivel carregar o arquiteto em destaque.`);
   }
+
+  const payload = (await response.json()) as LandingPageResponse;
+  return mapFeaturedArchitect(payload, lang);
 }

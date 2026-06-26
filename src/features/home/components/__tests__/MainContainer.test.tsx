@@ -3,7 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import MainContainer from "@/components/layout/MainContainer";
 import MainContainerSkeleton from "@/components/layout/MainContainerSkeleton";
 import { getLandingData } from "@/features/home/data/landing";
-import { landingMock } from "@/features/home/mocks/landing-mock";
+import type { LandingData } from "@/features/home/types/landing";
+
+const landingData: LandingData = {
+  title: "Uma Porto Alegre alemã",
+  description: "Arquitetura, memória e cidade.",
+};
 
 describe("MainContainer (Landing Page)", () => {
   const originalFetch = globalThis.fetch;
@@ -17,18 +22,18 @@ describe("MainContainer (Landing Page)", () => {
     vi.restoreAllMocks();
   });
 
-  it("deve renderizar título e descrição do mock", () => {
-    render(<MainContainer data={landingMock} />);
+  it("deve renderizar título e descrição quando há dados", () => {
+    render(<MainContainer data={landingData} />);
 
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /o legado da arquitetura alemã/i,
+        name: /uma porto alegre alemã/i,
       })
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/explorando edifícios, memórias e instituições/i)
+      screen.getByText(/arquitetura, memória e cidade/i)
     ).toBeInTheDocument();
 
     expect(screen.getByTestId("landing-content")).toBeInTheDocument();
@@ -40,10 +45,10 @@ describe("MainContainer (Landing Page)", () => {
     expect(screen.getByTestId("landing-loading")).toBeInTheDocument();
   });
 
-  it("deve exibir fallback quando data é null", () => {
-    render(<MainContainer data={null} />);
+  it("não deve renderizar conteúdo quando data é null", () => {
+    const { container } = render(<MainContainer data={null} />);
 
-    expect(screen.getByTestId("landing-fallback")).toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
     expect(screen.queryByTestId("landing-content")).not.toBeInTheDocument();
   });
 
@@ -70,7 +75,7 @@ describe("MainContainer (Landing Page)", () => {
         href: "http://localhost:8080/landing-page?lang=pt",
       }),
       {
-        next: { revalidate: 3600 },
+        cache: "no-store",
       }
     );
 
@@ -81,18 +86,36 @@ describe("MainContainer (Landing Page)", () => {
     });
   });
 
-  it("deve testar erro de API", async () => {
+  it("deve aceitar payload ja traduzido pelo backend", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      json: async () => ({}),
+      ok: true,
+      json: async () => ({
+        mainTitle: "Uma Porto Alegre alemã",
+        subtitle: "Texto traduzido pelo backend.",
+      }),
     } as Response);
 
     const data = await getLandingData();
 
-    expect(data).toEqual(landingMock);
+    expect(data).toEqual({
+      title: "Uma Porto Alegre alemã",
+      description: "Texto traduzido pelo backend.",
+    });
   });
 
-  it("deve testar fallback com resposta vazia", async () => {
+  it("deve testar erro de API", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({}),
+    } as Response);
+
+    await expect(getLandingData()).rejects.toThrow(
+      "Erro 500: nao foi possivel carregar a landing page."
+    );
+  });
+
+  it("deve retornar null com resposta vazia", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -103,14 +126,12 @@ describe("MainContainer (Landing Page)", () => {
 
     const data = await getLandingData();
 
-    expect(data).toEqual(landingMock);
+    expect(data).toBeNull();
   });
 
-  it("deve testar erro de API quando a requisição falha", async () => {
+  it("deve propagar erro quando a requisição falha", async () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error("network error"));
 
-    const data = await getLandingData();
-
-    expect(data).toEqual(landingMock);
+    await expect(getLandingData()).rejects.toThrow("network error");
   });
 });

@@ -90,14 +90,15 @@ describe("GET /api/buildings", () => {
     ]);
   });
 
-  it("deve retornar fallback quando a API real falhar", async () => {
+  it("deve retornar erro 502 quando a API real falhar", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 
     const response = await GET(new Request("http://localhost/api/buildings?lang=pt"));
     const data = await response.json();
 
-    expect(response.headers.get("x-upaa-fallback")).toBe("map-buildings-mock");
-    expect(data.length).toBeGreaterThan(0);
+    expect(response.status).toBe(502);
+    expect(response.headers.get("x-upaa-fallback")).toBeNull();
+    expect(data).toEqual({ error: "Failed to load map buildings" });
   });
 
   it("deve manter a edificacao no mapa mesmo sem imagem valida, descartando apenas o anexo", async () => {

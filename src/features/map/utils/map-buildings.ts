@@ -5,10 +5,6 @@ import type { ImageMetadata } from "@/types/image";
 // architect_id, então o link "Sobre o Autor" usa a rota dele por padrão.
 const ARCHITECT_DETAIL_PATH = "/architects/theodor-wiederspahn";
 
-// Placeholder de texto livre até o CMS enviar a descrição das imagens.
-const IMAGE_DESCRIPTION_PLACEHOLDER =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-
 export type BuildingAttachment = ImageMetadata & {
   src: string;
   alt: string;
@@ -49,12 +45,15 @@ export type BackendBuilding = {
   coordinates?: unknown;
   latitude?: unknown;
   longitude?: unknown;
+  summary?: LocalizedText;
   description?: LocalizedText;
   constructionPeriod?: unknown;
   buildYear?: unknown;
   architect?: LocalizedText;
   architect_id?: unknown;
   current_occupation?: LocalizedText;
+  currentOccupation?: LocalizedText;
+  coverImage?: unknown;
   mediaGallery?: unknown;
   media_gallery?: unknown;
   images?: unknown;
@@ -92,13 +91,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function selectLocalizedText(value: LocalizedText, lang = "pt", fallback = ""): string {
+function selectLocalizedText(value: LocalizedText, lang = "pt", defaultValue = ""): string {
   if (typeof value === "string") {
     return value;
   }
 
   if (!isRecord(value)) {
-    return fallback;
+    return defaultValue;
   }
 
   const full = typeof value.full === "string" ? value.full : "";
@@ -111,7 +110,7 @@ function selectLocalizedText(value: LocalizedText, lang = "pt", fallback = ""): 
   const de = typeof value.de === "string" ? value.de : "";
   const preferred = lang === "en" ? en : lang === "de" ? de : pt;
 
-  return preferred || pt || en || de || full || composedName || fallback;
+  return preferred || pt || en || de || full || composedName || defaultValue;
 }
 
 function toOptionalString(value: unknown): string | undefined {
@@ -138,8 +137,12 @@ function extractCoordinates(building: BackendBuilding): {
   }
 
   return {
-    latitude: toOptionalNumber(building.coordinates.lat),
-    longitude: toOptionalNumber(building.coordinates.lng),
+    latitude:
+      toOptionalNumber(building.coordinates.lat) ??
+      toOptionalNumber(building.coordinates.latitude),
+    longitude:
+      toOptionalNumber(building.coordinates.lng) ??
+      toOptionalNumber(building.coordinates.longitude),
   };
 }
 
@@ -165,21 +168,23 @@ function mapBackendMediaToAttachment(
     src,
     alt,
     caption: caption || undefined,
-    // Placeholder até o CMS enviar título/texto livre das imagens.
-    title:
-      selectLocalizedText(media.title as LocalizedText, lang) || caption || buildingName,
-    description:
-      selectLocalizedText(media.description as LocalizedText, lang) ||
-      IMAGE_DESCRIPTION_PLACEHOLDER,
+    title: selectLocalizedText(media.title as LocalizedText, lang) || undefined,
+    description: selectLocalizedText(media.description as LocalizedText, lang) || undefined,
   };
 }
 
 function extractAttachments(
+  coverImage: unknown,
   mediaGallery: unknown,
   images: unknown,
   buildingName: string,
   lang: string,
 ): BuildingAttachment[] {
+  if (isRecord(coverImage)) {
+    const attachment = mapBackendMediaToAttachment(coverImage, buildingName, lang);
+    return attachment ? [attachment] : [];
+  }
+
   if (Array.isArray(mediaGallery)) {
     return mediaGallery
       .filter(isRecord)
@@ -194,8 +199,6 @@ function extractAttachments(
           ? {
               src: image,
               alt: buildingName,
-              title: buildingName,
-              description: IMAGE_DESCRIPTION_PLACEHOLDER,
             }
           : isRecord(image)
             ? mapBackendMediaToAttachment(image, buildingName, lang)
@@ -224,7 +227,9 @@ export function mapBackendBuildingToMapBuilding(
     slug: toOptionalString(building.slug),
     district: selectLocalizedText(building.location, lang),
     summary:
+      selectLocalizedText(building.summary, lang) ||
       selectLocalizedText(building.description, lang) ||
+      selectLocalizedText(building.currentOccupation, lang) ||
       selectLocalizedText(building.current_occupation, lang),
     yearLabel:
       toOptionalString(building.constructionPeriod) ??
@@ -232,6 +237,7 @@ export function mapBackendBuildingToMapBuilding(
     architectName: selectLocalizedText(building.architect, lang),
     architectPath: ARCHITECT_DETAIL_PATH,
     attachments: extractAttachments(
+      building.coverImage,
       building.mediaGallery ?? building.media_gallery,
       building.images,
       name,

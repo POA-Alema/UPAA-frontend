@@ -4,7 +4,6 @@ import {
   getFeaturedArchitect,
   listArchitects,
 } from "./architects";
-import { architectsMock } from "../mocks/architect-mock";
 
 describe("architect data layer", () => {
   const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -52,11 +51,11 @@ describe("architect data layer", () => {
       "/images/architects/theodor-wiederspahn.jpg"
     );
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/architects?lang=pt", {
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
   });
 
-  it("falls back to the curated mock when the API has no valid architect content", async () => {
+  it("returns an empty collection when the API has no valid architect content", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -73,21 +72,56 @@ describe("architect data layer", () => {
 
     const architects = await listArchitects();
 
-    expect(architects).toEqual(architectsMock);
+    expect(architects).toEqual([]);
   });
 
-  it("returns the mock collection when the architects API request fails", async () => {
+  it("propagates the error when the architects API request fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
 
-    const architects = await listArchitects();
-
-    expect(architects).toEqual(architectsMock);
+    await expect(listArchitects()).rejects.toThrow("Network error");
   });
 
-  it("returns the requested architect from the API by slug", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
+  it("returns the requested architect from the API by slug endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: "1",
+        slug: "theodor-wiederspahn",
+        name: "Theodor Wiederspahn",
+        summary: "Resumo",
+        biography: "Biografia completa vinda do banco.",
+        relatedBuildings: [
+          {
+            id: "building-1",
+            slug: "margs",
+            title: "Museu de Arte do RS",
+            imageUrl: "/images/margs/Margs.jpg",
+          },
+        ],
+      }),
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const architect = await getArchitectBySlug("theodor-wiederspahn");
+
+    expect(architect?.bio).toBe("Biografia completa vinda do banco.");
+    expect(architect?.works).toHaveLength(1);
+    expect(architect?.works?.[0]?.title).toBe("Museu de Arte do RS");
+    expect(architect?.works?.[0]?.href).toBe("/buildings/margs");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/architects/theodor-wiederspahn?lang=pt",
+      { next: { revalidate: 3600 } }
+    );
+  });
+
+  it("falls back to list endpoint when slug endpoint returns not found", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      })
+      .mockResolvedValueOnce({
         ok: true,
         json: async () => [
           {
@@ -98,12 +132,14 @@ describe("architect data layer", () => {
             biography: "Biografia completa vinda do banco.",
           },
         ],
-      })
-    );
+      });
+
+    vi.stubGlobal("fetch", fetchMock);
 
     const architect = await getArchitectBySlug("theodor-wiederspahn");
 
     expect(architect?.bio).toBe("Biografia completa vinda do banco.");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("returns the featured architect mapped from the landing-page payload", async () => {
@@ -156,7 +192,7 @@ describe("architect data layer", () => {
     });
   });
 
-  it("falls back to the mock when the API returns incomplete featured architect content", async () => {
+  it("returns null when the API returns incomplete featured architect content", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -171,15 +207,49 @@ describe("architect data layer", () => {
 
     const architect = await getFeaturedArchitect();
 
-    expect(architect).toEqual(architectsMock[0]);
+    expect(architect).toBeNull();
   });
 
-  it("returns the featured architect from the mock source when the request fails", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
+  it("supports featured architect payload already translated by the backend", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          architectSection: {
+            imageURL: "/images/architects/theodor-wiederspahn.jpg",
+            imageSubtitle: "Theodor Wiederspahn",
+            title: "O arquiteto",
+            subtitle: "Um nome central",
+            content: "Conteudo traduzido pelo backend.",
+            CTA: {
+              label: "Conhecer arquiteto",
+              target: "/architects/theodor-wiederspahn",
+            },
+          },
+        }),
+      })
+    );
 
     const architect = await getFeaturedArchitect();
 
-    expect(architect).toEqual(architectsMock[0]);
+    expect(architect).toEqual(
+      expect.objectContaining({
+        title: "O arquiteto",
+        bio: "Conteudo traduzido pelo backend.",
+        eyebrow: "Um nome central",
+      })
+    );
+    expect(architect?.actions?.primary).toEqual({
+      label: "Conhecer arquiteto",
+      href: "/architects/theodor-wiederspahn",
+    });
+  });
+
+  it("propagates the error when the featured architect request fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
+
+    await expect(getFeaturedArchitect()).rejects.toThrow("Network error");
   });
 
   it("calls the landing-page endpoint for the featured architect preview", async () => {
@@ -199,14 +269,14 @@ describe("architect data layer", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3001/landing-page?lang=pt",
-      { next: { revalidate: 3600 } }
+      { cache: "no-store" }
     );
   });
 
   it("returns null when the requested architect does not exist", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 404 }) // First call to slug endpoint fails
+      .mockResolvedValueOnce({
         ok: true,
         json: async () => [
           {
@@ -217,8 +287,9 @@ describe("architect data layer", () => {
             biography: "Biografia completa vinda do banco.",
           },
         ],
-      })
-    );
+      }); // Second call to list endpoint succeeds
+
+    vi.stubGlobal("fetch", fetchMock);
 
     const architect = await getArchitectBySlug("inexistente");
 

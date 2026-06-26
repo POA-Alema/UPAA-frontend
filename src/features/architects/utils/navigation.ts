@@ -14,11 +14,11 @@ function normalizeInternalHref(href: string | undefined) {
 
 export function resolveArchitectBackToMapHref(
   searchParams?: SearchParams,
-  fallbackHref = "/mapa",
+  defaultHref = "/mapa",
 ) {
   const returnTo = searchParams?.returnTo;
   const rawHref = Array.isArray(returnTo) ? returnTo[0] : returnTo;
   const normalizedHref = normalizeInternalHref(rawHref);
 
-  return normalizedHref ?? fallbackHref;
+  return normalizedHref ?? defaultHref;
 }

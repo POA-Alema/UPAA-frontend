@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import path from "node:path";
 import { stat } from "node:fs/promises";
 import { getPublicRuntimeConfig } from "@/lib/config";
-import { getMapBuildingsMock } from "@/features/map/mocks/map-buildings-mock";
 import {
   mapBackendBuildingsToMapBuildings,
   type Building,
@@ -106,11 +105,11 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(await sanitizeAttachments(buildings));
-  } catch {
-    return NextResponse.json(getMapBuildingsMock(lang), {
-      headers: {
-        "x-upaa-fallback": "map-buildings-mock",
-      },
-    });
+  } catch (error) {
+    console.error("[api/buildings] failed to load map buildings:", error);
+    return NextResponse.json(
+      { error: "Failed to load map buildings" },
+      { status: 502 },
+    );
   }
 }

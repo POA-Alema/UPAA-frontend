@@ -1,11 +1,50 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { BuildingPage } from "../BuildingPage";
-import { buildingsMock } from "../../mocks/building-mock";
+import type { Building } from "../../types/building";
+
+const building: Building = {
+  id: "margs",
+  slug: "margs",
+  eyebrow: "Theodor Wiederspahn, 1913",
+  title: "Museu de Arte do Rio Grande do Sul",
+  summary: "Antiga Delegacia Fiscal da Fazenda.",
+  hero: {
+    src: "/images/margs/Margs.jpg",
+    alt: "MARGS",
+  },
+  history: "<p>Antiga Delegacia Fiscal da Fazenda, proxima ao Portico do Cais Maua.</p>",
+  technicalSpecs: [
+    { label: "Localização", value: "Centro Histórico de Porto Alegre" },
+    { label: "Área Construída", value: "4.800 m²" },
+  ],
+  characteristics: [
+    {
+      icon: "domain",
+      title: "Simetria sutil",
+      description: "Composicao arquitetonica vinda do backend.",
+    },
+  ],
+  gallery: [
+    {
+      src: "/images/margs/foto-historica.jpg",
+      alt: "Foto histórica externa",
+    },
+  ],
+  architectCta: {
+    description: "Explore a vida e o legado de Theodor Wiederspahn.",
+    label: "Conheça mais sobre o Arquiteto",
+    href: "/architects/theodor-wiederspahn",
+  },
+  actions: {
+    backToMap: {
+      label: "Voltar ao Mapa",
+      href: "/mapa",
+    },
+  },
+};
 
 describe("BuildingPage", () => {
-  const building = buildingsMock[0];
-
   it("renders hero, eyebrow, technical specs, history, characteristics, gallery and CTAs", () => {
     render(<BuildingPage building={building} />);
 
@@ -14,7 +53,9 @@ describe("BuildingPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/theodor wiederspahn, 1913/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/antiga delegacia fiscal da fazenda/i),
+      screen.getByText((content) =>
+        content.includes("ntiga Delegacia Fiscal da Fazenda")
+      ),
     ).toBeInTheDocument();
 
     expect(screen.getByText(/localização/i)).toBeInTheDocument();
@@ -25,7 +66,7 @@ describe("BuildingPage", () => {
 
     expect(screen.getByRole("heading", { level: 2, name: /histórico/i })).toBeInTheDocument();
     expect(
-      screen.getByText((content) => content.includes("Pórtico do Cais Mauá")),
+      screen.getByText((content) => content.includes("Portico do Cais Maua")),
     ).toBeInTheDocument();
 
     expect(screen.getByRole("heading", { level: 2, name: /características/i })).toBeInTheDocument();

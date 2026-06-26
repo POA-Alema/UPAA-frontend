@@ -1,8 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import HomePage from "./page";
-import { architectsMock } from "@/features/architects/mocks/architect-mock";
 import { getFeaturedArchitect } from "@/features/architects/data/architects";
+import type { Architect } from "@/features/architects/types/architect";
+
+const featuredArchitect: Architect = {
+  id: "theodor-wiederspahn",
+  slug: "theodor-wiederspahn",
+  title: "Theodor Wiederspahn",
+  bioSummary: "Resumo vindo do backend.",
+  bio: "Biografia vinda do backend.",
+};
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({ get: () => undefined }),
@@ -62,7 +70,7 @@ describe("HomePage", () => {
   });
 
   it("should render the architect preview when featured architect data is available", async () => {
-    vi.mocked(getFeaturedArchitect).mockResolvedValue(architectsMock[0]);
+    vi.mocked(getFeaturedArchitect).mockResolvedValue(featuredArchitect);
 
     const result = await HomePage();
 

@@ -68,7 +68,6 @@ export function MapPlaceholder({
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [usedFallback, setUsedFallback] = useState(false);
   const [userPosition, setUserPosition] = useState<LatLngExpression | null>(
     null,
   );
@@ -84,7 +83,6 @@ export function MapPlaceholder({
     async function load() {
       try {
         const response = await fetch(`/api/buildings?lang=${i18n.language}`);
-        const didUseFallback = response.headers.get("x-upaa-fallback") != null;
 
         if (!response.ok) {
           throw new Error("Failed to load buildings");
@@ -99,10 +97,8 @@ export function MapPlaceholder({
 
         setMarkers(mappedMarkers);
         setHasError(false);
-        setUsedFallback(didUseFallback);
         trackMapBuildingsLoadSuccess({
           markerCount: mappedMarkers.length,
-          fallback: didUseFallback,
         });
       } catch (error) {
         if (!isMounted) {
@@ -111,7 +107,6 @@ export function MapPlaceholder({
 
         setMarkers([]);
         setHasError(true);
-        setUsedFallback(false);
         trackMapBuildingsLoadFailure({
           error: error instanceof Error ? error.message : "Unknown error",
         });
@@ -283,19 +278,6 @@ export function MapPlaceholder({
           className="absolute top-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
         >
           {t("map.loading", "Carregando dados do mapa.")}
-        </div>
-      )}
-
-      {!loading && usedFallback && !hasError && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="absolute bottom-2 left-2 bg-white text-black px-3 py-1 rounded shadow"
-        >
-          {t(
-            "map.fallback",
-            "Dados reais indisponiveis. Exibindo pontos de referencia.",
-          )}
         </div>
       )}
 

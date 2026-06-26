@@ -4,7 +4,6 @@ import { useState, useTransition, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import type { BuildingFormData, BuildingSource } from '@/types/building';
 import type { ArchitectOption } from '@/services/architects';
-import { s3ImageUrl } from '@/lib/s3';
 import { uploadBuildingImage } from '@/services/buildings';
 import AssetCard from './AssetCard';
 import { RichTextEditor } from './RichTextEditor';
@@ -896,10 +895,6 @@ export function BuildingForm({ onSubmit, initialData, isLoading = false, archite
                     url: draftImage.url.trim(),
                     alt: draftImage.alt.trim(),
                     caption: draftImage.caption.trim() || undefined,
-                    fallbackUrl:
-                      key === 'interiorPhotos'
-                        ? s3ImageUrl('images/Memorial RS.jpg')
-                        : s3ImageUrl('images/margs/Margs.jpg'),
                   }
                 : null;
 

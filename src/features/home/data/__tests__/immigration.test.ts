@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { immigrationMock } from "../../mocks/immigration-mock";
 import { getImmigrationData } from "../immigration";
 
 describe("getImmigrationData", () => {
@@ -42,8 +41,8 @@ describe("getImmigrationData", () => {
       image: {
         src: "/images/backend.jpg",
         alt: "Imagem vinda do backend",
-        title: immigrationMock.image?.title,
-        description: immigrationMock.image?.description,
+        title: undefined,
+        description: undefined,
       },
     });
   });
@@ -78,13 +77,13 @@ describe("getImmigrationData", () => {
       image: {
         src: "/images/lista.jpg",
         alt: "Legenda da lista",
-        title: immigrationMock.image?.title,
-        description: immigrationMock.image?.description,
+        title: undefined,
+        description: undefined,
       },
     });
   });
 
-  it("should return the mock as fallback when API responds without valid immigration content", async () => {
+  it("should return null when API responds without valid immigration content", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -100,18 +99,48 @@ describe("getImmigrationData", () => {
 
     const result = await getImmigrationData();
 
-    expect(result).toEqual(immigrationMock);
+    expect(result).toBeNull();
   });
 
-  it("should return the mock as fallback when request fails", async () => {
+  it("should support payload already translated by the backend", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          immigrationSection: {
+            subtitle: "Subtitulo traduzido",
+            title: "Titulo traduzido",
+            content: "Conteudo traduzido",
+            imageURL: "/images/backend.jpg",
+            imgSubtitle: "Legenda traduzida",
+          },
+        }),
+      })
+    );
+
+    const result = await getImmigrationData();
+
+    expect(result).toEqual({
+      subtitle: "Subtitulo traduzido",
+      title: "Titulo traduzido",
+      content: "Conteudo traduzido",
+      image: {
+        src: "/images/backend.jpg",
+        alt: "Legenda traduzida",
+        title: undefined,
+        description: undefined,
+      },
+    });
+  });
+
+  it("should propagate request failures", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockRejectedValue(new Error("Network error"))
     );
 
-    const result = await getImmigrationData();
-
-    expect(result).toEqual(immigrationMock);
+    await expect(getImmigrationData()).rejects.toThrow("Network error");
   });
 
   it("should call the landing-page endpoint", async () => {
@@ -130,8 +159,10 @@ describe("getImmigrationData", () => {
     await getImmigrationData();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:3001/landing-page",
-      { next: { revalidate: 3600 } }
+      expect.objectContaining({
+        href: "http://localhost:3001/landing-page?lang=pt",
+      }),
+      { cache: "no-store" }
     );
   });
 });

@@ -19,23 +19,23 @@ const MATERIAL_META: Record<
   {
     icon: string;
     labelKey: string;
-    fallbackLabel: string;
+    defaultLabel: string;
   }
 > = {
   plant: {
     icon: "architecture",
     labelKey: "building_materials.types.plant",
-    fallbackLabel: "Planta",
+    defaultLabel: "Planta",
   },
   document: {
     icon: "description",
     labelKey: "building_materials.types.document",
-    fallbackLabel: "Documento",
+    defaultLabel: "Documento",
   },
   analysis: {
     icon: "analytics",
     labelKey: "building_materials.types.analysis",
-    fallbackLabel: "Análise",
+    defaultLabel: "Análise",
   },
 };
 
@@ -85,7 +85,7 @@ export function BuildingMaterialsSection({
         >
           {(materials ?? []).map((material) => {
             const meta = MATERIAL_META[material.type];
-            const typeLabel = t(meta.labelKey, meta.fallbackLabel);
+            const typeLabel = t(meta.labelKey, meta.defaultLabel);
             const displayTitle =
               material.title ||
               t("building_materials.unnamed", "Material");
@@ -101,16 +101,7 @@ export function BuildingMaterialsSection({
                       sizes="(max-width: 820px) 82vw, 360px"
                       src={material.previewUrl}
                     />
-                  ) : (
-                    <div className="building-materials__card-fallback">
-                      <span
-                        className="material-symbols-outlined"
-                        aria-hidden="true"
-                      >
-                        {meta.icon}
-                      </span>
-                    </div>
-                  )}
+                  ) : null}
                   <span className="building-materials__type-badge">
                     <span
                       className="material-symbols-outlined"

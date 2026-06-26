@@ -1,90 +1,125 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getLandingPageData, updateLandingPageData, INITIAL_LANDING_PAGE_DATA } from '../landingPage';
+import { getLandingPageData, updateLandingPageData } from '../landingPage';
 import type { LandingPageData } from '@/types/landingPage';
+
+const landingPageData: LandingPageData = {
+  id: 'landing-page-id',
+  mainTitle: { pt: 'Titulo Principal PT', en: 'Main Title EN', de: 'Haupttitel DE' },
+  subtitle: { pt: 'Subtitulo PT', en: 'Subtitle EN', de: 'Untertitel DE' },
+  architectSection: {
+    imageURL: '/images/test.jpg',
+    title: { pt: 'O Arquiteto PT' },
+    content: { pt: '<p>Descricao PT</p>' },
+    CTA: { label: { pt: 'Botao' }, target: '/test', icon: 'test-icon' },
+    order: 1,
+  },
+  immigrationSection: {
+    imageURL: '/images/test-imm.jpg',
+    title: { pt: 'Imigracao PT' },
+    content: { pt: '<p>Imigracao descricao PT</p>' },
+    order: 2,
+  },
+  institutionsSection: {
+    title: { pt: 'Instituicoes PT' },
+    institutions: [],
+  },
+};
 
 describe('landingPage service', () => {
   const originalApiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_API_URL = 'http://localhost:3001';
-    localStorage.clear();
-    vi.spyOn(localStorage, 'getItem');
-    vi.spyOn(localStorage, 'setItem');
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    localStorage.clear();
+    vi.unstubAllGlobals();
     process.env.NEXT_PUBLIC_API_URL = originalApiUrl;
   });
 
   it('should fetch and normalize landing page data from API', async () => {
-    const mockApiResponse = {
-      id: 'mock-lp-id',
-      mainTitle: { pt: 'Título Principal PT', en: 'Main Title EN', de: 'Haupttitel DE' },
-      subtitle: { pt: 'Subtítulo PT', en: 'Subtitle EN', de: 'Untertitel DE' },
-      architectSection: {
-        imageURL: '/images/test.jpg',
-        title: { pt: 'O Arquiteto PT' },
-        content: { pt: '<p>Descrição PT</p>' },
-        CTA: { label: { pt: 'Botão' }, target: '/test', icon: 'test-icon' },
-        order: 1,
-      },
-      immigrationSection: {
-        imageURL: '/images/test-imm.jpg',
-        title: { pt: 'Imigração PT' },
-        content: { pt: '<p>Imigração descrição PT</p>' },
-        order: 2,
-      },
-      institutionsSection: {
-        title: { pt: 'Instituições PT' },
-        institutions: [],
-      },
-    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => landingPageData,
+    });
 
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await getLandingPageData();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3001/landing-page?lang=all',
+      expect.objectContaining({ cache: 'no-store' })
+    );
+    expect(result.id).toBe('landing-page-id');
+    expect(result.mainTitle.pt).toBe('Titulo Principal PT');
+    expect(result.subtitle.en).toBe('Subtitle EN');
+    expect(result.architectSection.imageURL).toBe('/images/test.jpg');
+    expect(result.immigrationSection?.title?.pt).toBe('Imigracao PT');
+    expect(result.institutionsSection.institutions).toEqual([]);
+  });
+
+  it('should normalize translated string payloads for the admin form', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => mockApiResponse,
+        json: async () => ({
+          ...landingPageData,
+          mainTitle: 'Titulo Principal PT',
+          subtitle: 'Subtitulo PT',
+          architectSection: {
+            ...landingPageData.architectSection,
+            title: 'O Arquiteto PT',
+            content: '<p>Descricao PT</p>',
+            CTA: { label: 'Botao', target: '/test', icon: 'test-icon' },
+          },
+          immigrationSection: {
+            ...landingPageData.immigrationSection,
+            title: 'Imigracao PT',
+            content: '<p>Imigracao descricao PT</p>',
+          },
+          institutionsSection: {
+            title: 'Instituicoes PT',
+            institutions: [
+              {
+                id: 'institution-id',
+                title: 'Instituicao PT',
+                description: '<p>Descricao PT</p>',
+                CTA: { label: 'Ver mais', target: '/institution' },
+                order: 1,
+              },
+            ],
+          },
+        }),
       })
     );
 
     const result = await getLandingPageData();
 
-    expect(result.id).toBe('mock-lp-id');
-    expect(result.mainTitle.pt).toBe('Título Principal PT');
-    expect(result.subtitle.en).toBe('Subtitle EN');
-    expect(result.architectSection.imageURL).toBe('/images/test.jpg');
-    expect(result.immigrationSection?.title?.pt).toBe('Imigração PT');
-    expect(result.institutionsSection.institutions).toEqual([]);
+    expect(result.mainTitle.pt).toBe('Titulo Principal PT');
+    expect(result.subtitle.pt).toBe('Subtitulo PT');
+    expect(result.architectSection.title.pt).toBe('O Arquiteto PT');
+    expect(result.architectSection.CTA.label.pt).toBe('Botao');
+    expect(result.immigrationSection?.content.pt).toBe('<p>Imigracao descricao PT</p>');
+    expect(result.institutionsSection.title.pt).toBe('Instituicoes PT');
+    expect(result.institutionsSection.institutions[0].title.pt).toBe('Instituicao PT');
   });
 
-  it('should fallback to local storage when fetch fails', async () => {
-    const mockLocalStorageData: LandingPageData = {
-      ...INITIAL_LANDING_PAGE_DATA,
-      mainTitle: { pt: 'Título Local Storage', en: 'Title Local Storage EN' },
-    };
-
+  it('should throw when fetch fails', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockRejectedValue(new Error('Network error'))
     );
 
-    // Write directly to the real localStorage
-    localStorage.setItem('upaa_landing_page', JSON.stringify(mockLocalStorageData));
-
-    const result = await getLandingPageData();
-
-    expect(result.mainTitle.pt).toBe('Título Local Storage');
-    expect(localStorage.getItem).toHaveBeenCalledWith('upaa_landing_page');
+    await expect(getLandingPageData()).rejects.toThrow('Network error');
   });
 
-  it('should update landing page data locally and call PUT endpoint when ID is present', async () => {
+  it('should call PUT endpoint when ID is present', async () => {
     const updateData: LandingPageData = {
-      ...INITIAL_LANDING_PAGE_DATA,
-      id: 'existing-id',
-      mainTitle: { pt: 'Novo Título' },
+      ...landingPageData,
+      mainTitle: { pt: 'Novo Titulo' },
     };
 
     const fetchMock = vi.fn().mockResolvedValue({
@@ -96,14 +131,9 @@ describe('landingPage service', () => {
 
     const result = await updateLandingPageData(updateData);
 
-    expect(result.mainTitle.pt).toBe('Novo Título');
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      'upaa_landing_page',
-      JSON.stringify(updateData)
-    );
-    expect(JSON.parse(localStorage.getItem('upaa_landing_page') || '{}')).toEqual(updateData);
+    expect(result.mainTitle.pt).toBe('Novo Titulo');
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:3001/landing-page/existing-id',
+      'http://localhost:3001/landing-page/landing-page-id',
       expect.objectContaining({
         method: 'PUT',
         body: JSON.stringify(updateData),
@@ -111,38 +141,26 @@ describe('landingPage service', () => {
     );
   });
 
-  it('should throw and preserve local data when API returns error response', async () => {
-    const updateData: LandingPageData = {
-      ...INITIAL_LANDING_PAGE_DATA,
-      id: 'existing-id',
-      mainTitle: { pt: 'Título que falhou no servidor' },
-    };
-
+  it('should throw when API returns error response', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 500 })
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () => JSON.stringify({ message: 'Erro no servidor' }),
+      })
     );
 
-    await expect(updateLandingPageData(updateData)).rejects.toThrow(
-      'Erro ao salvar no servidor. As alterações foram preservadas localmente.'
+    await expect(updateLandingPageData(landingPageData)).rejects.toThrow(
+      'Erro no servidor'
     );
-
-    expect(JSON.parse(localStorage.getItem('upaa_landing_page') || '{}')).toEqual(updateData);
   });
 
-  it('should throw and preserve local data when API is unreachable', async () => {
-    const updateData: LandingPageData = {
-      ...INITIAL_LANDING_PAGE_DATA,
-      id: 'existing-id',
-      mainTitle: { pt: 'Título offline' },
-    };
-
+  it('should throw when API is unreachable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
 
-    await expect(updateLandingPageData(updateData)).rejects.toThrow(
-      'Servidor indisponível. As alterações foram preservadas localmente.'
+    await expect(updateLandingPageData(landingPageData)).rejects.toThrow(
+      'Network error'
     );
-
-    expect(JSON.parse(localStorage.getItem('upaa_landing_page') || '{}')).toEqual(updateData);
   });
 });
