@@ -106,10 +106,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json(await sanitizeAttachments(buildings));
   } catch (error) {
+    console.error("[api/buildings] failed to load map buildings:", error);
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to load map buildings",
-      },
+      { error: "Failed to load map buildings" },
       { status: 502 },
     );
   }

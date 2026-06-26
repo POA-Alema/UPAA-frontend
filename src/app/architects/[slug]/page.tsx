@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { ArchitectPage } from "@/features/architects/components/ArchitectPage";
@@ -6,6 +7,8 @@ import { resolveArchitectBackToMapHref } from "@/features/architects/utils/navig
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { resolveLocale, toI18nLanguage } from "@/lib/language";
+
+const cachedGetArchitectBySlug = cache(getArchitectBySlug);
 
 type ArchitectDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -16,7 +19,9 @@ type ArchitectDetailPageProps = {
 
 export async function generateMetadata({ params }: ArchitectDetailPageProps) {
   const { slug } = await params;
-  const architect = await getArchitectBySlug(slug);
+  const cookieStore = await cookies();
+  const lang = toI18nLanguage(resolveLocale(cookieStore.get("upaa:locale")?.value));
+  const architect = await cachedGetArchitectBySlug(slug, lang);
 
   if (!architect) {
     return {
@@ -46,7 +51,7 @@ export default async function ArchitectDetailPage({
 
   const cookieStore = await cookies();
   const lang = toI18nLanguage(resolveLocale(cookieStore.get("upaa:locale")?.value));
-  const architect = await getArchitectBySlug(slug, lang);
+  const architect = await cachedGetArchitectBySlug(slug, lang);
 
   if (!architect) {
     notFound();
