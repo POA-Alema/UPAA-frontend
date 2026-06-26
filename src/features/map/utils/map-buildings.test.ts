@@ -133,8 +133,39 @@ describe("mapBackendBuildingsToMapBuildings", () => {
         src: "/images/Margs.jpg",
         alt: "Fachada principal",
         caption: "Fachada principal",
-        title: "Fachada principal",
-        description: expect.any(String),
+      }),
+    ]);
+  });
+
+  it("deve adaptar o payload atual de buildings/map do backend", () => {
+    const [result] = mapBackendBuildingsToMapBuildings([
+      {
+        id: "backend-map-id",
+        slug: "margs",
+        name: "MARGS",
+        summary: "Resumo da edificacao",
+        coordinates: { latitude: -30.01, longitude: -51.22 },
+        coverImage: {
+          url: "/images/Margs.jpg",
+          alt: "Fachada do MARGS",
+          caption: "Fachada principal",
+        },
+      },
+    ]);
+
+    expect(result).toMatchObject({
+      id: "backend-map-id",
+      name: "MARGS",
+      slug: "margs",
+      summary: "Resumo da edificacao",
+      latitude: -30.01,
+      longitude: -51.22,
+    });
+    expect(result.attachments).toEqual([
+      expect.objectContaining({
+        src: "/images/Margs.jpg",
+        alt: "Fachada do MARGS",
+        caption: "Fachada principal",
       }),
     ]);
   });
@@ -175,8 +206,6 @@ describe("mapBackendBuildingsToMapBuildings", () => {
         src: "/images/Margs.jpg",
         alt: "Fachada principal",
         caption: "Fachada principal",
-        title: "Fachada principal",
-        description: expect.any(String),
       }),
     ]);
   });
@@ -206,8 +235,6 @@ describe("mapBackendBuildingsToMapBuildings", () => {
       expect.objectContaining({
         src: "/images/obra.jpg",
         alt: "Obra simples",
-        title: "Obra simples",
-        description: expect.any(String),
       }),
     ]);
   });

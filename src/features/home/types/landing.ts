@@ -3,11 +3,13 @@ export type LandingData = {
   description: string;
 };
 
-type LocalizedField = {
+type LocalizedMap = {
   pt?: string;
   en?: string;
   de?: string;
 };
+
+type LocalizedField = string | LocalizedMap;
 
 export type LandingPageRecord = {
   id?: string;

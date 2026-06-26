@@ -102,6 +102,38 @@ describe("getImmigrationData", () => {
     expect(result).toBeNull();
   });
 
+  it("should support payload already translated by the backend", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          immigrationSection: {
+            subtitle: "Subtitulo traduzido",
+            title: "Titulo traduzido",
+            content: "Conteudo traduzido",
+            imageURL: "/images/backend.jpg",
+            imgSubtitle: "Legenda traduzida",
+          },
+        }),
+      })
+    );
+
+    const result = await getImmigrationData();
+
+    expect(result).toEqual({
+      subtitle: "Subtitulo traduzido",
+      title: "Titulo traduzido",
+      content: "Conteudo traduzido",
+      image: {
+        src: "/images/backend.jpg",
+        alt: "Legenda traduzida",
+        title: undefined,
+        description: undefined,
+      },
+    });
+  });
+
   it("should propagate request failures", async () => {
     vi.stubGlobal(
       "fetch",
@@ -128,9 +160,9 @@ describe("getImmigrationData", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        href: "http://localhost:3001/landing-page",
+        href: "http://localhost:3001/landing-page?lang=pt",
       }),
-      { next: { revalidate: 3600 } }
+      { cache: "no-store" }
     );
   });
 });

@@ -28,12 +28,12 @@ describe("MainContainer (Landing Page)", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /o legado da arquitetura alemã/i,
+        name: /uma porto alegre alemã/i,
       })
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(/explorando edifícios, memórias e instituições/i)
+      screen.getByText(/arquitetura, memória e cidade/i)
     ).toBeInTheDocument();
 
     expect(screen.getByTestId("landing-content")).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe("MainContainer (Landing Page)", () => {
         href: "http://localhost:8080/landing-page?lang=pt",
       }),
       {
-        next: { revalidate: 3600 },
+        cache: "no-store",
       }
     );
 
@@ -83,6 +83,23 @@ describe("MainContainer (Landing Page)", () => {
       title: "Uma Porto Alegre alemã",
       description:
         "Arquitetura, memória e cidade a partir do legado de Theodor Wiederspahn.",
+    });
+  });
+
+  it("deve aceitar payload ja traduzido pelo backend", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        mainTitle: "Uma Porto Alegre alemã",
+        subtitle: "Texto traduzido pelo backend.",
+      }),
+    } as Response);
+
+    const data = await getLandingData();
+
+    expect(data).toEqual({
+      title: "Uma Porto Alegre alemã",
+      description: "Texto traduzido pelo backend.",
     });
   });
 

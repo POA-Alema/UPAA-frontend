@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
-import "@/features/i18n";
 import type { LandingData } from "@/features/home/types/landing";
 
 type MainContainerProps = {
@@ -9,8 +7,6 @@ type MainContainerProps = {
 };
 
 export default function MainContainer({ data }: MainContainerProps) {
-  const { t } = useTranslation("common");
-
   if (!data) {
     return null;
   }
@@ -22,9 +18,9 @@ export default function MainContainer({ data }: MainContainerProps) {
       data-testid="landing-content"
     >
       <h2 className="section-title section-title--full">
-        <strong>{t("landing.title")}</strong>
+        <strong>{data.title}</strong>
       </h2>
-      <p className="section-copy section-copy--accent">{t("landing.description")}</p>
+      <p className="section-copy section-copy--accent">{data.description}</p>
     </section>
   );
 }

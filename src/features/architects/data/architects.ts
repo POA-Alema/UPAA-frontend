@@ -7,10 +7,14 @@ type LocalizedField = {
   pt?: string;
   en?: string;
   de?: string;
-};
+} | string;
 
 function getLocalized(field: LocalizedField | undefined, lang: string): string | undefined {
-  return field?.[lang as keyof LocalizedField]?.trim();
+  if (typeof field === "string") {
+    return field.trim();
+  }
+
+  return field?.[lang as "pt" | "en" | "de"]?.trim();
 }
 
 type ArchitectApiRecord = Partial<Architect> & {
@@ -123,7 +127,7 @@ async function fetchArchitectsFromApi(lang = "pt"): Promise<Architect[] | null> 
   const url = new URL(ARCHITECTS_ENDPOINT, baseUrl);
   url.searchParams.set("lang", lang);
   const response = await fetch(url.toString(), {
-    next: { revalidate: 3600 },
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -205,7 +209,7 @@ export async function getFeaturedArchitect(lang = "pt"): Promise<Architect | nul
   const url = new URL("/landing-page", baseUrl);
   url.searchParams.set("lang", lang);
   const response = await fetch(url.toString(), {
-    next: { revalidate: 3600 },
+    cache: "no-store",
   });
 
   if (!response.ok) {
